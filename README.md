@@ -99,3 +99,4 @@ The M1 is just the beginning! Future calculators in the series might have:
 - Secret dev guide (once you unlock dev mode!)
 
 # WoofTech Progects Overview
+[weird calculator app](/index.html)
