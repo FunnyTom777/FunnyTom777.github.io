@@ -1,7 +1,11 @@
 ## Welcome to FunnyTom.com! find lots of stupid random stuff!
 
+## Content:
+[WoofTech M1 Advanced Calculator](https://funnytom777.github.io/#wooftech-m1-advanced-calculator)
+[WoofTech Progects Overview](https://funnytom777.github.io/#wooftech-m1-advanced-calculator)  
+
+
 ### WoofTech M1 Advanced Calculator
-## Where Calculations Meet Fun!
 
 ### Product Overview
 The WoofTech M1 is the first of the WoofTech calculator series, bringing together everything you'd expect from a scientific calculator plus some seriously cool extras! While it can handle your math homework and graphing needs, it's got some tricks up its sleeve that make it way more than just another boring calculator.
@@ -93,3 +97,5 @@ The M1 is just the beginning! Future calculators in the series might have:
 - Protective case
 - Quick guide to WoofTech Link™
 - Secret dev guide (once you unlock dev mode!)
+
+#WoofTech Progects Overview
