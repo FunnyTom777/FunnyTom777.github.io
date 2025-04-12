@@ -1,4 +1,4 @@
-## Welcome to FunnyTom.github.io!
+## Welcome to FunnyTom.com! find lots of stupid random stuff!
 
 ### WoofTech M1 Advanced Calculator
 ## Where Calculations Meet Fun!
