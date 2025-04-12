@@ -61,7 +61,7 @@ The WoofTech M1 is the first of the WoofTech calculator series, bringing togethe
   - Multiplayer challenges
   - Math games (that are actually fun)
 
-### Tech Specs
+### 7. Tech Specs
 - Nice clear screen with backlight
 - USB-C rechargeable battery
 - Plenty of storage (32MB)
@@ -70,7 +70,7 @@ The WoofTech M1 is the first of the WoofTech calculator series, bringing togethe
 - Custom WoofTech brain
 - WoofOS 1.0 (our own operating system!)
 
-### Future WoofTech Models
+### 8. Future WoofTech Models
 The M1 is just the beginning! Future calculators in the series might have:
 - Faster processing
 - More ways to connect
@@ -79,14 +79,14 @@ The M1 is just the beginning! Future calculators in the series might have:
 - New features
 - More mathematical functions
 
-### Who's It For?
+### 9. Who's It For?
 - Students who want something different
 - People who like tech gadgets
 - Anyone who thinks calculators should be fun
 - Math fans
 - People who like to tinker with tech
 
-### What's in the Box
+### 10. What's in the Box
 - Your WoofTech M1 Calculator
 - USB-C charging cable
 - Easy guide to get started
