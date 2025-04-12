@@ -98,4 +98,4 @@ The M1 is just the beginning! Future calculators in the series might have:
 - Quick guide to WoofTech Link™
 - Secret dev guide (once you unlock dev mode!)
 
-#WoofTech Progects Overview
+# WoofTech Progects Overview
