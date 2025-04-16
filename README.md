@@ -97,3 +97,9 @@ The M1 is just the beginning! Future calculators in the series might have:
 - Protective case
 - Quick guide to WoofTech Link™
 - Secret dev guide (once you unlock dev mode!)
+
+
+
+https://github.com/user-attachments/assets/bcceee46-49cb-46f9-ab21-927f91fa87c1
+
+
