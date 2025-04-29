@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FunnyTom777 - Projects</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .modal.active {
+      display: flex;
+    }
+  </style>
+</head>
+<body class="bg-black text-gray-300 font-sans">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-green-600 to-black p-4 shadow-xl sticky top-0 z-50">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-green-400">FunnyTom777</h1>
+      <nav class="flex space-x-4">
+        <a href="#about" class="text-gray-300 hover:text-green-500">About Me</a>
+        <a href="#projects" class="text-gray-300 hover:text-green-500">Projects</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- About Me -->
+  <section id="about" class="py-12 bg-gradient-to-b from-black to-gray-900">
+    <div class="container mx-auto text-center">
+      <img src="profile-pic.jpg" alt="Profile Picture" class="mx-auto rounded-full w-32 h-32 mb-4">
+      <h2 class="text-2xl font-bold text-green-400 mb-4">About Me</h2>
+      <p class="text-lg leading-relaxed">
+        welcome to <span class="font-bold text-green-400">FunnyTom777.com</span>, where you can find lots of wacky progects!
+      </p>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects" class="py-12 bg-gradient-to-b from-gray-900 to-black">
+    <div class="container mx-auto">
+      <h2 class="text-2xl font-bold text-green-400 text-center mb-8">Projects</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- MTT Card -->
+        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
+          <h3 class="text-xl font-bold text-green-400 mb-2">Milk🥛, Toast🍞, TACO!🌮 (MTT)</h3>
+          <p class="text-gray-300 mb-4">An open-world driving simulator where you explore quirky landscapes and engage in unique challenges.</p>
+          <button onclick="openModal('mtt-modal')" class="text-green-400 hover:underline">Learn More</button>
+        </div>
+        <!-- The Great Doggy War -->
+        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
+          <h3 class="text-xl font-bold text-green-400 mb-2">The Great Doggy War</h3>
+          <p class="text-gray-300 mb-4">A thrilling tale of canines in a world full of adventure, battles, and alliances.</p>
+          <button onclick="openModal('doggy-war-modal')" class="text-green-400 hover:underline">Learn More</button>
+        </div>
+        <!-- Barkipelago Adventures -->
+        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
+          <h3 class="text-xl font-bold text-green-400 mb-2">Barkipelago Adventures</h3>
+          <p class="text-gray-300 mb-4">Embark on a journey across the Barkipelago, filled with exciting quests and surprises.</p>
+          <button onclick="openModal('barkipelago-modal')" class="text-green-400 hover:underline">Learn More</button>
+        </div>
+        <!-- THING™️ -->
+        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
+          <h3 class="text-xl font-bold text-green-400 mb-2">THING™️</h3>
+          <p class="text-gray-300 mb-4">The next evolution in trading card games, blending physical and digital in one device!</p>
+          <button onclick="openModal('thing-modal')" class="text-green-400 hover:underline">Learn More</button>
+        </div>
+        <!-- WoofTech & Quantum OS -->
+        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
+          <h3 class="text-xl font-bold text-green-400 mb-2">WoofTech & Quantum OS</h3>
+          <p class="text-gray-300 mb-4">Developing Quantum OS, a Linux-based OS with no ads, and other innovative software included for free!.</p>
+          <button onclick="openModal('quantum-os-modal')" class="text-green-400 hover:underline">Learn More</button>
+        </div>
+        <!-- Happy Havoc!!!! -->
+        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
+          <h3 class="text-xl font-bold text-green-400 mb-2">Happy Havoc!!!!</h3>
+          <p class="text-gray-300 mb-4">A 2D sidescrolling platformer with smooth movement, a dynamic camera, and classic style gameplay.</p>
+          <button onclick="openModal('happy-havoc-modal')" class="text-green-400 hover:underline">Learn More</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modals -->
+  <div id="mtt-modal" class="modal">
+    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
+      <h2 class="text-2xl font-bold text-green-400 mb-4">Milk🥛, Toast🍞, TACO!🌮 (MTT)</h2>
+      <p class="text-gray-300 mb-6">An open-world driving simulator where players embark on wacky adventures, explore quirky landscapes, and complete challenging missions.</p>
+      <button onclick="closeModal('mtt-modal')" class="text-green-400 hover:underline">Close</button>
+    </div>
+  </div>
+
+  <div id="doggy-war-modal" class="modal">
+    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
+      <h2 class="text-2xl font-bold text-green-400 mb-4">The Great Doggy War</h2>
+      <p class="text-gray-300 mb-6">A thrilling tale of canines in a world full of adventure, battles, and alliances.</p>
+      <button onclick="closeModal('doggy-war-modal')" class="text-green-400 hover:underline">Close</button>
+    </div>
+  </div>
+
+  <div id="barkipelago-modal" class="modal">
+    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
+      <h2 class="text-2xl font-bold text-green-400 mb-4">Barkipelago Adventures</h2>
+      <p class="text-gray-300 mb-6">Embark on a journey across the Barkipelago, filled with exciting quests and surprises.</p>
+      <button onclick="closeModal('barkipelago-modal')" class="text-green-400 hover:underline">Close</button>
+    </div>
+  </div>
+
+  <div id="thing-modal" class="modal">
+    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
+      <h2 class="text-2xl font-bold text-green-400 mb-4">THING™️</h2>
+      <p class="text-gray-300 mb-6">The next evolution in trading card games, blending physical and digital in one device!</p>
+      <button onclick="closeModal('thing-modal')" class="text-green-400 hover:underline">Close</button>
+    </div>
+  </div>
+
+  <div id="quantum-os-modal" class="modal">
+    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
+      <h2 class="text-2xl font-bold text-green-400 mb-4">WoofTech & Quantum OS</h2>
+      <p class="text-gray-300 mb-6">Developing Quantum OS, a Linux-based OS with no ads or bloat, and other innovative products.</p>
+      <button onclick="closeModal('quantum-os-modal')" class="text-green-400 hover:underline">Close</button>
+    </div>
+  </div>
+
+  <div id="happy-havoc-modal" class="modal">
+    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
+      <h2 class="text-2xl font-bold text-green-400 mb-4">Happy Havoc!!!!</h2>
+      <p class="text-gray-300 mb-6">A 2D sidescrolling platformer with smooth movement, a dynamic camera, and classic style gameplay.</p>
+      <button onclick="closeModal('happy-havoc-modal')" class="text-green-400 hover:underline">Close</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 py-4 text-center">
+    <p class="text-gray-400">© 2025 FunnyTom777. All rights reserved.</p>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+  </script>
+</body>
+</html>
