@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WoofBot 🐾</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen p-4">
+  <div class="w-full max-w-md bg-gray-800 rounded-2xl shadow-lg p-6">
+    <h1 class="text-2xl font-bold mb-4 text-center">🐶 WoofBot</h1>
+    
+    <div id="chat" class="space-y-2 mb-4 h-64 overflow-y-auto border border-gray-600 rounded p-2 bg-gray-700 text-sm">
+      <!-- Chat messages go here -->
+    </div>
+    
+    <form id="chat-form" class="flex space-x-2">
+      <input type="text" id="user-input" class="flex-1 p-2 rounded bg-gray-600 text-white" placeholder="Ask me anything, pup!" required />
+      <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">Woof!</button>
+    </form>
+  </div>
+
+  <script>
+    // Synonyms for fuzzy matching
+    const synonyms = {
+      hello: ["hello", "hi", "hey", "hiya", "yo"],
+      goodbye: ["bye", "goodbye", "see ya", "later"],
+      woofworks: ["woofworks", "woof works", "ww company", "woof office", "bark corporation"],
+      food: ["food", "hungry", "treat", "snack", "eat"],
+      joke: ["joke", "funny", "laugh", "humor", "make me laugh"],
+      dog: ["dog", "puppy", "pup", "doggy", "canine"]
+    };
+
+    // Intent-based system
+    const intents = [
+      {
+        tag: "greeting",
+        keywords: ["hello", "hi", "hey", "hiya", "yo"],
+        responses: ["Woof woof! 🐾", "Hey there, pup!", "Tail wags!"]
+      },
+      {
+        tag: "goodbye",
+        keywords: ["bye", "goodbye", "see ya", "later"],
+        responses: ["Bye! Don’t forget to bring treats next time! 🦴", "Woof woof, see ya!", "Catch you later, tail-wagger!"]
+      },
+      {
+        tag: "woofworks",
+        keywords: ["woofworks", "woof works", "ww", "company", "bark corporation"],
+        responses: ["WoofWorks is the best pawffice in town! 💼🐶", "We create pawsome stuff at WoofWorks! 🐾"]
+      },
+      {
+        tag: "food",
+        keywords: ["hungry", "eat", "treat", "food", "snack"],
+        responses: ["Did someone say snacks?! 🦴", "I'm drooling just thinking about it!"]
+      },
+      {
+        tag: "funny",
+        keywords: ["joke", "funny", "laugh", "humor"],
+        responses: [
+          "Why did the dog sit in the shade? Because he didn’t want to be a hot dog! 🌭",
+          "Howl you doing? 😜",
+          "I tried to learn to code… but I kept typing in barks."
+        ]
+      },
+      {
+        tag: "dog",
+        keywords: ["dog", "puppy", "pup", "doggy", "canine"],
+        responses: ["DOGS RULE! 🐶🐾", "Puppers unite!", "I love pups! Especially smart ones like you!"]
+      }
+    ];
+
+    // Helper functions
+    function addMessage(sender, text) {
+      const msg = document.createElement('div');
+      msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      document.getElementById('chat').appendChild(msg);
+      document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+    }
+
+    function getWoofBotResponse(input) {
+      const lowerInput = input.toLowerCase();
+      let bestMatch = { score: 0, tag: "", response: "" };
+
+      // Fuzzy matching based on synonyms
+      const words = lowerInput.split(" ");
+      words.forEach(word => {
+        for (const key in synonyms) {
+          if (synonyms[key].includes(word)) {
+            words.forEach(keyword => {
+              for (const intent of intents) {
+                const matchScore = intent.keywords.filter(k => words.includes(k)).length;
+                if (matchScore > bestMatch.score) {
+                  bestMatch = {
+                    score: matchScore,
+                    tag: intent.tag,
+                    response: intent.responses[Math.floor(Math.random() * intent.responses.length)]
+                  };
+                }
+              }
+            });
+          }
+        }
+      });
+
+      if (bestMatch.score > 0) {
+        return bestMatch.response;
+      } else {
+        return "Ruff? I didn’t get that. Try woofing something else! 🐾";
+      }
+    }
+
+    document.getElementById('chat-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('user-input').value.trim();
+      if (!input) return;
+      addMessage("You", input);
+      const response = getWoofBotResponse(input);
+      setTimeout(() => addMessage("WoofBot", response), 300);
+      document.getElementById('user-input').value = "";
+    });
+  </script>
+</body>
+</html>
