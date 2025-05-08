@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dot Dodger</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    canvas {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center h-screen">
+  <canvas id="gameCanvas" width="400" height="600" class="border-4 border-white"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let player;
+    let enemies;
+    let keys;
+    let score;
+    let gameOver;
+    let spawnRate;
+    let spawnInterval;
+
+    function initGame() {
+      player = { x: 200, y: 550, size: 20, speed: 5 };
+      enemies = [];
+      keys = {};
+      score = 0;
+      gameOver = false;
+      spawnRate = 700;
+      clearInterval(spawnInterval);
+      spawnInterval = setInterval(spawnEnemy, spawnRate);
+    }
+
+    document.addEventListener("keydown", (e) => keys[e.key] = true);
+    document.addEventListener("keyup", (e) => keys[e.key] = false);
+    canvas.addEventListener("touchmove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      player.x = touch.clientX - rect.left;
+    });
+
+    canvas.addEventListener("click", () => {
+      if (gameOver) initGame();
+    });
+    canvas.addEventListener("touchstart", () => {
+      if (gameOver) initGame();
+    });
+
+    function spawnEnemy() {
+      const size = 20;
+      const x = Math.random() * (canvas.width - size);
+      const speed = 2 + Math.random() * (2 + score / 300);
+      enemies.push({ x, y: -size, size, speed });
+    }
+
+    function update() {
+      if (keys["ArrowLeft"]) player.x -= player.speed;
+      if (keys["ArrowRight"]) player.x += player.speed;
+
+      player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+
+      enemies.forEach((enemy) => {
+        enemy.y += enemy.speed;
+        if (
+          enemy.x < player.x + player.size &&
+          enemy.x + enemy.size > player.x &&
+          enemy.y < player.y + player.size &&
+          enemy.y + enemy.size > player.y
+        ) {
+          gameOver = true;
+          clearInterval(spawnInterval);
+        }
+      });
+
+      enemies = enemies.filter((e) => e.y < canvas.height);
+      if (!gameOver) score++;
+
+      // Increase difficulty
+      if (score % 500 === 0 && spawnRate > 200) {
+        spawnRate -= 50;
+        clearInterval(spawnInterval);
+        spawnInterval = setInterval(spawnEnemy, spawnRate);
+      }
+    }
+
+    function draw() {
+      ctx.fillStyle = "#111827";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#3B82F6";
+      ctx.fillRect(player.x, player.y, player.size, player.size);
+
+      ctx.fillStyle = "#EF4444";
+      enemies.forEach((e) => {
+        ctx.fillRect(e.x, e.y, e.size, e.size);
+      });
+
+      ctx.fillStyle = "white";
+      ctx.font = "20px sans-serif";
+      ctx.fillText("Score: " + score, 10, 30);
+
+      if (gameOver) {
+        ctx.fillStyle = "white";
+        ctx.font = "40px sans-serif";
+        ctx.fillText("Game Over", 100, 280);
+        ctx.font = "20px sans-serif";
+        ctx.fillText("Click or tap to restart", 100, 320);
+      }
+    }
+
+    function loop() {
+      if (!gameOver) update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    initGame();
+    loop();
+  </script>
+</body>
+</html>
