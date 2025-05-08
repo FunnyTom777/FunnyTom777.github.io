@@ -24,136 +24,141 @@
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
 
-    let groundY;
+  let groundY;
 
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      groundY = canvas.height - 50;
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    groundY = canvas.height - 50;
+    player.y = groundY - player.height;
+  }
 
-      // Make sure player is placed above the ground after resize
+  let player = {
+    x: 50,
+    y: 0,
+    width: 50,
+    height: 50,
+    yVelocity: 0,
+    jumping: false
+  };
+
+  let gravity = 1.2;
+  let obstacles = [];
+  let speed = 8;
+  let spawnTimer = 0;
+  let spawnInterval = 90;
+  let score = 0;
+  let gameOver = false;
+  let difficultyTimer = 0;
+
+  function jump() {
+    if (!player.jumping) {
+      player.yVelocity = -20;
+      player.jumping = true;
+    }
+  }
+
+  function spawnObstacle() {
+    obstacles.push({
+      x: canvas.width + 50,
+      y: groundY - 40,
+      width: 40 + Math.random() * 20,
+      height: 40
+    });
+  }
+
+  function update() {
+    if (gameOver) return;
+
+    player.y += player.yVelocity;
+    player.yVelocity += gravity;
+
+    if (player.y > groundY - player.height) {
       player.y = groundY - player.height;
+      player.yVelocity = 0;
+      player.jumping = false;
     }
 
-    // Player setup
-    let player = {
-      x: 50,
-      y: 0,
-      width: 50,
-      height: 50,
-      yVelocity: 0,
-      jumping: false
-    };
+    spawnTimer++;
+    difficultyTimer++;
 
-    let gravity = 1.2;
-    let obstacles = [];
-    let speed = 8;
-    let spawnTimer = 0;
-    let score = 0;
-    let gameOver = false;
-
-    function jump() {
-      if (!player.jumping) {
-        player.yVelocity = -20;
-        player.jumping = true;
-      }
+    if (spawnTimer > spawnInterval) {
+      spawnObstacle();
+      spawnTimer = 0;
     }
 
-    function spawnObstacle() {
-      obstacles.push({
-        x: canvas.width + 50,
-        y: groundY - 40,
-        width: 40 + Math.random() * 20,
-        height: 40
-      });
+    // INCREASE DIFFICULTY over time
+    if (difficultyTimer > 300) { // every ~5 seconds
+      if (spawnInterval > 40) spawnInterval -= 5; // faster spawns
+      speed += 0.5; // faster obstacles
+      difficultyTimer = 0;
     }
 
-    function update() {
-      if (gameOver) return;
+    for (let i = 0; i < obstacles.length; i++) {
+      obstacles[i].x -= speed;
 
-      player.y += player.yVelocity;
-      player.yVelocity += gravity;
-
-      if (player.y > groundY - player.height) {
-        player.y = groundY - player.height;
-        player.yVelocity = 0;
-        player.jumping = false;
+      if (
+        player.x < obstacles[i].x + obstacles[i].width &&
+        player.x + player.width > obstacles[i].x &&
+        player.y < obstacles[i].y + obstacles[i].height &&
+        player.y + player.height > obstacles[i].y
+      ) {
+        gameOver = true;
+        alert("Game Over! Score: " + score);
+        location.reload();
       }
 
-      spawnTimer++;
-      if (spawnTimer > 90) {
-        spawnObstacle();
-        spawnTimer = 0;
-      }
-
-      for (let i = 0; i < obstacles.length; i++) {
-        obstacles[i].x -= speed;
-
-        // Collision detection
-        if (
-          player.x < obstacles[i].x + obstacles[i].width &&
-          player.x + player.width > obstacles[i].x &&
-          player.y < obstacles[i].y + obstacles[i].height &&
-          player.y + player.height > obstacles[i].y
-        ) {
-          gameOver = true;
-          alert("Game Over! Score: " + score);
-          location.reload();
-        }
-
-        if (obstacles[i].x + obstacles[i].width < 0) {
-          obstacles.splice(i, 1);
-          score++;
-        }
+      if (obstacles[i].x + obstacles[i].width < 0) {
+        obstacles.splice(i, 1);
+        score++;
       }
     }
+  }
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Ground
-      ctx.fillStyle = "#654321";
-      ctx.fillRect(0, groundY, canvas.width, 50);
+    // Ground
+    ctx.fillStyle = "#654321";
+    ctx.fillRect(0, groundY, canvas.width, 50);
 
-      // Player
-      ctx.fillStyle = "#ff3333";
-      ctx.fillRect(player.x, player.y, player.width, player.height);
+    // Player
+    ctx.fillStyle = "#ff3333";
+    ctx.fillRect(player.x, player.y, player.width, player.height);
 
-      // Obstacles
-      ctx.fillStyle = "#333";
-      for (let obs of obstacles) {
-        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-      }
-
-      // Score
-      ctx.fillStyle = "#000";
-      ctx.font = "20px Arial";
-      ctx.fillText("Score: " + score, 20, 30);
+    // Obstacles
+    ctx.fillStyle = "#333";
+    for (let obs of obstacles) {
+      ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
     }
 
-    function gameLoop() {
-      update();
-      draw();
-      requestAnimationFrame(gameLoop);
-    }
+    // Score
+    ctx.fillStyle = "#000";
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 20, 30);
+  }
 
-    // Controls
-    document.addEventListener("keydown", (e) => {
-      if (e.code === "Space") jump();
-    });
+  function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+  }
 
-    document.addEventListener("touchstart", () => {
-      jump();
-    });
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space") jump();
+  });
 
-    window.addEventListener("resize", resizeCanvas);
+  document.addEventListener("touchstart", () => {
+    jump();
+  });
 
-    resizeCanvas();  // Call once initially
-    gameLoop();      // Start game
-  </script>
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+  gameLoop();
+</script>
 </body>
 </html>
