@@ -25,15 +25,12 @@
   </style>
 </head>
 <body class="bg-black text-gray-300 font-sans">
-  <!-- Header -->
+<!-- Header -->
 <header class="bg-gradient-to-r from-green-600 to-black p-4 shadow-xl sticky top-0 z-50">
   <div class="container mx-auto flex justify-between items-center">
     <h1 class="text-3xl font-bold text-green-400">FunnyTom777</h1>
     <nav class="flex space-x-4">
-      <a href="#about" class="text-gray-300 hover:text-green-500">About Me</a>
-      <a href="#projects" class="text-gray-300 hover:text-green-500">Projects</a>
-      <a href="woofbot.html" class="text-gray-300 hover:text-green-500">WoofBot</a>
-
+      
       <!-- Dropdown for Games -->
       <div class="relative">
         <button class="text-gray-300 hover:text-green-500 focus:outline-none">
@@ -46,18 +43,31 @@
         </div>
       </div>
 
+      <!-- Dropdown for Other -->
+      <div class="relative">
+        <button class="text-gray-300 hover:text-green-500 focus:outline-none">
+          Other
+        </button>
+        <div class="dropdown-content absolute hidden bg-black text-gray-300 shadow-lg rounded p-2">
+          <a href="woofbot.html" class="block hover:text-green-500">WoofBot</a>
+          <!-- You can add more links here for the "Other" dropdown -->
+        </div>
+      </div>
+
     </nav>
   </div>
 </header>
 
 <script>
   // JavaScript for dropdown toggle
-  document.querySelector('.relative').addEventListener('mouseenter', function() {
-    this.querySelector('.dropdown-content').classList.remove('hidden');
-  });
+  document.querySelectorAll('.relative').forEach(function(dropdown) {
+    dropdown.addEventListener('mouseenter', function() {
+      this.querySelector('.dropdown-content').classList.remove('hidden');
+    });
   
-  document.querySelector('.relative').addEventListener('mouseleave', function() {
-    this.querySelector('.dropdown-content').classList.add('hidden');
+    dropdown.addEventListener('mouseleave', function() {
+      this.querySelector('.dropdown-content').classList.add('hidden');
+    });
   });
 </script>
 
