@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FunnyTom777 Storefront</title>
+  <style>
+    body {
+      background-color: #1a1a1a; /* Dark background */
+      color: #e6e6e6; /* Light text color */
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 3rem;
+      font-weight: bold;
+      color: #22c55e; /* Green */
+      margin-top: 2rem;
+    }
+
+    .storefront {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    @media (min-width: 640px) {
+      .storefront {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .storefront {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .storefront {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    .box {
+      background-color: #2d2d2d; /* Dark gray */
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .box h2 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #22c55e; /* Green */
+    }
+
+    .box p {
+      color: #d1d1d1;
+      margin: 1rem 0;
+    }
+
+    .btn {
+      background-color: #22c55e; /* Green */
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #16a34a; /* Darker green */
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: #2d2d2d;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .modal-content h2 {
+      color: #22c55e;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-content p {
+      color: #d1d1d1;
+      margin-bottom: 1rem;
+    }
+
+    .close-btn {
+      background-color: #dc2626; /* Red */
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      background-color: #b91c1c; /* Darker red */
+    }
+
+    /* Back Button */
+    .back-btn {
+      display: inline-block;
+      background-color: #2d2d2d;
+      color: #22c55e;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      margin: 2rem auto;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background-color: #16a34a; /* Darker green */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>FunnyTom777</h1>
+  </header>
+
+  <!-- Back Button -->
+  <a href="index.html" class="back-btn">Back to Home</a>
+
+  <!-- Store Front -->
+  <div class="storefront">
+    <!-- Box 1 -->
+    <div class="box">
+      <h2>this is a place holder :D</h2>
+      <p>Short description of the item.</p>
+      <button class="btn" onclick="openModal('item1')">Learn More</button>
+    </div>
+    <!-- Box 2 -->
+    <div class="box">
+      <h2>this is a place holder :D</h2>
+      <p>Short description of the item.</p>
+      <button class="btn" onclick="openModal('item2')">Learn More</button>
+    </div>
+    <!-- Box 3 -->
+    <div class="box">
+      <h2>this is a place holder :D</h2>
+      <p>Short description of the item.</p>
+      <button class="btn" onclick="openModal('item3')">Learn More</button>
+    </div>
+    <!-- Box 4 -->
+    <div class="box">
+      <h2>this is a place holder :D</h2>
+      <p>Short description of the item.</p>
+      <button class="btn" onclick="openModal('item4')">Learn More</button>
+    </div>
+    <!-- Box 5 -->
+    <div class="box">
+      <h2>this is a place holder :D</h2>
+      <p>Short description of the item.</p>
+      <button class="btn" onclick="openModal('item5')">Learn More</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Item Details</h2>
+      <p id="modalDescription">Full description of the item.</p>
+      <a id="githubLink" href="#" style="color: #22c55e;" target="_blank">GitHub Link</a>
+      <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const items = {
+      item1: {
+        title: "this is a place holder :D",
+        description: "This is a longer description of item 1.",
+        github: "https://funnytom777.github.io"
+      },
+      item2: {
+        title: "this is a place holder :D",
+        description: "This is a longer description of item 2.",
+        github: "https://funnytom777.github.io"
+      },
+      item3: {
+        title: "this is a place holder :D",
+        description: "This is a longer description of item 3.",
+        github: "https://funnytom777.github.io"
+      },
+      item4: {
+        title: "Item 4",
+        description: "This is a longer description of item 4.",
+        github: "https://funnytom777.github.io"
+      },
+      item5: {
+        title: "Item 5",
+        description: "This is a longer description of item 5.",
+        github: "https://funnytom777.github.io"
+      }
+    };
+
+    function openModal(item) {
+      const modal = document.getElementById("modal");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalDescription = document.getElementById("modalDescription");
+      const githubLink = document.getElementById("githubLink");
+
+      modalTitle.textContent = items[item].title;
+      modalDescription.textContent = items[item].description;
+      githubLink.href = items[item].github;
+
+      modal.style.display = "flex";
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("modal");
+      modal.style.display = "none";
+    }
+  </script>
+
+</body>
+</html>
