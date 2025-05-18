@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WoofBot - WoofWorks Helper</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; max-width: 700px; margin: auto; background: #f5f9ff; }
+  h2 { color: #1a73e8; }
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #0d47a1;
+  }
+  select, button {
+    font-size: 1rem;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    min-width: 180px;
+  }
+  button {
+    cursor: pointer;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    transition: background-color 0.2s ease-in-out;
+  }
+  button:disabled {
+    background-color: #a3c0f9;
+    cursor: not-allowed;
+  }
+  button:hover:not(:disabled) {
+    background-color: #155ab6;
+  }
+  #response {
+    margin-top: 20px;
+    font-style: italic;
+    color: #555;
+  }
+  #answerBox {
+    margin-top: 15px;
+    padding: 18px;
+    border: 2px solid #1a73e8;
+    background: #dbe9ff;
+    min-height: 80px;
+    white-space: pre-wrap;
+    font-weight: 600;
+    color: #0d47a1;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #a3c0f9;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+  }
+</style>
+</head>
+<body>
+
+<h2>WoofBot - WoofWorks Helper</h2>
+
+<div class="controls">
+  <div class="control-group">
+    <label for="commandSelect">Command:</label>
+    <select id="commandSelect">
+      <option value="">-- Select Command --</option>
+    </select>
+  </div>
+
+  <div class="control-group">
+    <label for="optionSelect">Option:</label>
+    <select id="optionSelect" disabled>
+      <option value="">-- Select Option --</option>
+    </select>
+  </div>
+
+  <button id="sendBtn" disabled>Send</button>
+</div>
+
+<div id="response"></div>
+<div id="answerBox"></div>
+
+<script>
+// WoofWorks commands and options data
+const data = {
+  "Fetch": {
+    "WoofWorks Data": "Here is the latest WoofWorks Data report:\n- Active Projects: 12\n- Employees: 245\n- Revenue: $48M this quarter",
+    "User Profile": "Fetching user profile...\nName: Woofy\nRole: Lead Developer\nLast login: Today 08:45 AM",
+    "Latest Reports": "Showing the 3 most recent reports:\n1. Project Alpha - Phase 2 Complete\n2. Market Analysis Q2\n3. Security Audit Summary",
+    "Inventory Status": "Inventory:\n- AI Chips: 1200 units\n- Robotics Kits: 350 units\n- Software Licenses: 500 active"
+  },
+  "Show": {
+    "Dashboard": "Opening WoofWorks Dashboard...\n- Server uptime: 99.98%\n- Active users: 1200\n- New tickets: 8\n- Pending approvals: 5",
+    "Settings": "Settings menu displayed.\nYou can update your preferences, notification settings, and access control here.",
+    "Help": "Help section:\n- FAQ: Visit woofworks.com/help\n- Support Email: support@woofworks.com\n- Phone: +1-800-WOOFWKS",
+    "Team Contacts": "Team Contacts:\n- CEO: Ms. Barker\n- CTO: Dr. Paws\n- Support Lead: Max Retriever"
+  },
+  "Delete": {
+    "Temporary Files": "Temporary files deleted successfully. System optimized!",
+    "Cache": "Cache cleared. Performance boosted!",
+    "Old Logs": "Old logs have been removed. Storage cleaned up!"
+  },
+  "Update": {
+    "Software": "WoofWorks Software updated to version 3.4.7.\nChangelog:\n- Bug fixes\n- Performance improvements\n- Added new AI routines",
+    "Firmware": "Firmware update started on all robotic units.\nEstimated completion: 15 minutes.",
+    "Employee Records": "Employee records updated with recent hires and role changes."
+  },
+  "Create": {
+    "New Project": "New project creation started.\nPlease provide the project details in your next command.",
+    "User Account": "New user account template created.\nAssign roles and permissions in settings.",
+    "Report": "Report template generated.\nYou can now input data or select report type."
+  }
+};
+
+const commandSelect = document.getElementById('commandSelect');
+const optionSelect = document.getElementById('optionSelect');
+const sendBtn = document.getElementById('sendBtn');
+const responseDiv = document.getElementById('response');
+const answerBox = document.getElementById('answerBox');
+
+function populateCommands() {
+  for (const cmd in data) {
+    const option = document.createElement('option');
+    option.value = cmd;
+    option.textContent = cmd;
+    commandSelect.appendChild(option);
+  }
+}
+
+function populateOptions(command) {
+  optionSelect.innerHTML = '<option value="">-- Select Option --</option>';
+  if (command && data[command]) {
+    for (const opt in data[command]) {
+      const option = document.createElement('option');
+      option.value = opt;
+      option.textContent = opt;
+      optionSelect.appendChild(option);
+    }
+    optionSelect.disabled = false;
+  } else {
+    optionSelect.disabled = true;
+  }
+  optionSelect.value = "";
+  sendBtn.disabled = true;
+}
+
+commandSelect.addEventListener('change', () => {
+  populateOptions(commandSelect.value);
+  responseDiv.textContent = '';
+  answerBox.textContent = '';
+});
+
+optionSelect.addEventListener('change', () => {
+  sendBtn.disabled = optionSelect.value === "";
+  responseDiv.textContent = '';
+  answerBox.textContent = '';
+});
+
+sendBtn.addEventListener('click', () => {
+  const cmd = commandSelect.value;
+  const opt = optionSelect.value;
+  if (cmd && opt && data[cmd] && data[cmd][opt]) {
+    responseDiv.textContent = "Working...";
+    answerBox.textContent = "";
+    setTimeout(() => {
+      responseDiv.textContent = "";
+      answerBox.textContent = data[cmd][opt];
+    }, 1200);
+  } else {
+    responseDiv.textContent = "";
+    answerBox.textContent = "Sorry, I don't have info on that!";
+  }
+});
+
+populateCommands();
+</script>
+
+</body>
+</html>
