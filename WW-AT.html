@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Virtual Console Architecture</title>
+  <style>
+    body { background: #111; color: #0f0; font-family: monospace; padding: 1em; }
+    #console { white-space: pre-wrap; border: 1px solid #0f0; padding: 0.5em; height: 300px; overflow-y: auto; }
+    #input { width: 100%; background: #000; color: #0f0; border: none; padding: 0.5em; }
+  </style>
+</head>
+<body>
+  <div id="console">[Virtual Console Architecture v0.1]\nType a command below.</div>
+  <input id="input" placeholder="Enter command..." autofocus>
+
+  <script>
+    const consoleDiv = document.getElementById("console");
+    const input = document.getElementById("input");
+
+    function output(text) {
+      consoleDiv.innerText += "\n" + text;
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    function clearConsole() {
+      consoleDiv.innerText = "[Virtual Console Architecture v0.1]";
+    }
+
+    const VCA = {
+      version: "0.1",
+      commands: {},
+      registerCommand(name, fn) {
+        this.commands[name] = fn;
+        output(`Command registered: ${name}`);
+      },
+      execCommand(cmdLine) {
+        const parts = cmdLine.trim().split(" ");
+        const cmd = parts[0];
+        const args = parts.slice(1);
+
+        if (this.commands[cmd]) {
+          this.commands[cmd](args);
+        } else {
+          output(`Unknown command: ${cmd}`);
+        }
+      },
+      loadModule(moduleFunc) {
+        moduleFunc(this);
+      }
+    };
+
+    // Core system commands
+    VCA.registerCommand("help", () => {
+      output("Available commands: " + Object.keys(VCA.commands).join(", "));
+    });
+
+    VCA.registerCommand("clear", () => {
+      clearConsole();
+    });
+
+    VCA.registerCommand("echo", (args) => {
+      output(args.join(" "));
+    });
+
+    // Load an example "mod"
+    const exampleMod = (core) => {
+      core.registerCommand("bark", (args) => {
+        output("🐶 BARK: " + args.join(" "));
+      });
+      core.registerCommand("modver", () => {
+        output("ExampleMod v1.0 loaded");
+      });
+    };
+
+    VCA.loadModule(exampleMod);
+
+    // Handle input
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        const cmd = input.value;
+        input.value = "";
+        output("> " + cmd);
+        VCA.execCommand(cmd);
+      }
+    });
+  </script>
+</body>
+</html>
