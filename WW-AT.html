@@ -2,20 +2,44 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Virtual Console Architecture</title>
+  <title>VCA v0.5 — Drag-and-Drop!</title>
   <style>
     body { background: #111; color: #0f0; font-family: monospace; padding: 1em; }
-    #console { white-space: pre-wrap; border: 1px solid #0f0; padding: 0.5em; height: 300px; overflow-y: auto; }
+    #console, #visuals {
+      border: 1px solid #0f0;
+      padding: 0.5em;
+      margin-bottom: 10px;
+    }
+    #console { white-space: pre-wrap; height: 200px; overflow-y: auto; }
+    #visuals { height: 200px; background: #000; position: relative; }
     #input { width: 100%; background: #000; color: #0f0; border: none; padding: 0.5em; }
+
+    #dropzone {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,255,0,0.2);
+      border: 2px dashed #0f0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #0f0;
+      font-size: 1.2em;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
-  <div id="console">[Virtual Console Architecture v0.1]\nType a command below.</div>
+  <div id="console">[VCA v0.5] Drag JS modules here or type commands</div>
+  <div id="visuals">
+    <div id="dropzone">Drop a JS module file here!</div>
+  </div>
   <input id="input" placeholder="Enter command..." autofocus>
 
   <script>
     const consoleDiv = document.getElementById("console");
+    const visualsDiv = document.getElementById("visuals");
     const input = document.getElementById("input");
+    const dropzone = document.getElementById("dropzone");
 
     function output(text) {
       consoleDiv.innerText += "\n" + text;
@@ -23,11 +47,11 @@
     }
 
     function clearConsole() {
-      consoleDiv.innerText = "[Virtual Console Architecture v0.1]";
+      consoleDiv.innerText = "[VCA v0.5]";
     }
 
     const VCA = {
-      version: "0.1",
+      version: "0.5",
       commands: {},
       registerCommand(name, fn) {
         this.commands[name] = fn;
@@ -37,50 +61,92 @@
         const parts = cmdLine.trim().split(" ");
         const cmd = parts[0];
         const args = parts.slice(1);
-
         if (this.commands[cmd]) {
           this.commands[cmd](args);
         } else {
           output(`Unknown command: ${cmd}`);
         }
       },
-      loadModule(moduleFunc) {
-        moduleFunc(this);
+      loadModule(fn) {
+        try {
+          fn(this);
+          output("Module loaded.");
+        } catch (e) {
+          output("Module error: " + e.message);
+        }
+      },
+      injectVisual(html) {
+        visualsDiv.innerHTML = html;
+      },
+      appendVisual(html) {
+        visualsDiv.innerHTML += html;
+      },
+      clearVisuals() {
+        visualsDiv.innerHTML = "[Visual modules go here]";
+        visualsDiv.appendChild(dropzone);
       }
     };
 
-    // Core system commands
+    // Built-in commands
     VCA.registerCommand("help", () => {
-      output("Available commands: " + Object.keys(VCA.commands).join(", "));
+      output("Commands: " + Object.keys(VCA.commands).join(", "));
     });
+    VCA.registerCommand("clear", clearConsole);
+    VCA.registerCommand("echo", args => output(args.join(" ")));
+    VCA.registerCommand("clearui", () => VCA.clearVisuals());
 
-    VCA.registerCommand("clear", () => {
-      clearConsole();
-    });
-
-    VCA.registerCommand("echo", (args) => {
-      output(args.join(" "));
-    });
-
-    // Load an example "mod"
-    const exampleMod = (core) => {
-      core.registerCommand("bark", (args) => {
-        output("🐶 BARK: " + args.join(" "));
+    // Default example module
+    VCA.loadModule(core => {
+      core.registerCommand("colorbox", () => {
+        core.injectVisual(`
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">
+            <div style="width:100px;height:100px;background:red;border:2px solid lime;animation: spin 2s linear infinite;"></div>
+          </div>
+          <style>@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}</style>
+        `);
+        output("ColorBox module loaded.");
       });
-      core.registerCommand("modver", () => {
-        output("ExampleMod v1.0 loaded");
-      });
-    };
+    });
 
-    VCA.loadModule(exampleMod);
-
-    // Handle input
     input.addEventListener("keydown", e => {
       if (e.key === "Enter") {
         const cmd = input.value;
         input.value = "";
         output("> " + cmd);
         VCA.execCommand(cmd);
+      }
+    });
+
+    // Drag-and-drop logic
+    window.addEventListener("dragover", e => {
+      e.preventDefault();
+      dropzone.style.display = "flex";
+    });
+
+    window.addEventListener("dragleave", e => {
+      dropzone.style.display = "none";
+    });
+
+    window.addEventListener("drop", e => {
+      e.preventDefault();
+      dropzone.style.display = "none";
+
+      const file = e.dataTransfer.files[0];
+      if (file && file.name.endsWith(".js")) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const code = evt.target.result;
+            const moduleFn = new Function("core", code);
+            VCA.loadModule(moduleFn);
+            output(`Dropped module: ${file.name}`);
+          } catch (err) {
+            output("Error loading module: " + err.message);
+          }
+        };
+        reader.readAsText(file);
+      } else {
+        output("Only .js files are supported.");
       }
     });
   </script>
