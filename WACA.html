@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>WACA v0.5 — Drag-and-Drop!</title>
+  <style>
+    body {
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 1em;
+      transition: background-color 0.5s, color 0.5s, font-family 0.5s;
+    }
+    #console,
+    #visuals {
+      border: 1px solid #0f0;
+      padding: 0.5em;
+      margin-bottom: 10px;
+    }
+    #console {
+      white-space: pre-wrap;
+      height: 200px;
+      overflow-y: auto;
+    }
+    #visuals {
+      height: 200px;
+      background: #000;
+      position: relative;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    #input {
+      width: 100%;
+      background: #000;
+      color: #0f0;
+      border: none;
+      padding: 0.5em;
+      font-family: monospace;
+      transition: background-color 0.5s, color 0.5s, font-family 0.5s;
+    }
+
+    #dropzone {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 255, 0, 0.2);
+      border: 2px dashed #0f0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #0f0;
+      font-size: 1.2em;
+      z-index: 10;
+    }
+    .error {
+      color: red !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="console">[WACA v0.5] Drag JS modules here or type commands</div>
+  <div id="visuals">
+    <div id="dropzone">Drop a JS module file here!</div>
+  </div>
+  <input id="input" placeholder="Enter command..." autofocus autocomplete="off" spellcheck="false" />
+
+  <script>
+    const consoleDiv = document.getElementById("console");
+    const visualsDiv = document.getElementById("visuals");
+    const input = document.getElementById("input");
+    const dropzone = document.getElementById("dropzone");
+    const body = document.body;
+
+    function output(text, isError = false) {
+      const line = document.createElement("div");
+      line.textContent = text;
+      if (isError) line.classList.add("error");
+      consoleDiv.appendChild(line);
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    function clearConsole() {
+      consoleDiv.innerHTML = "[WACA v0.5]";
+    }
+
+    const WACA = {
+      version: "0.5",
+      commands: {},
+      installedPackages: {},    // keep track installed packages
+      loadedPackages: {},       // keep track loaded packages
+
+      registerCommand(name, fn) {
+        this.commands[name] = fn;
+        output(`Command registered: ${name}`);
+      },
+
+      execCommand(cmdLine) {
+        cmdLine = cmdLine.trim();
+        if (!cmdLine) return;
+        // Special .grump commands (dot commands)
+        if (cmdLine.startsWith(".grump")) {
+          if (this.loadedPackages.grump) {
+            this.commands[".grump"](cmdLine.split(" ").slice(1));
+          } else {
+            output("Error: grump package not loaded. Use 'pop load grump' first.", true);
+          }
+          return;
+        }
+
+        // pop commands special parsing
+        if (cmdLine.startsWith("pop ")) {
+          const parts = cmdLine.split(" ");
+          const subcmd = parts[1];
+          if (subcmd === "apt" && parts[2] === "update") {
+            this.commands["pop apt update"]();
+            return;
+          }
+          if (subcmd === "pkg" && parts[2] === "install" && parts.length > 3) {
+            this.commands["pop pkg install"](parts.slice(3));
+            return;
+          }
+          if (subcmd === "load" && parts.length > 2) {
+            this.commands["pop load"](parts.slice(2));
+            return;
+          }
+          output(`Unknown pop command: ${cmdLine}`, true);
+          return;
+        }
+
+        // Normal command exec
+        const parts = cmdLine.split(" ");
+        const cmd = parts[0];
+        const args = parts.slice(1);
+        if (this.commands[cmd]) {
+          this.commands[cmd](args);
+        } else {
+          output(`Unknown command: ${cmd}`, true);
+        }
+      },
+
+      loadModule(fn) {
+        try {
+          fn(this);
+          output("Module loaded.");
+        } catch (e) {
+          output("Module error: " + e.message, true);
+        }
+      },
+
+      injectVisual(html) {
+        visualsDiv.innerHTML = html;
+      },
+
+      appendVisual(html) {
+        visualsDiv.innerHTML += html;
+      },
+
+      clearVisuals() {
+        visualsDiv.innerHTML = "[Visual modules go here]";
+        visualsDiv.appendChild(dropzone);
+      },
+
+      resetUI() {
+        body.style.backgroundColor = "#111";
+        body.style.color = "#0f0";
+        body.style.fontFamily = "monospace";
+        visualsDiv.style.backgroundColor = "#000";
+        visualsDiv.style.color = "#0f0";
+        input.style.backgroundColor = "#000";
+        input.style.color = "#0f0";
+        input.style.fontFamily = "monospace";
+      },
+    };
+
+    // Built-in commands
+    WACA.registerCommand("help", () => {
+      output("Commands: " + Object.keys(WACA.commands).join(", "));
+    });
+
+    WACA.registerCommand("clear", clearConsole);
+
+    WACA.registerCommand("echo", (args) => output(args.join(" ")));
+
+    WACA.registerCommand("clearui", () => WACA.clearVisuals());
+
+    WACA.registerCommand("version", () =>
+      output("WACA v0.5 — WoofWorks Advanced Compute Architecture")
+    );
+
+    WACA.registerCommand("about", () =>
+      output("Created by WoofTech — Bringing you a new kind of CLI & visual shell!")
+    );
+
+    // pop apt update - just confirm latest version
+    WACA.registerCommand("pop apt update", () => {
+      output("WACA is up to date (version " + WACA.version + ")");
+    });
+
+    // pop pkg install <package>
+    WACA.registerCommand("pop pkg install", (args) => {
+      const pkg = args[0];
+      if (!pkg) {
+        output("Usage: pop pkg install <package>", true);
+        return;
+      }
+      if (WACA.installedPackages[pkg]) {
+        output(`Package '${pkg}' is already installed.`);
+        return;
+      }
+      // For demo: only "grump" and "input" packages supported
+      if (pkg === "grump" || pkg === "input") {
+        WACA.installedPackages[pkg] = true;
+        output(`Package '${pkg}' installed successfully.`);
+      } else {
+        output(`Package '${pkg}' not found in repo.`, true);
+      }
+    });
+
+    // pop load <package>
+    WACA.registerCommand("pop load", (args) => {
+      const pkg = args[0];
+      if (!pkg) {
+        output("Usage: pop load <package>", true);
+        return;
+      }
+      if (!WACA.installedPackages[pkg]) {
+        output(`Package '${pkg}' is not installed. Use 'pop pkg install ${pkg}' first.`, true);
+        return;
+      }
+      if (WACA.loadedPackages[pkg]) {
+        output(`Package '${pkg}' already loaded.`);
+        return;
+      }
+      // For demo: only implement grump loading
+      if (pkg === "grump") {
+        WACA.loadedPackages.grump = true;
+        output("Grump package loaded. Use .grump commands to control UI.");
+      } else if (pkg === "input") {
+        WACA.loadedPackages.input = true;
+        output("Input package loaded. (No commands implemented yet)");
+      } else {
+        output(`Package '${pkg}' loading not implemented.`, true);
+      }
+    });
+
+    // .grump commands handler
+    WACA.registerCommand(".grump", (args) => {
+      const cmd = args[0];
+      if (!cmd) {
+        output("Usage: .grump <command> [...args]", true);
+        return;
+      }
+      if (cmd === "uicolor") {
+        const color = args[1];
+        if (!color || !/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(color)) {
+          output("Usage: .grump uicolor <hex color> (e.g. #0f0 or #00ff00)", true);
+          return;
+        }
+        // Change UI colors
+        body.style.backgroundColor = color;
+        body.style.color = invertHexColor(color);
+        visualsDiv.style.backgroundColor = shadeColor(color, -30);
+        visualsDiv.style.color = invertHexColor(shadeColor(color, -30));
+        input.style.backgroundColor = shadeColor(color, -60);
+        input.style.color = invertHexColor(shadeColor(color, -60));
+        output(`UI color changed to ${color}`);
+        return;
+      }
+      if (cmd === "uifont") {
+        const font = args[1];
+        const allowedFonts = ["monospace", "Arial", "Courier New", "Georgia", "Verdana", "Comic Sans MS"];
+        if (!font || !allowedFonts.includes(font)) {
+          output(
+            `Usage: .grump uifont <font>. Allowed fonts: ${allowedFonts.join(", ")}`,
+            true
+          );
+          return;
+        }
+        body.style.fontFamily = font;
+        input.style.fontFamily = font;
+        output(`UI font changed to ${font}`);
+        return;
+      }
+      if (cmd === "clear") {
+        WACA.resetUI();
+        output("Grump UI changes cleared.");
+        return;
+      }
+      output(`Unknown .grump command: ${cmd}`, true);
+    });
+
+    // Helper: invert hex color for text contrast
+    function invertHexColor(hex) {
+      hex = hex.replace("#", "");
+      if (hex.length === 3)
+        hex =
+          hex[0] +
+          hex[0] +
+          hex[1] +
+          hex[1] +
+          hex[2] +
+          hex[2];
+      const r = 255 - parseInt(hex.substring(0, 2), 16);
+      const g = 255 - parseInt(hex.substring(2, 4), 16);
+      const b = 255 - parseInt(hex.substring(4, 6), 16);
+      return `rgb(${r},${g},${b})`;
+    }
+
+    // Helper: shade color by % (negative darker)
+    function shadeColor(color, percent) {
+      let f = parseInt(color.slice(1), 16),
+        t = percent < 0 ? 0 : 255,
+        p = Math.abs(percent) / 100,
+        R = f >> 16,
+        G = (f >> 8) & 0x00ff,
+        B = f & 0x0000ff;
+      const newR = Math.round((t - R) * p) + R;
+      const newG = Math.round((t - G) * p) + G;
+      const newB = Math.round((t - B) * p) + B;
+      return `rgb(${newR},${newG},${newB})`;
+    }
+
+    // Input event listener
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const cmd = input.value;
+        input.value = "";
+        output("> " + cmd);
+        WACA.execCommand(cmd);
+      }
+    });
+
+    // Drag & Drop for JS modules
+    visualsDiv.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.style.display = "flex";
+    });
+    visualsDiv.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+      dropzone.style.display = "none";
+    });
+    visualsDiv.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.style.display = "none";
+      if (e.dataTransfer.files.length) {
+        const file = e.dataTransfer.files[0];
+        if (file.name.endsWith(".js")) {
+          const reader = new FileReader();
+          reader.onload = function () {
+            try {
+              // Wrap the loaded JS as a function taking WACA as arg
+              const fn = new Function("WACA", reader.result);
+              WACA.loadModule(fn);
+            } catch (err) {
+              output("Module load error: " + err.message, true);
+            }
+          };
+          reader.readAsText(file);
+        } else {
+          output("Only .js files can be loaded as modules.", true);
+        }
+      }
+    });
+
+    // Initial greeting
+    output("[WACA v0.5] Drag JS modules here or type commands. Type 'help' for commands.");
+
+    // Reset UI initially
+    WACA.resetUI();
+  </script>
+</body>
+</html>
