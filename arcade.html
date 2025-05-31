@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Insert Coin Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: linear-gradient(#e0e0e0, #c0c0c0);
+      font-family: sans-serif;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #gameArea {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #coin {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: gold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #slotContainer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100px;
+      height: 90px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    #slot {
+      position: absolute;
+      top: 35px;
+      left: 10px;
+      width: 80px;
+      height: 20px;
+      background: #333;
+      border: 3px solid #999;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #000;
+      z-index: 2;
+    }
+
+    #slotCover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 55px;
+      background: #c0c0c0;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      z-index: 3;
+    }
+
+    #display {
+      position: absolute;
+      bottom: 60%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 240px;
+      height: 140px;
+      background: black;
+      border-radius: 12px;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      padding: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.4);
+    }
+
+    .gameOption {
+      margin: 5px;
+      padding: 8px 14px;
+      background: #333;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+      display: none;
+    }
+
+    .gameOption:hover {
+      background: #555;
+    }
+
+    #tip {
+      position: absolute;
+      right: 10px;
+      top: 20px;
+      background: rgba(255,255,255,0.8);
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 1rem;
+      z-index: 5;
+    }
+
+    @media (max-width: 600px) {
+      #coin {
+        width: 50px;
+        height: 50px;
+      }
+
+      #slotContainer {
+        width: 80px;
+        height: 70px;
+      }
+
+      #slot {
+        width: 60px;
+        height: 16px;
+        left: 10px;
+      }
+
+      #slotCover {
+        height: 50px;
+      }
+
+      #display {
+        width: 90%;
+        height: auto;
+        font-size: 0.95rem;
+      }
+
+      #tip {
+        font-size: 0.9rem;
+        right: 5px;
+        top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="gameArea">
+    <div id="coin" draggable="false"></div>
+
+    <div id="slotContainer">
+      <div id="slot"></div>
+      <div id="slotCover"></div>
+    </div>
+
+    <div id="display">
+      <div id="gameList">
+        <div class="gameOption" onclick="window.location.href='game1.html'">🎮 Game 1</div>
+        <div class="gameOption" onclick="window.location.href='game2.html'">🎲 Game 2</div>
+        <div class="gameOption" onclick="window.location.href='game3.html'">🧩 Game 3</div>
+      </div>
+    </div>
+
+    <div id="tip">🪙 Insert coin to play!</div>
+  </div>
+
+  <script>
+    const coin = document.getElementById("coin");
+    const slot = document.getElementById("slot");
+    const options = document.querySelectorAll(".gameOption");
+
+    let dragging = false;
+    let offsetX = 0, offsetY = 0;
+
+    const startDrag = (e) => {
+      dragging = true;
+      const rect = coin.getBoundingClientRect();
+      const touch = e.touches ? e.touches[0] : e;
+      offsetX = touch.clientX - rect.left;
+      offsetY = touch.clientY - rect.top;
+      coin.style.cursor = 'grabbing';
+    };
+
+    const stopDrag = () => {
+      dragging = false;
+      coin.style.cursor = 'grab';
+      checkSlot();
+    };
+
+    const drag = (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      const touch = e.touches ? e.touches[0] : e;
+      const x = touch.clientX - offsetX;
+      const y = touch.clientY - offsetY;
+
+      coin.style.left = `${x}px`;
+      coin.style.top = `${y}px`;
+      coin.style.bottom = "auto";
+      coin.style.transform = "none";
+    };
+
+    const checkSlot = () => {
+      const coinRect = coin.getBoundingClientRect();
+      const slotRect = slot.getBoundingClientRect();
+
+      const overlap = !(coinRect.right < slotRect.left ||
+                        coinRect.left > slotRect.right ||
+                        coinRect.bottom < slotRect.top ||
+                        coinRect.top > slotRect.bottom);
+
+      if (overlap) {
+        coin.style.display = "none";
+        options.forEach(opt => opt.style.display = "block");
+        document.getElementById("tip").innerText = "✅ Choose a game!";
+      } else {
+        resetCoin();
+      }
+    };
+
+    const resetCoin = () => {
+      coin.style.top = "";
+      coin.style.left = "50%";
+      coin.style.bottom = "40px";
+      coin.style.transform = "translateX(-50%)";
+    };
+
+    // Mouse events
+    coin.addEventListener("mousedown", startDrag);
+    document.addEventListener("mousemove", drag);
+    document.addEventListener("mouseup", stopDrag);
+
+    // Touch events
+    coin.addEventListener("touchstart", startDrag);
+    document.addEventListener("touchmove", drag, { passive: false });
+    document.addEventListener("touchend", stopDrag);
+  </script>
+</body>
+</html>
