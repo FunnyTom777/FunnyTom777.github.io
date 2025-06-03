@@ -85,13 +85,31 @@
     </div>
   </section>
 
-    <!-- WWBC Banner -->
-  <section class="bg-red-600 py-4 text-center">
-    <h2 class="text-xl font-bold text-white">New Content on WWBC</h2>
-    <a href="https://funnytom777.github.io/WWBC.github.io/" class="text-white underline hover:text-gray-200 block mt-2">
-      Visit WWBC Site
-    </a>
-  </section>
+<!-- WWBC Banner -->
+<section class="bg-red-600 py-4 text-center animate-slidefade-in">
+  <h2 class="text-white text-2xl font-bold">New Content on WWBC</h2>
+  <a href="https://funnytom777.github.io/WWBC.github.io/" target="_blank" class="text-white underline hover:text-yellow-300 transition duration-300">
+    Check it out here!
+  </a>
+</section>
+
+<!-- Custom animation -->
+<style>
+  @keyframes slidefade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-slidefade-in {
+    animation: slidefade-in 1s ease-out forwards;
+  }
+</style>
+
 
   <!-- Projects -->
   <section id="projects" class="py-12 bg-gradient-to-b from-gray-900 to-black">
