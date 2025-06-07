@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obsidian Industries</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --obsidian: #16181c;
+        --accent: #3d8cff;
+        --white: #f7f8fa;
+        --gray: #2a2d33;
+        --shadow: 0 2px 24px 0 rgba(61,140,255,0.09);
+        --radius: 1rem;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        margin: 0;
+        font-family: 'Montserrat', Arial, sans-serif;
+        background: var(--obsidian);
+        color: var(--white);
+    }
+
+    .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* NAVBAR */
+    .navbar {
+        background: var(--obsidian);
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 99;
+    }
+    .nav-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 72px;
+    }
+    .logo {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+    .logo .accent {
+        color: var(--accent);
+    }
+    .nav-links {
+        list-style: none;
+        display: flex;
+        gap: 2rem;
+        margin: 0;
+        padding: 0;
+    }
+    .nav-links a {
+        color: var(--white);
+        text-decoration: none;
+        font-weight: 500;
+        letter-spacing: 1px;
+        transition: color 0.2s;
+    }
+    .nav-links a:hover {
+        color: var(--accent);
+    }
+
+    /* HERO */
+    .hero {
+        min-height: 64vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(120deg, var(--obsidian) 60%, var(--accent) 100%);
+        box-shadow: var(--shadow);
+    }
+    .hero-content {
+        padding: 5rem 0 3rem 0;
+        text-align: left;
+    }
+    .hero h1 {
+        font-size: 3rem;
+        line-height: 1.1;
+        font-weight: 700;
+        margin: 0 0 1rem 0;
+        letter-spacing: 1px;
+    }
+    .hero .accent {
+        color: var(--accent);
+    }
+    .hero p {
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+        max-width: 600px;
+    }
+    .cta {
+        background: var(--accent);
+        color: var(--white);
+        text-decoration: none;
+        padding: 1rem 2.5rem;
+        border-radius: var(--radius);
+        font-size: 1.1rem;
+        font-weight: 700;
+        box-shadow: var(--shadow);
+        transition: background 0.2s, color 0.2s;
+    }
+    .cta:hover {
+        background: var(--white);
+        color: var(--accent);
+    }
+
+    /* SECTIONS */
+    .section {
+        padding: 4rem 0;
+        background: var(--white);
+        color: var(--obsidian);
+        transition: background 0.3s, color 0.3s;
+    }
+    .section h2 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        letter-spacing: 1px;
+    }
+    .dark {
+        background: var(--gray);
+        color: var(--white);
+    }
+    .cards {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    .card {
+        background: var(--obsidian);
+        color: var(--white);
+        flex: 1 1 250px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        min-width: 250px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-8px) scale(1.04);
+        box-shadow: 0 4px 32px 0 rgba(61,140,255,0.17);
+    }
+    .card h3 {
+        color: var(--accent);
+        margin-top: 0;
+    }
+
+    /* VALUES */
+    .values-list {
+        list-style: none;
+        padding: 0;
+        font-size: 1.15rem;
+    }
+    .values-list li {
+        margin-bottom: 1.2rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+    .values-list li:before {
+        content: "◆";
+        color: var(--accent);
+        position: absolute;
+        left: 0;
+    }
+
+    /* FOOTER */
+    .footer {
+        background: var(--obsidian);
+        color: var(--white);
+        padding: 2.5rem 0 1rem 0;
+        box-shadow: var(--shadow);
+    }
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+    .footer-logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+    .footer-logo .accent {
+        color: var(--accent);
+    }
+    .copyright {
+        text-align: center;
+        color: #a9adc1;
+        font-size: 0.95rem;
+        margin-top: 1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 900px) {
+        .cards {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .footer-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+    }
+    @media (max-width: 600px) {
+        .nav-content {
+            flex-direction: column;
+            height: auto;
+            gap: 1rem;
+        }
+        .hero-content {
+            padding: 3rem 0 2rem 0;
+            text-align: left;
+        }
+        .section {
+            padding: 2rem 0;
+        }
+        .footer-content {
+            gap: 1.5rem;
+        }
+        .logo, .footer-logo {
+            font-size: 1.2rem;
+        }
+    }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="logo">
+                <span>Obsidian</span><span class="accent">Industries</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#solutions">Solutions</a></li>
+                <li><a href="#values">Values</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <header class="hero">
+        <div class="container hero-content">
+            <h1>
+                Powering Progress.<br>
+                <span class="accent">Engineering the Future.</span>
+            </h1>
+            <p>
+                Obsidian Industries is a global leader in advanced manufacturing and engineering, specializing in high-performance propulsion systems and breakthrough technologies for land, sea, and air.
+            </p>
+            <a href="#contact" class="cta">Connect With Us</a>
+        </div>
+    </header>
+
+    <section id="about" class="section dark">
+        <div class="container">
+            <h2>About Us</h2>
+            <p>
+                With decades of expertise and a passion for innovation, Obsidian Industries designs and delivers powerful engines for trains, ships, aircraft, and heavy machinery. We blend precision engineering with large-scale production to serve the world’s most critical industries.
+            </p>
+        </div>
+    </section>
+
+    <section id="solutions" class="section">
+        <div class="container">
+            <h2>Our Solutions</h2>
+            <div class="cards">
+                <div class="card">
+                    <h3>Propulsion Systems</h3>
+                    <p>
+                        Next-gen engines and powertrains for land, sea, and air—built for performance, efficiency, and durability.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>Engineering Innovation</h3>
+                    <p>
+                        Advanced R&D and integration of autonomous vehicles, complex industrial systems, and future-ready technologies.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>Integrated Manufacturing</h3>
+                    <p>
+                        Scalable, precision-driven production supporting governments, transportation networks, and private enterprises worldwide.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="values" class="section dark">
+        <div class="container">
+            <h2>Our Values</h2>
+            <ul class="values-list">
+                <li><strong>Reliability</strong> — Delivering robust solutions that power the world’s infrastructure.</li>
+                <li><strong>Efficiency</strong> — Pushing the boundaries of performance and sustainability.</li>
+                <li><strong>Innovation</strong> — Advancing engineering through creativity and technology.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer id="contact" class="footer">
+        <div class="container footer-content">
+            <div>
+                <h3>Contact Obsidian Industries</h3>
+                <p>Email: BARK!@BARK!.BARK!.BARK!</p>
+                <p>Global Headquarters: 123 BARKSWORTH RD, Doggington, The Barkipeligo</p>
+            </div>
+            <div class="footer-logo">
+                <span>Obsidian</span><span class="accent">Industries</span>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 Obsidian Industries. All rights reserved. Obsidian Industries and all its assets are controled and governed by WoofWorks INC
+        </div>
+    </footer>
+</body>
+</html>
