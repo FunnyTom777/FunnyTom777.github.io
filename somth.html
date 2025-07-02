@@ -238,6 +238,7 @@
     onSnapshot,
     query,
     orderBy,
+    serverTimestamp,
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -287,10 +288,16 @@
         const isSelf = auth.currentUser && msg.sender === auth.currentUser.email;
         div.className = "msg " + (isSelf ? "self" : "other");
 
+        const time =
+          msg.timestamp?.toDate?.().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }) || "sending...";
+
         div.innerHTML = `
           <div class="sender">${msg.sender || "Anonymous"}</div>
           <div class="text">${msg.text}</div>
-          <div class="timestamp">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+          <div class="timestamp">${time}</div>
         `;
         chatBox.appendChild(div);
       });
@@ -304,7 +311,7 @@
       await addDoc(messagesRef, {
         text,
         sender: auth.currentUser?.email || "Anon",
-        timestamp: Date.now(),
+        timestamp: serverTimestamp(),
       });
       messageInput.value = "";
     });
