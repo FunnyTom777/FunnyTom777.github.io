@@ -6,113 +6,229 @@
   <title>BarkWorksTransceiver900</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Scrollbar */
-    .scrollbar::-webkit-scrollbar {
-      width: 8px;
+    body, html {
+      height: 100%;
+      width: 100%;
+      min-height: 100vh;
     }
-    .scrollbar::-webkit-scrollbar-thumb {
-      background-color: #22c55e;
-      border-radius: 4px;
+    #app {
+      min-height: 100vh;
+      min-width: 100vw;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #0e1911;
+      display: flex;
+      flex-direction: column;
     }
-
-    /* Scroll shadow for chat */
-    #chat-box {
-      position: relative;
-    }
-    #chat-box::before {
-      content: "";
-      position: sticky;
-      top: 0;
-      height: 15px;
-      pointer-events: none;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
-      z-index: 10;
-      display: block;
-    }
-
-    /* Sidebar bottom border active tab */
-    .tab-btn.active {
-      border-bottom: 3px solid #22c55e;
-      color: #a7f3d0;
-    }
-
-    /* Chat bubbles */
-    .msg {
-      max-width: 75%;
-      padding: 0.5rem 1rem;
-      border-radius: 12px;
-      margin-bottom: 0.5rem;
-      position: relative;
-      word-wrap: break-word;
-      font-size: 0.9rem;
-      line-height: 1.3;
-      user-select: text;
-    }
-    .msg .sender {
-      font-weight: 600;
-      color: #86efac;
-      margin-bottom: 0.15rem;
-    }
-    .msg .timestamp {
-      font-size: 0.7rem;
-      color: #4ade80;
-      position: absolute;
-      bottom: 4px;
-      right: 10px;
-    }
-    .msg.self {
-      background-color: #166534;
-      margin-left: auto;
-      text-align: right;
+    .header-bar {
+      height: 52px;
+      background: #101d13;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid #166534;
+      padding: 0 1.2rem;
+      font-weight: bold;
       color: #d9f99d;
+      font-size: 1.13rem;
+      letter-spacing: 0.03em;
+      box-shadow: 0 2px 12px #052e1620;
+      z-index: 2;
     }
-    .msg.other {
-      background-color: #14532d;
-      margin-right: auto;
-      color: #bbf7d0;
+    #chat {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      max-width: 100vw;
+      min-height: 0;
     }
-    .msg:hover {
-      filter: brightness(1.1);
-      cursor: default;
+    #chat-box {
+      flex: 1 1 0;
+      overflow-y: auto;
+      padding: 0.6rem 0.2rem 0.2rem 0.2rem;
+      background: linear-gradient(132deg, #052e16 0 80%, #166534 100%);
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 8px 36px #000a;
+      margin-bottom: 0.3rem;
+      border-bottom: 2.5px solid #166534;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .msg-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      margin: 0.3rem 0 0 0;
+      padding-left: 0.9rem;
+    }
+    .msg-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #1a2e1f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.21em;
+      color: #bef264;
+      margin-top: 0.18rem;
+      flex-shrink: 0;
+    }
+    .msg-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 0;
+      width: 100%;
+    }
+    .msg-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.02rem;
+    }
+    .msg-username {
+      font-weight: 700;
+      font-size: 1.00rem;
+      letter-spacing: 0.01em;
+      margin-right: 0.3rem;
+      /* color set via JS for each user */
+    }
+    .msg-time {
+      font-size: 0.75rem;
+      color: #7dd3fc;
+      font-weight: 400;
+    }
+    .msg-bubble {
+      position: relative;
+      background: #222;
+      color: #fff;
+      padding: 0.67rem 1.1rem 0.67rem 1.1rem;
+      border-radius: 17px;
+      margin-bottom: 1px;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      box-shadow: 0 2px 12px #052e1635;
+      max-width: 100vw;
+      word-break: break-word;
+      min-width: 0;
+      margin-right: 0.7rem;
+      margin-top: 0.03rem;
+      transition: background 0.17s;
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 17px;
+      border-top-left-radius: 17px;
+      border-top-right-radius: 6px;
+      /* color set via JS for each user */
+    }
+    /* Own message right side */
+    .own-group { flex-direction: row-reverse; }
+    .own-content { align-items: flex-end; }
+    .own-bubble {
+      margin-right: 0;
+      margin-left: 0.7rem;
+      border-bottom-right-radius: 6px;
+      border-bottom-left-radius: 17px;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 17px;
     }
 
-    /* Responsive sidebar -> bottom nav on small screens */
+    /* Chat input area */
+    #chat-form {
+      display: flex;
+      gap: 0.7rem;
+      padding: 0.7rem 0.97rem 0.9rem 0.97rem;
+      border-radius: 0 0 18px 18px;
+      background: #0d1a10;
+      border-top: 2.5px solid #166534;
+      box-shadow: 0 2px 16px #052e1630;
+      z-index: 4;
+      width: 100%;
+      align-items: center;
+    }
+    #chat-form input {
+      min-height: 46px;
+      font-size: 1.08em;
+      border-radius: 12px;
+      background: #1c3023;
+      color: #d9f99d;
+      border: 1.7px solid #14532d;
+      padding: 0.4rem 1rem;
+      transition: border 0.16s, box-shadow 0.16s;
+      outline: none;
+      flex: 1 1 0;
+    }
+    #chat-form input:focus {
+      border: 2px solid #22c55e;
+      box-shadow: 0 0 0 2px #22c55e55;
+      background: #233e2c;
+      color: #fff;
+    }
+    #chat-form button {
+      font-size: 1.09em;
+      min-width: 76px;
+      font-weight: 700;
+      border-radius: 10px;
+      background: #22c55e;
+      color: #052e16;
+      border: none;
+      transition: background 0.14s, color 0.14s;
+    }
+    #chat-form button:hover {
+      background: #bef264;
+      color: #101d13;
+    }
+    /* Hide scrollbars */
+    #chat-box::-webkit-scrollbar { width: 8px;}
+    #chat-box::-webkit-scrollbar-thumb { background: #22c55e; border-radius: 4px;}
+    /* Mobile tweaks */
     @media (max-width: 640px) {
-      #app {
-        flex-direction: column;
-      }
-      #sidebar {
-        flex-direction: row;
-        width: 100%;
-        height: 56px;
-        justify-content: space-around;
-        padding: 0;
-        border-top: 1px solid #064e3b;
-      }
-      #sidebar button {
-        font-size: 1.6rem;
-        padding: 0;
-        border: none;
-        border-bottom: none !important;
-      }
-      .tab-btn.active {
-        border-bottom: none;
-        border-top: 3px solid #22c55e;
-      }
-      .content {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding: 1rem 0.5rem 0.5rem 0.5rem;
-      }
+      #app { min-width: 100vw; width: 100vw; }
+      .header-bar { font-size: 0.97rem; padding: 0 0.8rem; }
+      #chat-box { padding: 0.22rem 0.01rem 0.13rem 0.01rem; }
+      .msg-group { padding-left: 0.35rem; gap: 0.49rem;}
+      .msg-avatar { width: 30px; height: 30px; font-size: 1em;}
+      .msg-bubble { font-size: 0.97em; padding: 0.45rem 0.79rem; }
+      #chat-form { padding: 0.5rem 0.3rem 0.6rem 0.3rem; gap: 0.3rem;}
+      #chat-form button { min-width: 56px;}
+    }
+    /* Login styling */
+    #login-screen form {
+      box-shadow: 0 8px 32px #052e1660;
+      border: 2.5px solid #166534;
+    }
+    #login-screen input {
+      background: #13311c;
+      border: 1.5px solid #166534;
+      color: #cbd5e1;
+      margin-bottom: 0.6rem;
+      font-size: 1.07em;
+    }
+    #login-screen input:focus {
+      outline: 2px solid #22c55e;
+      background: #1e573b;
+      color: #fff;
+    }
+    #login-screen button {
+      background: #22c55e;
+      color: #052e16;
+      font-weight: 700;
+      font-size: 1.09em;
+    }
+    #login-screen button:hover {
+      background: #bef264;
+      color: #14532d;
     }
   </style>
 </head>
-<body class="h-screen flex overflow-hidden font-mono">
+<body class="h-screen w-screen font-mono bg-black">
 
 <!-- Login Screen -->
-<div id="login-screen" class="w-full h-full flex items-center justify-center bg-black">
-  <form id="login-form" class="bg-green-900 p-6 rounded shadow space-y-4 w-full max-w-xs">
-    <h2 class="text-2xl font-bold text-center">🔐 Login</h2>
+<div id="login-screen" class="fixed inset-0 flex items-center justify-center bg-black z-40">
+  <form id="login-form" class="bg-green-900 p-7 rounded-xl shadow space-y-4 w-full max-w-xs">
+    <h2 class="text-2xl font-bold text-center tracking-tight">🐾 BarkWorks</h2>
     <input type="email" name="email" required placeholder="Email" class="w-full p-2 rounded bg-green-800 text-green-100" />
     <input type="password" name="password" required placeholder="Password" class="w-full p-2 rounded bg-green-800 text-green-100" />
     <button type="submit" class="w-full bg-green-700 hover:bg-green-600 p-2 rounded">Login</button>
@@ -120,107 +236,14 @@
 </div>
 
 <!-- Main App -->
-<div id="app" class="hidden h-screen w-full flex" >
-  <!-- Sidebar -->
-  <div
-    id="sidebar"
-    class="w-20 bg-green-900 flex flex-col items-center py-6 space-y-8 sm:space-y-0 sm:flex-row sm:justify-around"
-  >
-    <button data-tab="dashboard" class="tab-btn hover:text-green-300">🪟</button>
-    <button data-tab="chat" class="tab-btn hover:text-green-300">💬</button>
-    <button data-tab="account" class="tab-btn hover:text-green-300">💵</button>
-    <button data-tab="tasks" class="tab-btn hover:text-green-300">⚒️</button>
-    <button data-tab="settings" class="tab-btn hover:text-green-300">⚙️</button>
-  </div>
-
-  <!-- Main Content -->
-  <div class="content flex-1 p-6 overflow-auto scrollbar">
-    <div id="dashboard" class="tab hidden">
-      <h1 class="text-4xl font-bold mb-6">📋 Dashboard</h1>
-      <div class="grid grid-cols-2 gap-6">
-        <div class="bg-green-950 p-6 rounded-lg shadow-lg">💰 <strong>Total WoofCoin Balance:</strong> 3,210 WC</div>
-        <div class="bg-green-950 p-6 rounded-lg shadow-lg">📉 <strong>Recent Spending:</strong> -50 WC @ WoofMart</div>
-        <div class="bg-green-950 p-6 rounded-lg shadow-lg">📈 <strong>Recent Earning:</strong> +150 WC from Task #14</div>
-        <div class="bg-green-950 p-6 rounded-lg shadow-lg">
-          🧑‍🤝‍🧑 <strong>Friends:</strong><br />
-          - Barker ✅<br />
-          - Ruff 💤<br />
-          - Scrappy Terrier ✅
-        </div>
-        <div class="bg-green-950 p-6 rounded-lg shadow-lg col-span-2">
-          🔨 <strong>Active Tasks:</strong><br />
-          - Fix the antenna (Progress 40%)<br />
-          - Deliver message to outpost
-        </div>
-      </div>
-    </div>
-
-    <div id="chat" class="tab hidden flex flex-col h-[500px] max-h-[70vh]">
-      <h1 class="text-4xl font-bold mb-4">💬 Chat</h1>
-      <div
-        id="chat-box"
-        class="flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar bg-green-950 rounded-lg shadow-lg border border-green-700"
-      ></div>
-      <form id="chat-form" class="flex mt-3 gap-2">
-        <input
-          id="chat-input"
-          autocomplete="off"
-          type="text"
-          placeholder="Send a message..."
-          class="flex-1 rounded bg-green-900 text-green-100 p-3 placeholder-green-400 focus:outline-none focus:ring-2 focus:ring-green-500"
-          required
-        />
-        <button
-          type="submit"
-          class="bg-green-700 hover:bg-green-600 px-4 rounded text-green-100 font-semibold select-none"
-        >
-          Send
-        </button>
-      </form>
-    </div>
-
-    <div id="account" class="tab hidden">
-      <h1 class="text-4xl font-bold mb-6">💵 Account</h1>
-      <div class="bg-green-950 p-6 rounded-lg shadow-lg mb-6">
-        <strong>Total Balance:</strong> 3,210 WC
-      </div>
-      <div class="bg-green-950 p-6 rounded-lg shadow-lg mb-6">
-        <strong>Transaction History:</strong><br />
-        -50 WC @ WoofMart<br />
-        +150 WC Task 14<br />
-        -10 WC Loan Repayment
-      </div>
-      <div class="bg-green-950 p-6 rounded-lg shadow-lg">
-        <strong>Loans & Debt:</strong><br />
-        Current Debt: 90 WC<br />
-        Next Payment Due: 3 Days
-      </div>
-    </div>
-
-    <div id="tasks" class="tab hidden">
-      <h1 class="text-4xl font-bold mb-6">⚒️ Tasks</h1>
-      <div class="space-y-6">
-        <div class="bg-green-950 p-6 rounded-lg shadow-lg flex items-center justify-between">
-          <span>📡 Repair Outpost Beacon</span>
-          <div>
-            <input type="checkbox" class="mr-2" /> <button class="bg-green-700 hover:bg-green-600 px-3 py-1 rounded">Accept</button>
-          </div>
-        </div>
-        <div class="bg-green-950 p-6 rounded-lg shadow-lg flex items-center justify-between">
-          <span>📦 Deliver Supply Crate</span>
-          <div>
-            <input type="checkbox" class="mr-2" /> <button class="bg-green-700 hover:bg-green-600 px-3 py-1 rounded">Accept</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="settings" class="tab hidden">
-      <h1 class="text-4xl font-bold mb-6">⚙️ Settings</h1>
-      <div class="bg-green-950 p-6 rounded-lg shadow-lg">
-        <p>(Settings coming soon... maybe themes, audio alerts, etc?)</p>
-      </div>
-    </div>
+<div id="app" class="hidden">
+  <div class="header-bar">💬 BarkWorks Messenger</div>
+  <div id="chat" class="flex-1 flex flex-col h-full">
+    <div id="chat-box" class="flex-1"></div>
+    <form id="chat-form" autocomplete="off">
+      <input id="chat-input" type="text" autocomplete="off" placeholder="Send a message..." required />
+      <button type="submit">Send</button>
+    </form>
   </div>
 </div>
 
@@ -259,6 +282,35 @@
   const chatForm = document.getElementById("chat-form");
   const messageInput = document.getElementById("chat-input");
 
+  // Discord-like color palette for user bubble backgrounds (extendable, hashes to user)
+  const bubbleColors = [
+    "#53a76b", "#2fc7b2", "#7c6ee6", "#e66eaa", "#e6c36e", "#e67c6e", "#6ea4e6", "#b86ee6", "#e66e6e",
+    "#96e66e", "#6ee6bb", "#6ee6e6", "#d46ee6", "#f88e31", "#c8e66e"
+  ];
+  // Text colors for bubble backgrounds, indexed the same
+  const textColors = [
+    "#eafff0", "#eafff7", "#f4f3ff", "#fff3fa", "#fffbe9", "#fff5f3", "#f1f7ff", "#faedff", "#fff4f4",
+    "#f7fff3", "#f2fff9", "#f2ffff", "#fff1ff", "#fff5e9", "#faffea"
+  ];
+
+  // For consistent color assignment per user
+  function getUserColorIndex(email) {
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) hash = (hash << 5) - hash + email.charCodeAt(i);
+    return Math.abs(hash) % bubbleColors.length;
+  }
+
+  function nameToInitials(email) {
+    if (!email) return "?";
+    const username = email.split("@")[0];
+    if (!username) return "?";
+    let parts = username.split(/[.\-_]/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return parts.slice(0, 2).map(p => p[0].toUpperCase()).join("");
+  }
+
   loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const email = e.target.email.value;
@@ -272,35 +324,48 @@
     if (user) {
       document.getElementById("login-screen")?.classList.add("hidden");
       document.getElementById("app")?.classList.remove("hidden");
-      showTab("dashboard");
       setupChat();
     }
   });
 
+  function createMsgGroup(msg, isSelf, prevMsg, nextMsg) {
+    // Group if previous/next is from same user (not used in this version, but can be extended)
+    const colorIdx = getUserColorIndex(msg.sender || "anon");
+    const bubbleBg = bubbleColors[colorIdx];
+    const bubbleText = textColors[colorIdx];
+    // Username color (slightly darker for names)
+    const nameColor = bubbleColors[colorIdx];
+
+    // Avatar
+    const avatar = `<div class="msg-avatar" style="background:${bubbleBg};color:${bubbleText};">${nameToInitials(msg.sender)}</div>`;
+    // Username/time
+    const username = `<span class="msg-username" style="color:${nameColor};">${msg.sender ? msg.sender.split("@")[0] : "Anonymous"}</span>`;
+    const time = `<span class="msg-time">${msg.timestamp?.toDate?.().toLocaleTimeString([], {hour: "2-digit", minute:"2-digit"}) || "sending..."}</span>`;
+    // Message bubble
+    const bubble = `<div class="msg-bubble${isSelf ? " own-bubble" : ""}" style="background:${bubbleBg};color:${bubbleText};">${msg.text}</div>`;
+
+    // Content
+    const msgContent = `<div class="msg-content${isSelf ? " own-content" : ""}">
+      <div class="msg-header">${username}${time}</div>
+      ${bubble}
+    </div>`;
+    return `<div class="msg-group${isSelf ? " own-group" : ""}">${avatar}${msgContent}</div>`;
+  }
+
   async function setupChat() {
     const messagesRef = collection(db, "messages");
     const q = query(messagesRef, orderBy("timestamp"));
-    onSnapshot(q, (snapshot) => {
+    let unsubscribe = onSnapshot(q, (snapshot) => {
       chatBox.innerHTML = "";
-      snapshot.forEach((doc) => {
-        const msg = doc.data();
-        const div = document.createElement("div");
+      let prev = null;
+      let docs = [];
+      snapshot.forEach((doc) => docs.push(doc));
+      for (let i = 0; i < docs.length; i++) {
+        const msg = docs[i].data();
         const isSelf = auth.currentUser && msg.sender === auth.currentUser.email;
-        div.className = "msg " + (isSelf ? "self" : "other");
-
-        const time =
-          msg.timestamp?.toDate?.().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }) || "sending...";
-
-        div.innerHTML = `
-          <div class="sender">${msg.sender || "Anonymous"}</div>
-          <div class="text">${msg.text}</div>
-          <div class="timestamp">${time}</div>
-        `;
-        chatBox.appendChild(div);
-      });
+        chatBox.innerHTML += createMsgGroup(msg, isSelf);
+      }
+      // Always scroll to bottom
       chatBox.scrollTop = chatBox.scrollHeight;
     });
 
@@ -316,20 +381,6 @@
       messageInput.value = "";
     });
   }
-
-  function showTab(tabName) {
-    document.querySelectorAll(".tab").forEach((tab) => tab.classList.add("hidden"));
-    document.getElementById(tabName).classList.remove("hidden");
-    document.querySelectorAll(".tab-btn").forEach((btn) => btn.classList.remove("active"));
-    const btn = [...document.querySelectorAll(".tab-btn")].find((b) => b.dataset.tab === tabName);
-    if (btn) btn.classList.add("active");
-  }
-
-  document.querySelectorAll(".tab-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      showTab(btn.dataset.tab);
-    });
-  });
 </script>
 </body>
 </html>
