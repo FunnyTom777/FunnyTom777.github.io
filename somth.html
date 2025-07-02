@@ -6,15 +6,104 @@
   <title>BarkWorksTransceiver900</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .active-tab {
-      background-color: #064e3b;
-    }
+    /* Scrollbar */
     .scrollbar::-webkit-scrollbar {
-      width: 6px;
+      width: 8px;
     }
     .scrollbar::-webkit-scrollbar-thumb {
       background-color: #22c55e;
-      border-radius: 3px;
+      border-radius: 4px;
+    }
+
+    /* Scroll shadow for chat */
+    #chat-box {
+      position: relative;
+    }
+    #chat-box::before {
+      content: "";
+      position: sticky;
+      top: 0;
+      height: 15px;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+      z-index: 10;
+      display: block;
+    }
+
+    /* Sidebar bottom border active tab */
+    .tab-btn.active {
+      border-bottom: 3px solid #22c55e;
+      color: #a7f3d0;
+    }
+
+    /* Chat bubbles */
+    .msg {
+      max-width: 75%;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      position: relative;
+      word-wrap: break-word;
+      font-size: 0.9rem;
+      line-height: 1.3;
+      user-select: text;
+    }
+    .msg .sender {
+      font-weight: 600;
+      color: #86efac;
+      margin-bottom: 0.15rem;
+    }
+    .msg .timestamp {
+      font-size: 0.7rem;
+      color: #4ade80;
+      position: absolute;
+      bottom: 4px;
+      right: 10px;
+    }
+    .msg.self {
+      background-color: #166534;
+      margin-left: auto;
+      text-align: right;
+      color: #d9f99d;
+    }
+    .msg.other {
+      background-color: #14532d;
+      margin-right: auto;
+      color: #bbf7d0;
+    }
+    .msg:hover {
+      filter: brightness(1.1);
+      cursor: default;
+    }
+
+    /* Responsive sidebar -> bottom nav on small screens */
+    @media (max-width: 640px) {
+      #app {
+        flex-direction: column;
+      }
+      #sidebar {
+        flex-direction: row;
+        width: 100%;
+        height: 56px;
+        justify-content: space-around;
+        padding: 0;
+        border-top: 1px solid #064e3b;
+      }
+      #sidebar button {
+        font-size: 1.6rem;
+        padding: 0;
+        border: none;
+        border-bottom: none !important;
+      }
+      .tab-btn.active {
+        border-bottom: none;
+        border-top: 3px solid #22c55e;
+      }
+      .content {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 1rem 0.5rem 0.5rem 0.5rem;
+      }
     }
   </style>
 </head>
@@ -31,18 +120,21 @@
 </div>
 
 <!-- Main App -->
-<div id="app" class="hidden h-screen w-full flex">
+<div id="app" class="hidden h-screen w-full flex" >
   <!-- Sidebar -->
-  <div class="w-20 bg-green-900 flex flex-col items-center py-6 space-y-8">
-    <button data-tab="dashboard" class="tab-btn text-2xl hover:text-green-300">🪟</button>
-    <button data-tab="chat" class="tab-btn text-2xl hover:text-green-300">💬</button>
-    <button data-tab="account" class="tab-btn text-2xl hover:text-green-300">💵</button>
-    <button data-tab="tasks" class="tab-btn text-2xl hover:text-green-300">⚒️</button>
-    <button data-tab="settings" class="tab-btn text-2xl hover:text-green-300">⚙️</button>
+  <div
+    id="sidebar"
+    class="w-20 bg-green-900 flex flex-col items-center py-6 space-y-8 sm:space-y-0 sm:flex-row sm:justify-around"
+  >
+    <button data-tab="dashboard" class="tab-btn hover:text-green-300">🪟</button>
+    <button data-tab="chat" class="tab-btn hover:text-green-300">💬</button>
+    <button data-tab="account" class="tab-btn hover:text-green-300">💵</button>
+    <button data-tab="tasks" class="tab-btn hover:text-green-300">⚒️</button>
+    <button data-tab="settings" class="tab-btn hover:text-green-300">⚙️</button>
   </div>
 
   <!-- Main Content -->
-  <div class="flex-1 p-6 overflow-auto scrollbar">
+  <div class="content flex-1 p-6 overflow-auto scrollbar">
     <div id="dashboard" class="tab hidden">
       <h1 class="text-4xl font-bold mb-6">📋 Dashboard</h1>
       <div class="grid grid-cols-2 gap-6">
@@ -63,20 +155,28 @@
       </div>
     </div>
 
-    <div id="chat" class="tab hidden">
-      <h1 class="text-4xl font-bold mb-6">💬 Chat</h1>
-      <div class="bg-green-950 rounded-lg shadow-lg h-[500px] flex flex-col">
-        <div class="bg-green-800 px-4 py-3 text-lg font-semibold rounded-t-lg border-b border-green-700"># general</div>
-        <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-2 space-y-3 scrollbar"></div>
-        <div class="bg-green-800 p-3 border-t border-green-700">
-          <input
-            id="chat-input"
-            type="text"
-            class="w-full p-2 rounded bg-green-900 text-green-100 placeholder-green-400"
-            placeholder="Send a message..."
-          />
-        </div>
-      </div>
+    <div id="chat" class="tab hidden flex flex-col h-[500px] max-h-[70vh]">
+      <h1 class="text-4xl font-bold mb-4">💬 Chat</h1>
+      <div
+        id="chat-box"
+        class="flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar bg-green-950 rounded-lg shadow-lg border border-green-700"
+      ></div>
+      <form id="chat-form" class="flex mt-3 gap-2">
+        <input
+          id="chat-input"
+          autocomplete="off"
+          type="text"
+          placeholder="Send a message..."
+          class="flex-1 rounded bg-green-900 text-green-100 p-3 placeholder-green-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+          required
+        />
+        <button
+          type="submit"
+          class="bg-green-700 hover:bg-green-600 px-4 rounded text-green-100 font-semibold select-none"
+        >
+          Send
+        </button>
+      </form>
     </div>
 
     <div id="account" class="tab hidden">
@@ -130,7 +230,6 @@
     getAuth,
     signInWithEmailAndPassword,
     onAuthStateChanged,
-    signOut,
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore,
@@ -156,6 +255,7 @@
 
   const loginForm = document.getElementById("login-form");
   const chatBox = document.getElementById("chat-box");
+  const chatForm = document.getElementById("chat-form");
   const messageInput = document.getElementById("chat-input");
 
   loginForm?.addEventListener("submit", (e) => {
@@ -184,34 +284,38 @@
       snapshot.forEach((doc) => {
         const msg = doc.data();
         const div = document.createElement("div");
-        div.className = "text-green-200 mb-2";
-        div.textContent = `${msg.sender || "Anonymous"}: ${msg.text}`;
+        const isSelf = auth.currentUser && msg.sender === auth.currentUser.email;
+        div.className = "msg " + (isSelf ? "self" : "other");
+
+        div.innerHTML = `
+          <div class="sender">${msg.sender || "Anonymous"}</div>
+          <div class="text">${msg.text}</div>
+          <div class="timestamp">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        `;
         chatBox.appendChild(div);
       });
       chatBox.scrollTop = chatBox.scrollHeight;
     });
 
-    messageInput?.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter" && messageInput.value.trim() !== "") {
-        await addDoc(messagesRef, {
-          text: messageInput.value,
-          sender: auth.currentUser?.email || "Anon",
-          timestamp: Date.now(),
-        });
-        messageInput.value = "";
-      }
+    chatForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = messageInput.value.trim();
+      if (text === "") return;
+      await addDoc(messagesRef, {
+        text,
+        sender: auth.currentUser?.email || "Anon",
+        timestamp: Date.now(),
+      });
+      messageInput.value = "";
     });
   }
 
   function showTab(tabName) {
     document.querySelectorAll(".tab").forEach((tab) => tab.classList.add("hidden"));
     document.getElementById(tabName).classList.remove("hidden");
-    document.querySelectorAll(".tab-btn").forEach((btn) => btn.classList.remove("active-tab"));
-    const tabs = ["dashboard", "chat", "account", "tasks", "settings"];
-    const idx = tabs.indexOf(tabName);
-    if (idx !== -1) {
-      document.querySelectorAll(".tab-btn")[idx].classList.add("active-tab");
-    }
+    document.querySelectorAll(".tab-btn").forEach((btn) => btn.classList.remove("active"));
+    const btn = [...document.querySelectorAll(".tab-btn")].find((b) => b.dataset.tab === tabName);
+    if (btn) btn.classList.add("active");
   }
 
   document.querySelectorAll(".tab-btn").forEach((btn) => {
