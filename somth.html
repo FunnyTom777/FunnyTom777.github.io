@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black text-green-400">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BarkWorksTransceiver900</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .active-tab {
+      background-color: #064e3b;
+    }
+    .scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .scrollbar::-webkit-scrollbar-thumb {
+      background-color: #22c55e;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="h-screen flex overflow-hidden font-mono">
+
+<!-- Login Screen -->
+<div id="login-screen" class="w-full h-full flex items-center justify-center bg-black">
+  <form id="login-form" class="bg-green-900 p-6 rounded shadow space-y-4 w-full max-w-xs">
+    <h2 class="text-2xl font-bold text-center">🔐 Login</h2>
+    <input type="email" name="email" required placeholder="Email" class="w-full p-2 rounded bg-green-800 text-green-100" />
+    <input type="password" name="password" required placeholder="Password" class="w-full p-2 rounded bg-green-800 text-green-100" />
+    <button type="submit" class="w-full bg-green-700 hover:bg-green-600 p-2 rounded">Login</button>
+  </form>
+</div>
+
+<!-- Main App -->
+<div id="app" class="hidden h-screen w-full flex">
+  <!-- Sidebar -->
+  <div class="w-20 bg-green-900 flex flex-col items-center py-6 space-y-8">
+    <button data-tab="dashboard" class="tab-btn text-2xl hover:text-green-300">🪟</button>
+    <button data-tab="chat" class="tab-btn text-2xl hover:text-green-300">💬</button>
+    <button data-tab="account" class="tab-btn text-2xl hover:text-green-300">💵</button>
+    <button data-tab="tasks" class="tab-btn text-2xl hover:text-green-300">⚒️</button>
+    <button data-tab="settings" class="tab-btn text-2xl hover:text-green-300">⚙️</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 p-6 overflow-auto scrollbar">
+    <div id="dashboard" class="tab hidden">
+      <h1 class="text-4xl font-bold mb-6">📋 Dashboard</h1>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="bg-green-950 p-6 rounded-lg shadow-lg">💰 <strong>Total WoofCoin Balance:</strong> 3,210 WC</div>
+        <div class="bg-green-950 p-6 rounded-lg shadow-lg">📉 <strong>Recent Spending:</strong> -50 WC @ WoofMart</div>
+        <div class="bg-green-950 p-6 rounded-lg shadow-lg">📈 <strong>Recent Earning:</strong> +150 WC from Task #14</div>
+        <div class="bg-green-950 p-6 rounded-lg shadow-lg">
+          🧑‍🤝‍🧑 <strong>Friends:</strong><br />
+          - Barker ✅<br />
+          - Ruff 💤<br />
+          - Scrappy Terrier ✅
+        </div>
+        <div class="bg-green-950 p-6 rounded-lg shadow-lg col-span-2">
+          🔨 <strong>Active Tasks:</strong><br />
+          - Fix the antenna (Progress 40%)<br />
+          - Deliver message to outpost
+        </div>
+      </div>
+    </div>
+
+    <div id="chat" class="tab hidden">
+      <h1 class="text-4xl font-bold mb-6">💬 Chat</h1>
+      <div class="bg-green-950 rounded-lg shadow-lg h-[500px] flex flex-col">
+        <div class="bg-green-800 px-4 py-3 text-lg font-semibold rounded-t-lg border-b border-green-700"># general</div>
+        <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-2 space-y-3 scrollbar"></div>
+        <div class="bg-green-800 p-3 border-t border-green-700">
+          <input
+            id="chat-input"
+            type="text"
+            class="w-full p-2 rounded bg-green-900 text-green-100 placeholder-green-400"
+            placeholder="Send a message..."
+          />
+        </div>
+      </div>
+    </div>
+
+    <div id="account" class="tab hidden">
+      <h1 class="text-4xl font-bold mb-6">💵 Account</h1>
+      <div class="bg-green-950 p-6 rounded-lg shadow-lg mb-6">
+        <strong>Total Balance:</strong> 3,210 WC
+      </div>
+      <div class="bg-green-950 p-6 rounded-lg shadow-lg mb-6">
+        <strong>Transaction History:</strong><br />
+        -50 WC @ WoofMart<br />
+        +150 WC Task 14<br />
+        -10 WC Loan Repayment
+      </div>
+      <div class="bg-green-950 p-6 rounded-lg shadow-lg">
+        <strong>Loans & Debt:</strong><br />
+        Current Debt: 90 WC<br />
+        Next Payment Due: 3 Days
+      </div>
+    </div>
+
+    <div id="tasks" class="tab hidden">
+      <h1 class="text-4xl font-bold mb-6">⚒️ Tasks</h1>
+      <div class="space-y-6">
+        <div class="bg-green-950 p-6 rounded-lg shadow-lg flex items-center justify-between">
+          <span>📡 Repair Outpost Beacon</span>
+          <div>
+            <input type="checkbox" class="mr-2" /> <button class="bg-green-700 hover:bg-green-600 px-3 py-1 rounded">Accept</button>
+          </div>
+        </div>
+        <div class="bg-green-950 p-6 rounded-lg shadow-lg flex items-center justify-between">
+          <span>📦 Deliver Supply Crate</span>
+          <div>
+            <input type="checkbox" class="mr-2" /> <button class="bg-green-700 hover:bg-green-600 px-3 py-1 rounded">Accept</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="settings" class="tab hidden">
+      <h1 class="text-4xl font-bold mb-6">⚙️ Settings</h1>
+      <div class="bg-green-950 p-6 rounded-lg shadow-lg">
+        <p>(Settings coming soon... maybe themes, audio alerts, etc?)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut,
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    onSnapshot,
+    query,
+    orderBy,
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB3UhzvMkOIyF5l7Ic6YZrwo5kxXRkkY_4",
+    authDomain: "barkworkstransmissionapp.firebaseapp.com",
+    projectId: "barkworkstransmissionapp",
+    storageBucket: "barkworkstransmissionapp.firebasestorage.app",
+    messagingSenderId: "1000654007316",
+    appId: "1:1000654007316:web:81b2fa6dbb4b1be4bfcb01",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const loginForm = document.getElementById("login-form");
+  const chatBox = document.getElementById("chat-box");
+  const messageInput = document.getElementById("chat-input");
+
+  loginForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+    signInWithEmailAndPassword(auth, email, password).catch((err) => {
+      alert("Login failed: " + err.message);
+    });
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById("login-screen")?.classList.add("hidden");
+      document.getElementById("app")?.classList.remove("hidden");
+      showTab("dashboard");
+      setupChat();
+    }
+  });
+
+  async function setupChat() {
+    const messagesRef = collection(db, "messages");
+    const q = query(messagesRef, orderBy("timestamp"));
+    onSnapshot(q, (snapshot) => {
+      chatBox.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const msg = doc.data();
+        const div = document.createElement("div");
+        div.className = "text-green-200 mb-2";
+        div.textContent = `${msg.sender || "Anonymous"}: ${msg.text}`;
+        chatBox.appendChild(div);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    messageInput?.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter" && messageInput.value.trim() !== "") {
+        await addDoc(messagesRef, {
+          text: messageInput.value,
+          sender: auth.currentUser?.email || "Anon",
+          timestamp: Date.now(),
+        });
+        messageInput.value = "";
+      }
+    });
+  }
+
+  function showTab(tabName) {
+    document.querySelectorAll(".tab").forEach((tab) => tab.classList.add("hidden"));
+    document.getElementById(tabName).classList.remove("hidden");
+    document.querySelectorAll(".tab-btn").forEach((btn) => btn.classList.remove("active-tab"));
+    const tabs = ["dashboard", "chat", "account", "tasks", "settings"];
+    const idx = tabs.indexOf(tabName);
+    if (idx !== -1) {
+      document.querySelectorAll(".tab-btn")[idx].classList.add("active-tab");
+    }
+  }
+
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      showTab(btn.dataset.tab);
+    });
+  });
+</script>
+</body>
+</html>
