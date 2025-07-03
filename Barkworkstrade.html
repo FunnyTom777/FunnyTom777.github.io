@@ -130,7 +130,7 @@
 
     <div class="footer">
       <em>Made with 💸 + 🔥 by FunnyTom777</em><br>
-      <span class="muted" style="font-size:0.95em;">(Run on <b>localhost</b> for Google sign-in to work!)</span>
+      <span class="muted" style="font-size:0.95em;">(Run on <b>localhost</b> or add your domain to Firebase Auth for Google sign-in!)</span>
     </div>
   </div>
 
@@ -173,12 +173,11 @@
     function setText(id, text) { document.getElementById(id).textContent = text; }
 
     // ======= 5. Google Redirect Handler (MUST for signInWithRedirect) =======
-    // This must run early to resolve the redirect result, otherwise you might get stuck in a login loop.
     window.onload = async () => {
       try {
         await auth.getRedirectResult(); // resolves pending login, if any
       } catch (e) {
-        // Ignore if no pending login.
+        // ignore
       }
     }
 
