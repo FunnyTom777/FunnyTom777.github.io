@@ -18,9 +18,12 @@
       --fair: #f9c846;
       --bad: #ff595e;
       --event: #ffe066;
+      --arrow-up: #27ef6a;
+      --arrow-down: #ff595e;
+      --arrow-flat: #b1b5bb;
     }
     html, body { background: var(--bg); color: var(--text); margin: 0; height: 100%; font-family: 'Inter', Arial, sans-serif;}
-    #container { max-width: 470px; margin: 48px auto 0 auto; padding: 0 16px;}
+    #container { max-width: 520px; margin: 48px auto 0 auto; padding: 0 8px;}
     h1 { text-align: center; font-weight: 600; letter-spacing: -1px; margin-bottom: 6px;}
     .card {
       background: var(--card);
@@ -147,12 +150,66 @@
       display: inline-block;
       line-height: 1.35;
     }
-    @media (max-width: 640px) {
+    .arrow-up {
+      color: var(--arrow-up);
+      font-weight: bold;
+      font-size: 1.09em;
+      margin-left: 2px;
+    }
+    .arrow-down {
+      color: var(--arrow-down);
+      font-weight: bold;
+      font-size: 1.09em;
+      margin-left: 2px;
+    }
+    .arrow-flat {
+      color: var(--arrow-flat);
+      font-size: 1.05em;
+      margin-left: 2px;
+    }
+    .mini-graph {
+      height: 18px;
+      width: 60px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 3px;
+    }
+    .statbar {
+      margin: 12px 0 12px 0;
+      background: #171b21;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 9px 11px 2px 11px;
+      font-size: 1.02em;
+      color: var(--muted);
+    }
+    .statbar b {
+      color: var(--text);
+    }
+    .statbar .profit {
+      font-weight: bold;
+      color: var(--good);
+    }
+    .statbar .loss {
+      font-weight: bold;
+      color: var(--bad);
+    }
+    .buy-qty-in {
+      width: 48px; background: #13181f; color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 1em; padding: 3px 4px; margin-right: 3px; text-align: center;
+    }
+    .buy-form { display: flex; align-items: center;}
+    .buy-form button {margin:0;}
+    .buy-form input[type=number]::-webkit-inner-spin-button,
+    .buy-form input[type=number]::-webkit-outer-spin-button { opacity: 1;}
+    @media (max-width: 700px) {
       #container { max-width: 99vw; }
-      .card { padding: 20px 8px 14px 8px; }
+      .card { padding: 20px 2px 14px 2px; }
       .stock-table th, .stock-table td, .portfolio-table th, .portfolio-table td { padding: 6px 2px;}
       #howToBtn { top: 8px; right: 8px; font-size: 1em;}
       #howToModal .modal-card { max-width: 97vw;}
+      .mini-graph { width: 45px;}
     }
   </style>
 </head>
@@ -163,9 +220,11 @@
       <h2>How to Play</h2>
       <ul>
         <li>You start with $1000 and no stocks.</li>
-        <li>Each stock has a price and a rating (chance to rise).</li>
+        <li>Each stock has a price, a rating (chance to rise), and a price change arrow/mini-graph.</li>
         <li>Buy low, sell high! Try to grow your wealth.</li>
         <li>Click "Progress 1 Day" to update stock prices and ratings.</li>
+        <li>Specify how many shares to buy when you buy.</li>
+        <li>See stats on your shares' original value, current value, and profit/loss.</li>
         <li>Occasionally, <b>market events</b> will affect certain stocks!</li>
         <li>Restart anytime with the Restart button.</li>
       </ul>
@@ -188,6 +247,7 @@
       <button id="progressBtn" onclick="progressDay()" style="width:100%;margin-bottom:12px;">
         Progress 1 Day
       </button>
+      <div class="statbar" id="statBar"></div>
       <div class="portfolio-header">Stocks</div>
       <table class="stock-table">
         <thead>
@@ -195,8 +255,8 @@
             <th>Symbol</th>
             <th>Price</th>
             <th>Rating</th>
-            <th class="actions-cell">Buy</th>
-            <th class="actions-cell">Sell</th>
+            <th>Trend</th>
+            <th class="actions-cell">Buy/Sell</th>
           </tr>
         </thead>
         <tbody id="stocksBody"></tbody>
@@ -207,7 +267,7 @@
       <div id="eventMsg" style="margin-top:9px;text-align:center;"></div>
     </div>
     <div class="footer">
-      <em>Made with by FunnyTom777</em><br>
+      <em>Made with 💸 + 🔥 by FunnyTom777 & Copilot</em><br>
       <span class="muted" style="font-size:0.95em;">Pure JS, reload to play again!</span>
     </div>
   </div>
@@ -245,24 +305,31 @@
       ICE: "Icecap Insurance"
     };
     let game = {};
-    function randomStock(start) {
-      // Give each stock a random price and rating
+
+    // Each time you buy, we record: {sym, shares, price, day}
+    // We'll store: game.purchaseHistory = [ {sym, shares, price, day} ]
+    function randomStock() {
       return {
         price: +(Math.random()*50+50).toFixed(2), // $50-$100
         rating: +(Math.random()*0.7+0.15).toFixed(2), // 0.15-0.85
-        history: [start]
+        history: [], // price history
+        trend: 0 // -1 = down, 0 = unchanged, 1 = up (for last day)
       };
     }
     function initialGameState() {
       let stocks = {};
-      for (let s of STOCK_SYMBOLS) stocks[s] = randomStock();
+      for (let s of STOCK_SYMBOLS) {
+        stocks[s] = randomStock();
+        stocks[s].history = [stocks[s].price];
+      }
       return {
         day: 1,
         balance: 1000,
         stocks: stocks,
-        portfolio: {},
+        portfolio: {}, // symbol -> shares
         msg: "",
-        eventMsg: ""
+        eventMsg: "",
+        purchaseHistory: [] // for stats
       };
     }
     function resetGame() {
@@ -271,9 +338,7 @@
     }
 
     // ======= Market Event Mechanic =======
-    // Once every 4-8 days, a random stock or sector has a special event!
     function maybeMarketEvent() {
-      // 1 in 5 chance of event; makes events not too frequent
       if (Math.random() < 0.22) {
         const eventType = Math.random();
         let chosen, msg = "";
@@ -328,37 +393,45 @@
     function progressDay() {
       game.day++;
       game.msg = "";
-      maybeMarketEvent(); // new mechanic!
+      maybeMarketEvent();
       for (const sym of STOCK_SYMBOLS) {
         let s = game.stocks[sym];
-        // Determine if price goes up or down based on rating
+        let prevPrice = s.price;
         const up = Math.random() < s.rating;
         let baseMove = (Math.random()*0.04 + 0.01); // 1%-5%
         if (s.rating > 0.8 || s.rating < 0.2) baseMove *= 1.7;
         let priceChange = up ? (1+baseMove) : (1-baseMove);
         s.price = Math.max(1, +(s.price * priceChange).toFixed(2));
-        // Add randomness: rare big swings!
         if (Math.random() < 0.03) {
           let jump = (Math.random()*0.4+0.15);
           if (Math.random()<0.5) jump = -jump;
           s.price = Math.max(1, +(s.price*(1+jump)).toFixed(2));
           game.msg += `🌠 ${sym} had a wild swing!<br>`;
         }
-        // Recalculate rating: drift toward 0.5 but with randomness
+        // Save price history and update trend
+        s.history.push(s.price);
+        if (s.price > prevPrice) s.trend = 1;
+        else if (s.price < prevPrice) s.trend = -1;
+        else s.trend = 0;
+        // Recalculate rating
         s.rating += (Math.random()-0.5)*0.12 - (s.rating-0.5)*0.03;
         s.rating = +Math.max(0.05, Math.min(0.95, s.rating)).toFixed(2);
-        s.history.push(s.price);
       }
       render();
     }
 
     // ======= Buy/Sell =======
-    function buyStock(sym) {
+    function buyStock(sym, qtyId) {
+      let qty = parseInt(document.getElementById(qtyId).value, 10);
+      if(isNaN(qty) || qty < 1) qty = 1;
       let s = game.stocks[sym];
-      if (game.balance >= s.price) {
-        game.balance = +(game.balance - s.price).toFixed(2);
-        game.portfolio[sym] = (game.portfolio[sym]||0) + 1;
-        game.msg = `Bought 1 share of ${sym} for $${s.price.toFixed(2)}.`;
+      let totalCost = +(s.price * qty).toFixed(2);
+      if (game.balance >= totalCost) {
+        game.balance = +(game.balance - totalCost).toFixed(2);
+        game.portfolio[sym] = (game.portfolio[sym]||0) + qty;
+        // Record purchase for stats
+        game.purchaseHistory.push({sym, shares: qty, price: s.price, day: game.day});
+        game.msg = `Bought ${qty} share${qty>1?'s':''} of ${sym} for $${totalCost.toFixed(2)}.`;
       } else {
         game.msg = "Not enough balance!";
       }
@@ -377,10 +450,60 @@
       render();
     }
 
+    // ======= Stats =======
+    function calcPortfolioStats() {
+      // Get all shares you own, and what you paid for them (original value), and current value
+      let originalValue = 0;
+      let currentValue = 0;
+      let sharesOwned = {};
+      for(let sym of STOCK_SYMBOLS) sharesOwned[sym] = game.portfolio[sym]||0;
+      // Go through purchase history, assign bought shares to current holdings
+      let leftToAssign = {...sharesOwned};
+      for(const purchase of game.purchaseHistory) {
+        let assign = Math.min(purchase.shares, leftToAssign[purchase.sym]);
+        if(assign > 0) {
+          originalValue += purchase.price * assign;
+          leftToAssign[purchase.sym] -= assign;
+        }
+      }
+      // Current value
+      for(const sym of STOCK_SYMBOLS) {
+        if(sharesOwned[sym]>0) {
+          currentValue += sharesOwned[sym] * game.stocks[sym].price;
+        }
+      }
+      let profit = currentValue - originalValue;
+      return {
+        originalValue: +originalValue.toFixed(2),
+        currentValue: +currentValue.toFixed(2),
+        profit: +profit.toFixed(2)
+      };
+    }
+
     // ======= Render =======
+    function renderMiniGraph(history) {
+      // Renders a mini sparkline SVG
+      if(history.length < 2) return "";
+      let lastN = history.slice(-10);
+      let min = Math.min(...lastN), max = Math.max(...lastN);
+      let range = max-min || 1;
+      let points = lastN.map((v,i)=>`${i*6},${18-(14*(v-min)/range+2)}`).join(" ");
+      return `<svg class="mini-graph" width="60" height="18"><polyline points="${points}" fill="none" stroke="#5e9cff" stroke-width="2"/></svg>`;
+    }
+    function renderArrow(trend) {
+      if(trend > 0) return `<span class="arrow-up">&#8593;</span>`;
+      if(trend < 0) return `<span class="arrow-down">&#8595;</span>`;
+      return `<span class="arrow-flat">&#8596;</span>`;
+    }
     function render() {
       document.getElementById('userBalance').textContent = game.balance.toFixed(2);
       document.getElementById('dayNum').textContent = game.day;
+      // Stats bar
+      let stats = calcPortfolioStats();
+      let profitClass = stats.profit > 0 ? "profit" : (stats.profit < 0 ? "loss" : "");
+      document.getElementById('statBar').innerHTML =
+        `Shares original value: <b>$${stats.originalValue}</b> &mdash; Current value: <b>$${stats.currentValue}</b> &mdash; <span class="${profitClass}">Total profit: $${stats.profit}</span>`;
+
       // Render stocks table
       let stocksHtml = '';
       for (let sym of STOCK_SYMBOLS) {
@@ -388,12 +511,19 @@
         let ratingClass = s.rating >= 0.7 ? "rating-good"
               : s.rating >= 0.4 ? "rating-fair" : "rating-bad";
         let ratingText = `<span class="${ratingClass}">${Math.round(s.rating*100)}%</span>`;
+        let qtyId = `buyqty_${sym}`;
         stocksHtml += `<tr>
           <td title="${stockNames[sym]}"><b>${sym}</b></td>
-          <td>$${s.price.toFixed(2)}</td>
+          <td>$${s.price.toFixed(2)} ${renderArrow(s.trend)}</td>
           <td>${ratingText}</td>
-          <td class="actions-cell"><button onclick="buyStock('${sym}')" ${game.balance < s.price ? 'disabled' : ''}>Buy</button></td>
-          <td class="actions-cell"><button onclick="sellStock('${sym}')" ${(game.portfolio[sym]||0)>0?'':'disabled'}>Sell</button></td>
+          <td>${renderMiniGraph(s.history)}</td>
+          <td class="actions-cell">
+            <form class="buy-form" onsubmit="buyStock('${sym}','${qtyId}');return false;">
+              <input id="${qtyId}" class="buy-qty-in" type="number" min="1" value="1" autocomplete="off">
+              <button type="submit" ${game.balance < s.price ? 'disabled' : ''}>Buy</button>
+            </form>
+            <button onclick="sellStock('${sym}')" ${(game.portfolio[sym]||0)>0?'':'disabled'} style="margin-left:2px;">Sell</button>
+          </td>
         </tr>`;
       }
       document.getElementById('stocksBody').innerHTML = stocksHtml;
