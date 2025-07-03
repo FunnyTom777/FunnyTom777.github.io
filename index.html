@@ -2,557 +2,398 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>BarkWorks Trade Simulator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FunnyTom777 - Projects</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root {
-      --bg: #10151c;
-      --card: #181c22;
-      --accent: #5e9cff;
-      --accent-hover: #3887ff;
-      --text: #f2f2f2;
-      --muted: #b1b5bb;
-      --border: #232a35;
-      --good: #27ef6a;
-      --fair: #f9c846;
-      --bad: #ff595e;
-      --event: #ffe066;
-      --arrow-up: #27ef6a;
-      --arrow-down: #ff595e;
-      --arrow-flat: #b1b5bb;
-    }
-    html, body { background: var(--bg); color: var(--text); margin: 0; height: 100%; font-family: 'Inter', Arial, sans-serif;}
-    #container { max-width: 520px; margin: 48px auto 0 auto; padding: 0 8px;}
-    h1 { text-align: center; font-weight: 600; letter-spacing: -1px; margin-bottom: 6px;}
-    .card {
-      background: var(--card);
-      border-radius: 18px;
-      box-shadow: 0 3px 18px 0 #0002;
-      padding: 32px 24px 24px 24px;
-      margin: 24px 0;
-      border: 1px solid var(--border);
-      min-width: 0;
-      animation: fadeIn 0.8s;
-    }
-    @keyframes fadeIn { from { opacity:0; transform: translateY(40px);} to{opacity:1; transform:none;} }
-    button, .btn {
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      padding: 10px 22px;
-      border: none;
-      border-radius: 7px;
-      cursor: pointer;
-      margin: 7px 0 0 0;
-      font-size: 1em;
-      transition: background 0.18s;
-      box-shadow: 0 2px 6px #0002;
-    }
-    button:disabled, .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    button:hover:not(:disabled), .btn:hover:not(:disabled) { background: var(--accent-hover);}
-    .user-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;}
-    .balance { font-size: 1.22em; font-weight: 600; margin-bottom: 7px; }
-    .stock-table, .portfolio-table {
-      width: 100%; border-collapse: collapse; margin: 16px 0 8px 0;
-      background: transparent;
-    }
-    .stock-table th, .stock-table td, .portfolio-table th, .portfolio-table td {
-      padding: 10px 6px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-      font-size: 1em;
-    }
-    .stock-table th, .portfolio-table th {
-      font-size: 1.05em;
-      color: var(--muted);
-      font-weight: 500;
-      background: none;
-    }
-    .stock-table tr:last-child td, .portfolio-table tr:last-child td {
-      border-bottom: none;
-    }
-    .rating-good { color: var(--good); font-weight: bold; }
-    .rating-fair { color: var(--fair); font-weight: bold; }
-    .rating-bad { color: var(--bad); font-weight: bold; }
-    .portfolio-header { font-weight: 600; font-size: 1.05em; margin-top: 24px;}
-    .muted { color: var(--muted);}
-    .actions-cell { white-space: nowrap;}
-    .footer { margin: 32px 0 0 0; text-align: center; color: #666;}
-    .logo { display: block; margin: 0 auto 12px auto; width: 64px;}
-    .day-row {font-size: 1.09em; font-weight: 500; margin: 6px 0 16px 0;}
-    .reset-btn {background: #222; color: #eee; border: 1px solid var(--border); margin-top: 12px;}
-    #howToBtn {
-      position: absolute;
-      top: 22px;
-      right: 22px;
-      background: #232a35;
-      color: var(--accent);
-      font-size: 1.18em;
-      padding: 5px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      z-index: 10;
-      font-weight: 600;
-    }
-    #howToModal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #000a;
-      z-index: 100;
+    .modal {
       display: none;
-      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
       justify-content: center;
+      align-items: center;
+      z-index: 9999;
     }
-    #howToModal .modal-card {
-      background: var(--card);
-      color: var(--text);
-      padding: 30px 20px 18px 20px;
-      border-radius: 16px;
-      max-width: 390px;
-      box-shadow: 0 4px 24px 0 #0005;
-      border: 1.5px solid var(--border);
-      animation: fadeIn 0.4s;
+    .modal.active { display: flex; }
+
+    @keyframes slidefade-in {
+      0% { opacity: 0; transform: translateY(-20px);}
+      100% { opacity: 1; transform: translateY(0);}
     }
-    #howToModal h2 {
-      margin-top: 0;
-      margin-bottom: 12px;
-      font-size: 1.24em;
-      color: var(--accent);
+    .animate-slidefade-in { animation: slidefade-in 1s ease-out forwards; }
+    .barkworks-panel {
+      box-shadow: 0 0 40px 10px #1aff5e33, 0 0 0 3px #035a30 inset;
+      border: 2px solid #19e37c;
     }
-    #howToModal ul {
-      margin-top: 0;
-      margin-bottom: 0;
-      padding-left: 19px;
-    }
-    #howToModal button {
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      padding: 7px 18px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1em;
-      margin-top: 18px;
-    }
-    .event-msg {
-      background: var(--event);
-      color: #333;
-      padding: 7px 10px;
-      border-radius: 7px;
-      margin: 7px 0 0 0;
-      font-weight: 600;
-      box-shadow: 0 1px 4px #0001;
-      text-align: center;
-      font-size: 1.01em;
+    .bw-light {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
       display: inline-block;
-      line-height: 1.35;
-    }
-    .arrow-up {
-      color: var(--arrow-up);
-      font-weight: bold;
-      font-size: 1.09em;
-      margin-left: 2px;
-    }
-    .arrow-down {
-      color: var(--arrow-down);
-      font-weight: bold;
-      font-size: 1.09em;
-      margin-left: 2px;
-    }
-    .arrow-flat {
-      color: var(--arrow-flat);
-      font-size: 1.05em;
-      margin-left: 2px;
-    }
-    .mini-graph {
-      height: 18px;
-      width: 60px;
-      display: inline-block;
+      margin: 0 2px;
+      box-shadow: 0 0 10px 2px #00ff94bb;
+      background: #19e37c;
       vertical-align: middle;
-      margin-left: 3px;
+      transition: background 0.2s, box-shadow 0.2s;
     }
-    .statbar {
-      margin: 12px 0 12px 0;
-      background: #171b21;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 9px 11px 2px 11px;
-      font-size: 1.02em;
-      color: var(--muted);
+    .bw-light.off {
+      background: #1a2b1e;
+      box-shadow: 0 0 4px 0 #062415;
     }
-    .statbar b {
-      color: var(--text);
-    }
-    .statbar .profit {
-      font-weight: bold;
-      color: var(--good);
-    }
-    .statbar .loss {
-      font-weight: bold;
-      color: var(--bad);
-    }
-    .buy-qty-in {
-      width: 48px; background: #13181f; color: var(--text);
-      border: 1px solid var(--border); border-radius: 6px;
-      font-size: 1em; padding: 3px 4px; margin-right: 3px; text-align: center;
-    }
-    .buy-form { display: flex; align-items: center;}
-    .buy-form button {margin:0;}
-    .buy-form input[type=number]::-webkit-inner-spin-button,
-    .buy-form input[type=number]::-webkit-outer-spin-button { opacity: 1;}
-    @media (max-width: 700px) {
-      #container { max-width: 99vw; }
-      .card { padding: 20px 2px 14px 2px; }
-      .stock-table th, .stock-table td, .portfolio-table th, .portfolio-table td { padding: 6px 2px;}
-      #howToBtn { top: 8px; right: 8px; font-size: 1em;}
-      #howToModal .modal-card { max-width: 97vw;}
-      .mini-graph { width: 45px;}
-    }
+    /* Hide scrollbar for mobile menu */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body>
-  <button id="howToBtn" onclick="showHowTo()">How to play?</button>
-  <div id="howToModal" onclick="hideHowTo(event)">
-    <div class="modal-card" onclick="event.stopPropagation()">
-      <h2>How to Play</h2>
-      <ul>
-        <li>You start with $1000 and no stocks.</li>
-        <li>Each stock has a price, a rating (chance to rise), and a price change arrow/mini-graph.</li>
-        <li>Buy low, sell high! Try to grow your wealth.</li>
-        <li>Click "Progress 1 Day" to update stock prices and ratings.</li>
-        <li>Specify how many shares to buy when you buy.</li>
-        <li>See stats on your shares' original value, current value, and profit/loss.</li>
-        <li>Occasionally, <b>market events</b> will affect certain stocks!</li>
-        <li>Restart anytime with the Restart button.</li>
-      </ul>
-      <button onclick="hideHowTo()">OK, Got it!</button>
-    </div>
+<body class="bg-gradient-to-b from-[#0d1b13] via-[#13281b] to-[#121812] text-gray-200 font-sans">
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-[#19e37c] via-[#133f29] to-[#101e14] p-4 shadow-xl sticky top-0 z-50">
+  <div class="container mx-auto flex justify-between items-center max-w-6xl">
+    <h1 class="text-2xl sm:text-3xl font-bold text-[#19e37c]">FunnyTom777</h1>
+    <!-- Hamburger Button -->
+    <button id="menuBtn" class="sm:hidden flex flex-col gap-1.5 p-2 rounded hover:bg-[#12a04c]/40 focus:outline-none" aria-label="Open menu">
+      <span class="block w-7 h-0.5 bg-[#91ffbf]"></span>
+      <span class="block w-7 h-0.5 bg-[#91ffbf]"></span>
+      <span class="block w-7 h-0.5 bg-[#91ffbf]"></span>
+    </button>
+    <!-- Desktop Nav -->
+    <nav class="hidden sm:flex space-x-7 items-center">
+      <div class="group relative">
+        <button class="text-gray-200 hover:text-[#91ffbf] focus:outline-none font-semibold">Games</button>
+        <div class="absolute left-0 mt-2 hidden group-hover:block bg-[#13281b] text-gray-200 shadow-lg rounded p-2 min-w-[120px] z-40">
+          <a href="arcade.html" class="block hover:text-[#19e37c]">Arcade</a>
+        </div>
+      </div>
+      <div class="group relative">
+        <button class="text-gray-200 hover:text-[#91ffbf] focus:outline-none font-semibold">Other</button>
+        <div class="absolute left-0 mt-2 hidden group-hover:block bg-[#13281b] text-gray-200 shadow-lg rounded p-2 min-w-[180px] z-40">
+          <a href="thingy_mabobby.html" class="block hover:text-[#19e37c]">WoofBot</a>
+          <a href="storethingy.html" class="block hover:text-[#19e37c]">store *WIP*</a>
+          <a href="WoofWorlds Story V.1.html" class="block hover:text-[#19e37c]">WoofWorlds</a>
+          <a href="https://funnytom777.github.io/WWBC.github.io/" class="block hover:text-[#19e37c]">WWBC</a>
+          <a href="WACA.html" class="block hover:text-[#19e37c]">WACA</a>
+          <a href="X700doc.html" class="block hover:text-[#19e37c]">X700 Docs</a>
+          <a href="somth.html" class="block hover:text-[#19e37c]">BarkWorksAppThing!</a>
+          <a href="ramble.html" class="block hover:text-[#19e37c]">a big long ramble...</a>
+          <a href="https://funnytom777.github.io/Barkworkstrade.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">BarkWorks Trade (sim)</a>
+
+        </div>
+      </div>
+    </nav>
   </div>
-  <div id="container">
-    <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/paid/v11/24px.svg" class="logo" alt="logo">
-    <h1>BarkWorks<br>Trade Simulator</h1>
-    <div class="card" id="gameCard">
-      <div class="user-row">
-        <span class="balance">
-          Balance: $<span id="userBalance">1000.00</span>
-        </span>
-        <button id="resetBtn" class="reset-btn" onclick="resetGame()">Restart</button>
-      </div>
-      <div class="day-row">
-        Day <span id="dayNum">1</span>
-      </div>
-      <button id="progressBtn" onclick="progressDay()" style="width:100%;margin-bottom:12px;">
-        Progress 1 Day
+  <!-- Mobile Fullscreen Menu -->
+  <div id="mobileMenu" class="fixed inset-0 bg-[#0d1b13] bg-opacity-98 z-50 flex-col justify-start items-center hidden no-scrollbar overflow-auto transition-all duration-300">
+    <div class="flex justify-between items-center w-full p-4">
+      <h2 class="text-xl font-bold text-[#19e37c]">Menu</h2>
+      <button id="closeMenuBtn" class="p-2 rounded hover:bg-[#12a04c]/40 focus:outline-none" aria-label="Close menu">
+        <svg width="28" height="28" fill="none" stroke="#91ffbf"><line x1="7" y1="7" x2="21" y2="21" stroke-width="3"/><line x1="21" y1="7" x2="7" y2="21" stroke-width="3"/></svg>
       </button>
-      <div class="statbar" id="statBar"></div>
-      <div class="portfolio-header">Stocks</div>
-      <table class="stock-table">
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th>Price</th>
-            <th>Rating</th>
-            <th>Trend</th>
-            <th class="actions-cell">Buy/Sell</th>
-          </tr>
-        </thead>
-        <tbody id="stocksBody"></tbody>
-      </table>
-      <div class="portfolio-header">Your Portfolio</div>
-      <div id="userStocks"></div>
-      <div id="msg" style="margin-top:12px;text-align:center;font-weight:500;"></div>
-      <div id="eventMsg" style="margin-top:9px;text-align:center;"></div>
     </div>
-    <div class="footer">
-      <em>Made by FunnyTom777</em><br>
-      <span class="muted" style="font-size:0.95em;">Pure JS, reload to play again!</span>
+    <div class="flex flex-col w-full px-8 mt-6 gap-6 text-lg">
+      <div>
+        <span class="block uppercase font-bold text-[#19e37c] mb-2">Games</span>
+        <a href="arcade.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf] font-semibold">Arcade</a>
+      </div>
+      <div>
+        <span class="block uppercase font-bold text-[#19e37c] mb-2">Other</span>
+        <a href="thingy_mabobby.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">WoofBot</a>
+        <a href="storethingy.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">store *WIP*</a>
+        <a href="WoofWorlds Story V.1.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">WoofWorlds</a>
+        <a href="https://funnytom777.github.io/WWBC.github.io/" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">WWBC</a>
+        <a href="WACA.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">WACA</a>
+        <a href="X700doc.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">X700 Docs</a>
+        <a href="somth.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">BarkWorksAppThing!</a>
+        <a href="ramble.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">a big long ramble...</a>
+        <a href="https://funnytom777.github.io/Barkworkstrade.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">BarkWorks Trade (sim)</a>
+      </div>
     </div>
   </div>
-  <script>
-    // ======= How To Play Modal =======
-    function showHowTo() {
-      document.getElementById('howToModal').style.display = "flex";
-    }
-    function hideHowTo(e) {
-      if (!e || e.target === document.getElementById('howToModal'))
-        document.getElementById('howToModal').style.display = "none";
-    }
+</header>
+<script>
+  // Hamburger menu logic
+  const menuBtn = document.getElementById('menuBtn');
+  const closeMenuBtn = document.getElementById('closeMenuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  menuBtn.addEventListener('click', () => {
+    mobileMenu.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  });
+  closeMenuBtn.addEventListener('click', () => {
+    mobileMenu.classList.add('hidden');
+    document.body.style.overflow = '';
+  });
+  // Close menu on link click mobile
+  document.querySelectorAll('#mobileMenu a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden');
+      document.body.style.overflow = '';
+    });
+  });
+</script>
 
-    // ======= Game State =======
-    const STOCK_SYMBOLS = [
-      "ABC", "XYZ", "PQR", "FUN", "LOL",
-      "CAT", "DOG", "SUN", "MOON", "STAR",
-      "BEE", "OWL", "APE", "GEM", "ICE"
-    ];
-    const stockNames = {
-      ABC: "Alpha Beta Co.",
-      XYZ: "Xylophone Yeti Zone",
-      PQR: "Piquant Quokka Ranch",
-      FUN: "Funtastic Holdings",
-      LOL: "Looney Oranges Ltd.",
-      CAT: "Cataclysmic Tech",
-      DOG: "Dogmatic Energy",
-      SUN: "Sunrise Micro",
-      MOON: "Moonbase Motors",
-      STAR: "Starfruit Digital",
-      BEE: "Beeswax Biotech",
-      OWL: "Owlwise Analytics",
-      APE: "Apeiron Games",
-      GEM: "Gemstone Finance",
-      ICE: "Icecap Insurance"
-    };
-    let game = {};
+<!-- About Me -->
+<section id="about" class="py-10 sm:py-12 bg-gradient-to-b from-[#0d1b13] to-[#16271b]">
+  <div class="container mx-auto text-center px-4">
+    <img src="profile-pic.jpg" alt="Profile Picture" class="mx-auto rounded-full w-24 h-24 sm:w-32 sm:h-32 mb-4 border-4 border-[#19e37c] shadow-xl object-cover">
+    <h2 class="text-xl sm:text-2xl font-bold text-[#19e37c] mb-3 sm:mb-4">About Me</h2>
+    <p class="text-base sm:text-lg leading-relaxed">
+      welcome to <span class="font-bold text-[#19e37c]">FunnyTom777.com</span>, where you can find lots of wacky projects!
+    </p>
+  </div>
+</section>
 
-    // Each time you buy, we record: {sym, shares, price, day}
-    // We'll store: game.purchaseHistory = [ {sym, shares, price, day} ]
-    function randomStock() {
-      return {
-        price: +(Math.random()*50+50).toFixed(2), // $50-$100
-        rating: +(Math.random()*0.7+0.15).toFixed(2), // 0.15-0.85
-        history: [], // price history
-        trend: 0 // -1 = down, 0 = unchanged, 1 = up (for last day)
-      };
-    }
-    function initialGameState() {
-      let stocks = {};
-      for (let s of STOCK_SYMBOLS) {
-        stocks[s] = randomStock();
-        stocks[s].history = [stocks[s].price];
-      }
-      return {
-        day: 1,
-        balance: 1000,
-        stocks: stocks,
-        portfolio: {}, // symbol -> shares
-        msg: "",
-        eventMsg: "",
-        purchaseHistory: [] // for stats
-      };
-    }
-    function resetGame() {
-      game = initialGameState();
-      render();
-    }
+<!-- WWBC Banner (now green) -->
+<section class="py-4 text-center animate-slidefade-in bg-gradient-to-r from-[#133f29] via-[#19e37c]/70 to-[#133f29] border-b-2 border-[#91ffbf] shadow-lg">
+  <h2 class="text-[#91ffbf] text-xl sm:text-2xl font-bold">New Content on WWBC</h2>
+  <a href="https://funnytom777.github.io/WWBC.github.io/" target="_blank" class="text-[#cafada] underline hover:text-[#19e37c] transition duration-300">
+    Check it out here!
+  </a>
+</section>
 
-    // ======= Market Event Mechanic =======
-    function maybeMarketEvent() {
-      if (Math.random() < 0.22) {
-        const eventType = Math.random();
-        let chosen, msg = "";
-        if (eventType < 0.40) {
-          // Single stock surge/crash
-          chosen = STOCK_SYMBOLS[Math.floor(Math.random()*STOCK_SYMBOLS.length)];
-          let up = Math.random() < 0.5;
-          let factor = up ? (1 + Math.random()*0.25 + 0.15) : (1 - Math.random()*0.18 - 0.08);
-          let old = game.stocks[chosen].price;
-          game.stocks[chosen].price = +(game.stocks[chosen].price * factor).toFixed(2);
-          msg = up
-            ? `🚀 <b>${chosen}</b> (${stockNames[chosen]}) <b>skyrocketed</b> <span style="color:var(--good)">+$${(game.stocks[chosen].price-old).toFixed(2)}</span>!`
-            : `💥 <b>${chosen}</b> (${stockNames[chosen]}) <b>crashed</b> <span style="color:var(--bad)">-$${(old-game.stocks[chosen].price).toFixed(2)}</span>!`;
-        } else if (eventType < 0.72) {
-          // Sector event (animal stocks or fruit/element stocks)
-          let animalSyms = ["CAT","DOG","OWL","APE","BEE"];
-          let fruitElemSyms = ["SUN","MOON","STAR","GEM","ICE"];
-          let group = Math.random()<0.5 ? animalSyms : fruitElemSyms;
-          let up = Math.random() < 0.5;
-          let factor = up ? (1 + Math.random()*0.12 + 0.04) : (1 - Math.random()*0.08 - 0.03);
-          for (let sym of group) {
-            let old = game.stocks[sym].price;
-            game.stocks[sym].price = +(game.stocks[sym].price * factor).toFixed(2);
-          }
-          msg = up
-            ? `🌟 <b>${group.map(s=>stockNames[s]).join(", ")}</b> <b>sector boomed!</b>`
-            : `🌑 <b>${group.map(s=>stockNames[s]).join(", ")}</b> <b>sector slumped!</b>`;
-        } else {
-          // "Market Fad": All stocks with rating >0.7 jump, <0.3 drop
-          let winners = [], losers = [];
-          for (let sym of STOCK_SYMBOLS) {
-            if (game.stocks[sym].rating > 0.7) {
-              let change = 1 + Math.random()*0.16 + 0.11;
-              game.stocks[sym].price = +(game.stocks[sym].price * change).toFixed(2);
-              winners.push(sym);
-            }
-            if (game.stocks[sym].rating < 0.3) {
-              let change = 1 - Math.random()*0.11 - 0.05;
-              game.stocks[sym].price = +(game.stocks[sym].price * change).toFixed(2);
-              losers.push(sym);
-            }
-          }
-          msg = `🎲 <b>Market Fad:</b> High-rated stocks <span style="color:var(--good)">jump</span>, low-rated <span style="color:var(--bad)">drop</span>!`;
-        }
-        game.eventMsg = `<span class="event-msg">${msg}</span>`;
+<!-- Obsidian Industries Banner (now green) -->
+<section class="py-4 text-center animate-slidefade-in bg-gradient-to-r from-[#16271b] via-[#19e37c]/50 to-[#16271b] border-b-2 border-[#91ffbf] shadow-lg">
+  <h2 class="text-[#91ffbf] text-xl sm:text-2xl font-bold">Obsidian Industries</h2>
+  <p class="text-[#cafada] mt-1 mb-2">Obsidian Industries, leading Innovation</p>
+  <a href="ObsidianIndustries.html" class="text-[#cafada] underline hover:text-[#19e37c] transition duration-300">
+    Visit Obsidian Industries
+  </a>
+</section>
+
+<!-- BarkWorks MotherRoad Overview - Steam Style -->
+<section class="py-10 sm:py-12 bg-gradient-to-b from-[#13281b]/80 via-[#142d20]/80 to-[#101d16]/80">
+  <div class="container mx-auto max-w-3xl px-3 sm:px-0">
+    <div class="barkworks-panel rounded-xl p-6 sm:p-8 mb-10 bg-gradient-to-br from-[#1c2f23] via-[#133f29] to-[#121812] relative overflow-hidden">
+      <h2 class="text-2xl sm:text-3xl font-bold text-[#19e37c] mb-2 tracking-wide flex items-center gap-2">
+        <svg width="30" height="30" fill="none"><circle cx="15" cy="15" r="14" stroke="#19e37c" stroke-width="3"/><rect x="10" y="8" width="10" height="14" rx="4" fill="#19e37c" opacity="0.16"/></svg>
+        BarkWorks MotherRoad <span class="text-base ml-2 font-mono bg-[#133f29]/60 px-2 py-1 rounded text-[#91ffbf]">Server Overview</span>
+      </h2>
+      <div class="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-center mt-4 sm:mt-6 mb-2 text-base sm:text-lg">
+        <div>
+          <span class="font-bold text-[#91ffbf]">Progects:</span>
+          <span id="bw-projects" class="text-[#cafada] font-mono"></span>
+        </div>
+        <div>
+          <span class="font-bold text-[#91ffbf]">Load:</span>
+          <span id="bw-load" class="text-[#cafada] font-mono"></span>
+        </div>
+        <div>
+          <span class="font-bold text-[#91ffbf]">Power:</span>
+          <span id="bw-power" class="text-[#cafada] font-mono"></span> W
+        </div>
+        <div>
+          <span class="font-bold text-[#91ffbf]">BarkWorks Employees:</span>
+          <span id="bw-employees" class="text-[#cafada] font-mono"></span>
+        </div>
+        <div>
+          <span class="font-bold text-[#91ffbf]">Active Lights:</span>
+          <span id="bw-lights">
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+          </span>
+        </div>
+      </div>
+      <div class="text-[#b6e9c9] text-xs sm:text-sm mt-5 sm:mt-6 italic border-t border-[#133f29] pt-2 opacity-80">
+        BarkWorks MotherRoad is your hub for big barky ideas, running at peak wackiness and efficiency!
+      </div>
+      <div class="absolute top-0 right-0 opacity-20 pointer-events-none" style="font-size:5rem;line-height:1;">🐾</div>
+    </div>
+  </div>
+</section>
+
+<!-- Projects -->
+<section id="projects" class="py-10 sm:py-12 bg-gradient-to-b from-[#16271b] via-[#13281b] to-[#0d1b13]">
+  <div class="container mx-auto px-3 sm:px-0">
+    <h2 class="text-xl sm:text-2xl font-bold text-[#19e37c] text-center mb-8">Projects</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      <!-- MTT Card -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">Milk🥛, Toast🍞, TACO!🌮 (MTT)</h3>
+        <p class="text-gray-200 mb-4">An open-world driving simulator where you explore quirky landscapes and engage in unique challenges.</p>
+        <button onclick="openModal('mtt-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- The Great Doggy War -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">The Great Doggy War</h3>
+        <p class="text-gray-200 mb-4">A thrilling tale of canines in a world full of adventure, battles, and alliances.</p>
+        <button onclick="openModal('doggy-war-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- Barkipelago Adventures -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">Barkipelago Adventures</h3>
+        <p class="text-gray-200 mb-4">Embark on a journey across the Barkipelago, filled with exciting quests and surprises.</p>
+        <button onclick="openModal('barkipelago-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- THING™️ -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">THING™️</h3>
+        <p class="text-gray-200 mb-4">The next evolution in trading card games, blending physical and digital in one device!</p>
+        <button onclick="openModal('thing-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- WoofTech & Quantum OS -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">WoofTech & Quantum OS</h3>
+        <p class="text-gray-200 mb-4">Developing Quantum OS, a Linux-based OS with no ads, and other innovative software included for free!.</p>
+        <button onclick="openModal('quantum-os-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- WoofTech M1 Card -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">WoofTech M1 Calculator</h3>
+        <p class="text-gray-200 mb-4">A sleek, powerful calculator designed to streamline your calculations with advanced features and intuitive controls.</p>
+        <button onclick="openModal('wooftech-m1-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- Happy Havoc!!!! -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">Happy Havoc!!!!</h3>
+        <p class="text-gray-200 mb-4">A 2D sidescrolling platformer with smooth movement, a dynamic camera, and classic style gameplay.</p>
+        <button onclick="openModal('happy-havoc-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Teaser/Upcoming Section styled steam-like -->
+<section class="py-10 sm:py-12 bg-gradient-to-tr from-[#121812] via-[#133f29]/50 to-[#101e14]">
+  <div class="container mx-auto max-w-2xl px-3 sm:px-0">
+    <div class="rounded-xl border-2 border-[#19e37c]/40 shadow-lg p-5 sm:p-7 bg-gradient-to-br from-[#142d20] via-[#133f29] to-[#101e14]">
+      <h2 class="text-xl sm:text-2xl font-bold text-[#19e37c] mb-4 flex items-center gap-2">
+        <svg width="26" height="26" fill="none"><circle cx="13" cy="13" r="11" stroke="#19e37c" stroke-width="3"/><rect x="7" y="9" width="12" height="8" rx="4" fill="#19e37c" opacity="0.16"/></svg>
+        Upcoming Teasers
+      </h2>
+      <ul class="list-disc ml-7 text-base sm:text-lg space-y-2">
+        <li>
+          <span class="font-bold text-[#91ffbf]">BarkWorks YouTube Channel</span>
+          <span class="ml-2 text-[#cafada]">– Sneak peeks, devlogs, and fun videos are coming soon!</span>
+        </li>
+        <li>
+          <span class="font-bold text-[#91ffbf]">BarkWorks AppThing Major Update</span>
+          <span class="ml-2 text-[#cafada]">– Revamped UI, more barks, more fun.</span>
+        </li>
+        <li>
+          <span class="font-bold text-[#91ffbf]">Another Top Secret Project</span>
+          <span class="ml-2 text-[#cafada]">– Stay tuned for something wild and unexpected.</span>
+        </li>
+      </ul>
+      <div class="mt-6 text-xs sm:text-sm text-[#b6e9c9] italic border-t border-[#133f29] pt-2 opacity-80">
+        Want to see more? Subscribe to our upcoming YouTube channel and watch this space!
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modals -->
+<div id="mtt-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">Milk🥛, Toast🍞, TACO!🌮 (MTT)</h2>
+    <p class="text-gray-200 mb-6">An open-world driving simulator where players embark on wacky adventures, explore quirky landscapes, and complete challenging missions.</p>
+    <button onclick="closeModal('mtt-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+<div id="doggy-war-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">The Great Doggy War</h2>
+    <p class="text-gray-200 mb-6">A thrilling tale of canines in a world full of adventure, battles, and alliances.</p>
+    <button onclick="closeModal('doggy-war-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+<div id="barkipelago-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">Barkipelago Adventures</h2>
+    <p class="text-gray-200 mb-6">Embark on a journey across the Barkipelago, filled with exciting quests and surprises.</p>
+    <button onclick="closeModal('barkipelago-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+<div id="thing-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">THING™️</h2>
+    <p class="text-gray-200 mb-6">The next evolution in trading card games, blending physical and digital in one device!</p>
+    <button onclick="closeModal('thing-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+<div id="quantum-os-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">WoofTech & Quantum OS</h2>
+    <p class="text-gray-200 mb-6">Developing Quantum OS, a Linux-based OS with no ads or bloat, and other innovative products.</p>
+    <button onclick="closeModal('quantum-os-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+<div id="wooftech-m1-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">WoofTech M1 Calculator</h2>
+    <p class="text-gray-200 mb-6">A sleek, powerful calculator designed to streamline your calculations with advanced features and intuitive controls.</p>
+    <button onclick="closeModal('wooftech-m1-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+<div id="happy-havoc-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">Happy Havoc!!!!</h2>
+    <p class="text-gray-200 mb-6">A 2D sidescrolling platformer with smooth movement, a dynamic camera, and classic style gameplay.</p>
+    <button onclick="closeModal('happy-havoc-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-[#16271b] py-4 text-center border-t border-[#133f29]">
+  <p class="text-[#b6e9c9] text-sm">© 2025 FunnyTom777. All rights reserved.</p>
+</footer>
+
+<!-- JavaScript -->
+<script>
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+
+  // BarkWorks MotherRoad dynamic values
+  let bwProjects = 180 + Math.floor(Math.random() * 20);
+  let bwLoad = 0.30 + Math.random() * 0.40;
+  let bwPower = 2000 + Math.floor(Math.random() * 1500);
+  let bwEmployees = 3500 + Math.floor(Math.random() * 2000);
+
+  function fluctuate(val, min, max, maxDelta) {
+    let delta = (Math.random() - 0.5) * maxDelta;
+    let newVal = val + delta;
+    if (newVal > max) newVal = max;
+    if (newVal < min) newVal = min;
+    return newVal;
+  }
+
+  function updateBWPanel() {
+    bwProjects = Math.round(fluctuate(bwProjects, 100, 300, 2.2));
+    bwLoad = fluctuate(bwLoad, 0.15, 0.82, 0.014);
+    bwPower = Math.round(fluctuate(bwPower, 1200, 4200, 30));
+    bwEmployees = Math.round(fluctuate(bwEmployees, 1000, 7000, 35));
+    document.getElementById('bw-projects').innerText = bwProjects;
+    document.getElementById('bw-load').innerText = (bwLoad * 100).toFixed(1) + "%";
+    document.getElementById('bw-power').innerText = bwPower;
+    document.getElementById('bw-employees').innerText = bwEmployees;
+  }
+
+  let lights = document.querySelectorAll('.bw-light');
+  function randomizeLights() {
+    lights.forEach(light => {
+      if (Math.random() > 0.38) {
+        light.classList.remove('off');
       } else {
-        game.eventMsg = "";
+        light.classList.add('off');
       }
-    }
+    });
+  }
 
-    // ======= Stock Market Math =======
-    function progressDay() {
-      game.day++;
-      game.msg = "";
-      maybeMarketEvent();
-      for (const sym of STOCK_SYMBOLS) {
-        let s = game.stocks[sym];
-        let prevPrice = s.price;
-        const up = Math.random() < s.rating;
-        let baseMove = (Math.random()*0.04 + 0.01); // 1%-5%
-        if (s.rating > 0.8 || s.rating < 0.2) baseMove *= 1.7;
-        let priceChange = up ? (1+baseMove) : (1-baseMove);
-        s.price = Math.max(1, +(s.price * priceChange).toFixed(2));
-        if (Math.random() < 0.03) {
-          let jump = (Math.random()*0.4+0.15);
-          if (Math.random()<0.5) jump = -jump;
-          s.price = Math.max(1, +(s.price*(1+jump)).toFixed(2));
-          game.msg += `🌠 ${sym} had a wild swing!<br>`;
-        }
-        // Save price history and update trend
-        s.history.push(s.price);
-        if (s.price > prevPrice) s.trend = 1;
-        else if (s.price < prevPrice) s.trend = -1;
-        else s.trend = 0;
-        // Recalculate rating
-        s.rating += (Math.random()-0.5)*0.12 - (s.rating-0.5)*0.03;
-        s.rating = +Math.max(0.05, Math.min(0.95, s.rating)).toFixed(2);
-      }
-      render();
-    }
-
-    // ======= Buy/Sell =======
-    function buyStock(sym, qtyId) {
-      let qty = parseInt(document.getElementById(qtyId).value, 10);
-      if(isNaN(qty) || qty < 1) qty = 1;
-      let s = game.stocks[sym];
-      let totalCost = +(s.price * qty).toFixed(2);
-      if (game.balance >= totalCost) {
-        game.balance = +(game.balance - totalCost).toFixed(2);
-        game.portfolio[sym] = (game.portfolio[sym]||0) + qty;
-        // Record purchase for stats
-        game.purchaseHistory.push({sym, shares: qty, price: s.price, day: game.day});
-        game.msg = `Bought ${qty} share${qty>1?'s':''} of ${sym} for $${totalCost.toFixed(2)}.`;
-      } else {
-        game.msg = "Not enough balance!";
-      }
-      render();
-    }
-    function sellStock(sym) {
-      if ((game.portfolio[sym]||0) > 0) {
-        let s = game.stocks[sym];
-        game.balance = +(game.balance + s.price).toFixed(2);
-        game.portfolio[sym] -= 1;
-        if (game.portfolio[sym] <= 0) delete game.portfolio[sym];
-        game.msg = `Sold 1 share of ${sym} for $${s.price.toFixed(2)}.`;
-      } else {
-        game.msg = `You don't own any ${sym} shares!`;
-      }
-      render();
-    }
-
-    // ======= Stats =======
-    function calcPortfolioStats() {
-      // Get all shares you own, and what you paid for them (original value), and current value
-      let originalValue = 0;
-      let currentValue = 0;
-      let sharesOwned = {};
-      for(let sym of STOCK_SYMBOLS) sharesOwned[sym] = game.portfolio[sym]||0;
-      // Go through purchase history, assign bought shares to current holdings
-      let leftToAssign = {...sharesOwned};
-      for(const purchase of game.purchaseHistory) {
-        let assign = Math.min(purchase.shares, leftToAssign[purchase.sym]);
-        if(assign > 0) {
-          originalValue += purchase.price * assign;
-          leftToAssign[purchase.sym] -= assign;
-        }
-      }
-      // Current value
-      for(const sym of STOCK_SYMBOLS) {
-        if(sharesOwned[sym]>0) {
-          currentValue += sharesOwned[sym] * game.stocks[sym].price;
-        }
-      }
-      let profit = currentValue - originalValue;
-      return {
-        originalValue: +originalValue.toFixed(2),
-        currentValue: +currentValue.toFixed(2),
-        profit: +profit.toFixed(2)
-      };
-    }
-
-    // ======= Render =======
-    function renderMiniGraph(history) {
-      // Renders a mini sparkline SVG
-      if(history.length < 2) return "";
-      let lastN = history.slice(-10);
-      let min = Math.min(...lastN), max = Math.max(...lastN);
-      let range = max-min || 1;
-      let points = lastN.map((v,i)=>`${i*6},${18-(14*(v-min)/range+2)}`).join(" ");
-      return `<svg class="mini-graph" width="60" height="18"><polyline points="${points}" fill="none" stroke="#5e9cff" stroke-width="2"/></svg>`;
-    }
-    function renderArrow(trend) {
-      if(trend > 0) return `<span class="arrow-up">&#8593;</span>`;
-      if(trend < 0) return `<span class="arrow-down">&#8595;</span>`;
-      return `<span class="arrow-flat">&#8596;</span>`;
-    }
-    function render() {
-      document.getElementById('userBalance').textContent = game.balance.toFixed(2);
-      document.getElementById('dayNum').textContent = game.day;
-      // Stats bar
-      let stats = calcPortfolioStats();
-      let profitClass = stats.profit > 0 ? "profit" : (stats.profit < 0 ? "loss" : "");
-      document.getElementById('statBar').innerHTML =
-        `Shares original value: <b>$${stats.originalValue}</b> &mdash; Current value: <b>$${stats.currentValue}</b> &mdash; <span class="${profitClass}">Total profit: $${stats.profit}</span>`;
-
-      // Render stocks table
-      let stocksHtml = '';
-      for (let sym of STOCK_SYMBOLS) {
-        let s = game.stocks[sym];
-        let ratingClass = s.rating >= 0.7 ? "rating-good"
-              : s.rating >= 0.4 ? "rating-fair" : "rating-bad";
-        let ratingText = `<span class="${ratingClass}">${Math.round(s.rating*100)}%</span>`;
-        let qtyId = `buyqty_${sym}`;
-        stocksHtml += `<tr>
-          <td title="${stockNames[sym]}"><b>${sym}</b></td>
-          <td>$${s.price.toFixed(2)} ${renderArrow(s.trend)}</td>
-          <td>${ratingText}</td>
-          <td>${renderMiniGraph(s.history)}</td>
-          <td class="actions-cell">
-            <form class="buy-form" onsubmit="buyStock('${sym}','${qtyId}');return false;">
-              <input id="${qtyId}" class="buy-qty-in" type="number" min="1" value="1" autocomplete="off">
-              <button type="submit" ${game.balance < s.price ? 'disabled' : ''}>Buy</button>
-            </form>
-            <button onclick="sellStock('${sym}')" ${(game.portfolio[sym]||0)>0?'':'disabled'} style="margin-left:2px;">Sell</button>
-          </td>
-        </tr>`;
-      }
-      document.getElementById('stocksBody').innerHTML = stocksHtml;
-      // Portfolio
-      let owned = Object.entries(game.portfolio).filter(([k,v])=>v>0);
-      let html = '';
-      if (!owned.length) html += `<span class="muted">You don't own any stocks yet.</span>`;
-      else {
-        html += `<table class="portfolio-table"><thead><tr><th>Symbol</th><th>Shares</th><th>Value</th></tr></thead><tbody>`;
-        let total = 0;
-        for (const [sym, n] of owned) {
-          const value = n * (game.stocks[sym]?.price || 0);
-          html += `<tr><td><b>${sym}</b></td><td>${n}</td><td>$${value.toFixed(2)}</td></tr>`;
-          total += value;
-        }
-        html += `</tbody></table><div style="font-weight:500;margin-top:6px;">Total Portfolio Value: $${total.toFixed(2)}</div>`;
-      }
-      document.getElementById('userStocks').innerHTML = html;
-      document.getElementById('msg').innerHTML = game.msg;
-      document.getElementById('eventMsg').innerHTML = game.eventMsg || "";
-    }
-
-    window.buyStock = buyStock;
-    window.sellStock = sellStock;
-    window.progressDay = progressDay;
-    window.resetGame = resetGame;
-
-    // ======= Start Game! =======
-    resetGame();
-  </script>
+  setInterval(updateBWPanel, 1100);
+  setInterval(randomizeLights, 420);
+  updateBWPanel();
+  randomizeLights();
+</script>
 </body>
 </html>
