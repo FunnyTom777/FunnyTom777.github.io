@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slot Machine</title>
+  <style>
+    body {
+      background: #000;
+      color: #19e37c;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      flex-direction: column;
+    }
+    .how-to-play {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #19e37c;
+      color: #000;
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 9999;
+    }
+    .restart-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #19e37c;
+      color: #000;
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 9999;
+    }
+    .slot-machine {
+      background: #111;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 40px #19e37c88;
+      text-align: center;
+      max-width: 90vw;
+      width: 400px;
+    }
+    .slots {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      font-size: 2.5em;
+      margin: 20px 0;
+    }
+    .slot {
+      width: 60px;
+      height: 60px;
+      background: #000;
+      border: 2px solid #19e37c;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 10px #19e37c55;
+      animation: none;
+    }
+    @keyframes spinAnimation {
+      0% { transform: rotateX(0deg); }
+      100% { transform: rotateX(360deg); }
+    }
+    .spinning {
+      animation: spinAnimation 0.5s ease-in-out;
+    }
+    .controls input[type="number"] {
+      padding: 5px;
+      background: #000;
+      border: 1px solid #19e37c;
+      color: #19e37c;
+      width: 60px;
+    }
+    .controls button {
+      padding: 8px 16px;
+      background: #19e37c;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 10px;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    .controls button:hover {
+      background: #13b960;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 1.2em;
+      min-height: 1.5em;
+    }
+    .balance {
+      margin-bottom: 10px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      color: #19e37c;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: #111;
+      padding: 20px;
+      border: 2px solid #19e37c;
+      border-radius: 10px;
+      max-width: 300px;
+      text-align: center;
+    }
+    @keyframes slidefade-in {
+      0% { opacity: 0; transform: translateY(-20px);}
+      100% { opacity: 1; transform: translateY(0);}
+    }
+    .animate-slidefade-in { animation: slidefade-in 1s ease-out forwards; }
+    .barkworks-panel {
+      box-shadow: 0 0 40px 10px #1aff5e33, 0 0 0 3px #035a30 inset;
+      border: 2px solid #19e37c;
+    }
+    .bw-light {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 0 2px;
+      box-shadow: 0 0 10px 2px #00ff94bb;
+      background: #19e37c;
+      vertical-align: middle;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .bw-light.off {
+      background: #1a2b1e;
+      box-shadow: 0 0 4px 0 #062415;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body>
+  <div class="how-to-play" onclick="toggleHowTo()">How to Play</div>
+  <div class="restart-button" onclick="restartGame()">Restart</div>
+  <div class="modal" id="howToModal">
+    <div class="modal-content">
+      <h3>How to Play</h3>
+      <p>Enter your bet amount, then hit Spin! Match 2 or 3 symbols to win money. 💎 is the highest jackpot!</p>
+      <button onclick="toggleHowTo()">Close</button>
+    </div>
+  </div>
+  <div class="slot-machine barkworks-panel animate-slidefade-in">
+    <div class="balance">Balance: $<span id="balance">100</span></div>
+    <div class="slots">
+      <div class="slot" id="slot1">🍒</div>
+      <div class="slot" id="slot2">🍋</div>
+      <div class="slot" id="slot3">🍊</div>
+    </div>
+    <div class="controls">
+      <input type="number" id="bet" value="5" min="1" max="100" />
+      <button onclick="spin()">🎰 Spin!</button>
+    </div>
+    <div class="result" id="result"></div>
+  </div>
+  <script>
+    const symbols = ['🍒', '🍋', '🍊', '🍇', '🍉', '⭐', '💎'];
+    let balance = 100;
+    function getRandomSymbol() {
+      return symbols[Math.floor(Math.random() * symbols.length)];
+    }
+    function spin() {
+      const betInput = document.getElementById('bet');
+      const bet = parseInt(betInput.value);
+      const resultText = document.getElementById('result');
+      if (isNaN(bet) || bet > balance || bet <= 0) {
+        resultText.textContent = 'Invalid bet!';
+        return;
+      }
+      const slotEls = [
+        document.getElementById('slot1'),
+        document.getElementById('slot2'),
+        document.getElementById('slot3')
+      ];
+      slotEls.forEach(el => {
+        el.classList.add('spinning');
+        el.textContent = '🔄';
+      });
+      setTimeout(() => {
+        balance -= bet;
+        const values = [getRandomSymbol(), getRandomSymbol(), getRandomSymbol()];
+        values.forEach((val, i) => {
+          slotEls[i].textContent = val;
+          slotEls[i].classList.remove('spinning');
+        });
+        let winnings = 0;
+        if (values[0] === values[1] && values[1] === values[2]) {
+          let multiplier = (values[0] === '💎') ? 10 : (values[0] === '⭐') ? 5 : 3;
+          winnings = bet * multiplier;
+          resultText.textContent = `JACKPOT! You won $${winnings}!`;
+        } else if (values[0] === values[1] || values[1] === values[2] || values[0] === values[2]) {
+          winnings = Math.floor(bet * 1.5);
+          resultText.textContent = `Nice! You won $${winnings}.`;
+        } else {
+          resultText.textContent = 'Try again!';
+        }
+        balance += winnings;
+        document.getElementById('balance').textContent = balance;
+      }, 500);
+    }
+    function toggleHowTo() {
+      const modal = document.getElementById('howToModal');
+      modal.classList.toggle('active');
+    }
+    function restartGame() {
+      balance = 100;
+      document.getElementById('balance').textContent = balance;
+      document.getElementById('result').textContent = '';
+      document.getElementById('slot1').textContent = '🍒';
+      document.getElementById('slot2').textContent = '🍋';
+      document.getElementById('slot3').textContent = '🍊';
+    }
+  </script>
+</body>
+</html>
