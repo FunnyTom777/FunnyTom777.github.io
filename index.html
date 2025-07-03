@@ -6,7 +6,6 @@
   <title>FunnyTom777 - Projects</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Modal styles */
     .modal {
       display: none;
       position: fixed;
@@ -19,224 +18,379 @@
       align-items: center;
       z-index: 9999;
     }
-    .modal.active {
-      display: flex;
+    .modal.active { display: flex; }
+
+    @keyframes slidefade-in {
+      0% { opacity: 0; transform: translateY(-20px);}
+      100% { opacity: 1; transform: translateY(0);}
     }
+    .animate-slidefade-in { animation: slidefade-in 1s ease-out forwards; }
+    .barkworks-panel {
+      box-shadow: 0 0 40px 10px #1aff5e33, 0 0 0 3px #035a30 inset;
+      border: 2px solid #19e37c;
+    }
+    .bw-light {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 0 2px;
+      box-shadow: 0 0 10px 2px #00ff94bb;
+      background: #19e37c;
+      vertical-align: middle;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .bw-light.off {
+      background: #1a2b1e;
+      box-shadow: 0 0 4px 0 #062415;
+    }
+    /* Hide scrollbar for mobile menu */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-black text-gray-300 font-sans">
+<body class="bg-gradient-to-b from-[#0d1b13] via-[#13281b] to-[#121812] text-gray-200 font-sans">
+
 <!-- Header -->
-<header class="bg-gradient-to-r from-green-600 to-black p-4 shadow-xl sticky top-0 z-50">
-  <div class="container mx-auto flex justify-between items-center">
-    <h1 class="text-3xl font-bold text-green-400">FunnyTom777</h1>
-    <nav class="flex space-x-4">
-      
-      <!-- Dropdown for Games -->
-      <div class="relative">
-        <button class="text-gray-300 hover:text-green-500 focus:outline-none">
-          Games
-        </button>
-        <div class="dropdown-content absolute hidden bg-black text-gray-300 shadow-lg rounded p-2">
-          <a href="arcade.html" class="block hover:text-green-500">Arcade</a>
+<header class="bg-gradient-to-r from-[#19e37c] via-[#133f29] to-[#101e14] p-4 shadow-xl sticky top-0 z-50">
+  <div class="container mx-auto flex justify-between items-center max-w-6xl">
+    <h1 class="text-2xl sm:text-3xl font-bold text-[#19e37c]">FunnyTom777</h1>
+    <!-- Hamburger Button -->
+    <button id="menuBtn" class="sm:hidden flex flex-col gap-1.5 p-2 rounded hover:bg-[#12a04c]/40 focus:outline-none" aria-label="Open menu">
+      <span class="block w-7 h-0.5 bg-[#91ffbf]"></span>
+      <span class="block w-7 h-0.5 bg-[#91ffbf]"></span>
+      <span class="block w-7 h-0.5 bg-[#91ffbf]"></span>
+    </button>
+    <!-- Desktop Nav -->
+    <nav class="hidden sm:flex space-x-7 items-center">
+      <div class="group relative">
+        <button class="text-gray-200 hover:text-[#91ffbf] focus:outline-none font-semibold">Games</button>
+        <div class="absolute left-0 mt-2 hidden group-hover:block bg-[#13281b] text-gray-200 shadow-lg rounded p-2 min-w-[120px] z-40">
+          <a href="arcade.html" class="block hover:text-[#19e37c]">Arcade</a>
         </div>
       </div>
-
-      <!-- Dropdown for Other -->
-      <div class="relative">
-        <button class="text-gray-300 hover:text-green-500 focus:outline-none">
-          Other
-        </button>
-        <div class="dropdown-content absolute hidden bg-black text-gray-300 shadow-lg rounded p-2">
-          <a href="thingy_mabobby.html" class="block hover:text-green-500">WoofBot</a>
-          <a href="storethingy.html" class="block hover:text-green-500">store *WIP*</a>
-          <a href="WoofWorlds Story V.1.html" class="block hover:text-green-500">WoofWorlds</a>
-          <a href="https://funnytom777.github.io/WWBC.github.io/" class="block hover:text-green-500">WWBC</a>
-          <a href="WACA.html" class="block hover:text-green-500">WACA</a>
-          <a href="X700doc.html" class="block hover:text-green-500">X700 Docs</a>
-          <a href="somth.html" class="block hover:text-green-500">BarkWorksAppThing!</a>
-          <a href="ramble.html" class="block hover:text-green-500">a big long ramble...</a>
-          <!-- You can add more links here for the "Other" dropdown -->
+      <div class="group relative">
+        <button class="text-gray-200 hover:text-[#91ffbf] focus:outline-none font-semibold">Other</button>
+        <div class="absolute left-0 mt-2 hidden group-hover:block bg-[#13281b] text-gray-200 shadow-lg rounded p-2 min-w-[180px] z-40">
+          <a href="thingy_mabobby.html" class="block hover:text-[#19e37c]">WoofBot</a>
+          <a href="storethingy.html" class="block hover:text-[#19e37c]">store *WIP*</a>
+          <a href="WoofWorlds Story V.1.html" class="block hover:text-[#19e37c]">WoofWorlds</a>
+          <a href="https://funnytom777.github.io/WWBC.github.io/" class="block hover:text-[#19e37c]">WWBC</a>
+          <a href="WACA.html" class="block hover:text-[#19e37c]">WACA</a>
+          <a href="X700doc.html" class="block hover:text-[#19e37c]">X700 Docs</a>
+          <a href="somth.html" class="block hover:text-[#19e37c]">BarkWorksAppThing!</a>
+          <a href="ramble.html" class="block hover:text-[#19e37c]">a big long ramble...</a>
         </div>
       </div>
-
     </nav>
   </div>
+  <!-- Mobile Fullscreen Menu -->
+  <div id="mobileMenu" class="fixed inset-0 bg-[#0d1b13] bg-opacity-98 z-50 flex-col justify-start items-center hidden no-scrollbar overflow-auto transition-all duration-300">
+    <div class="flex justify-between items-center w-full p-4">
+      <h2 class="text-xl font-bold text-[#19e37c]">Menu</h2>
+      <button id="closeMenuBtn" class="p-2 rounded hover:bg-[#12a04c]/40 focus:outline-none" aria-label="Close menu">
+        <svg width="28" height="28" fill="none" stroke="#91ffbf"><line x1="7" y1="7" x2="21" y2="21" stroke-width="3"/><line x1="21" y1="7" x2="7" y2="21" stroke-width="3"/></svg>
+      </button>
+    </div>
+    <div class="flex flex-col w-full px-8 mt-6 gap-6 text-lg">
+      <div>
+        <span class="block uppercase font-bold text-[#19e37c] mb-2">Games</span>
+        <a href="arcade.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf] font-semibold">Arcade</a>
+      </div>
+      <div>
+        <span class="block uppercase font-bold text-[#19e37c] mb-2">Other</span>
+        <a href="thingy_mabobby.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">WoofBot</a>
+        <a href="storethingy.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">store *WIP*</a>
+        <a href="WoofWorlds Story V.1.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">WoofWorlds</a>
+        <a href="https://funnytom777.github.io/WWBC.github.io/" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">WWBC</a>
+        <a href="WACA.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">WACA</a>
+        <a href="X700doc.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">X700 Docs</a>
+        <a href="somth.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">BarkWorksAppThing!</a>
+        <a href="ramble.html" class="block py-2 px-2 rounded hover:bg-[#19e37c]/10 text-[#91ffbf]">a big long ramble...</a>
+      </div>
+    </div>
+  </div>
 </header>
-
 <script>
-  // JavaScript for dropdown toggle
-  document.querySelectorAll('.relative').forEach(function(dropdown) {
-    dropdown.addEventListener('mouseenter', function() {
-      this.querySelector('.dropdown-content').classList.remove('hidden');
-    });
-  
-    dropdown.addEventListener('mouseleave', function() {
-      this.querySelector('.dropdown-content').classList.add('hidden');
+  // Hamburger menu logic
+  const menuBtn = document.getElementById('menuBtn');
+  const closeMenuBtn = document.getElementById('closeMenuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  menuBtn.addEventListener('click', () => {
+    mobileMenu.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  });
+  closeMenuBtn.addEventListener('click', () => {
+    mobileMenu.classList.add('hidden');
+    document.body.style.overflow = '';
+  });
+  // Close menu on link click mobile
+  document.querySelectorAll('#mobileMenu a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden');
+      document.body.style.overflow = '';
     });
   });
 </script>
 
-  <!-- About Me -->
-  <section id="about" class="py-12 bg-gradient-to-b from-black to-gray-900">
-    <div class="container mx-auto text-center">
-      <img src="profile-pic.jpg" alt="Profile Picture" class="mx-auto rounded-full w-32 h-32 mb-4">
-      <h2 class="text-2xl font-bold text-green-400 mb-4">About Me</h2>
-      <p class="text-lg leading-relaxed">
-        welcome to <span class="font-bold text-green-400">FunnyTom777.com</span>, where you can find lots of wacky projects!
-      </p>
-    </div>
-  </section>
+<!-- About Me -->
+<section id="about" class="py-10 sm:py-12 bg-gradient-to-b from-[#0d1b13] to-[#16271b]">
+  <div class="container mx-auto text-center px-4">
+    <img src="profile-pic.jpg" alt="Profile Picture" class="mx-auto rounded-full w-24 h-24 sm:w-32 sm:h-32 mb-4 border-4 border-[#19e37c] shadow-xl object-cover">
+    <h2 class="text-xl sm:text-2xl font-bold text-[#19e37c] mb-3 sm:mb-4">About Me</h2>
+    <p class="text-base sm:text-lg leading-relaxed">
+      welcome to <span class="font-bold text-[#19e37c]">FunnyTom777.com</span>, where you can find lots of wacky projects!
+    </p>
+  </div>
+</section>
 
-<!-- WWBC Banner -->
-<section class="bg-red-600 py-4 text-center animate-slidefade-in">
-  <h2 class="text-white text-2xl font-bold">New Content on WWBC</h2>
-  <a href="https://funnytom777.github.io/WWBC.github.io/" target="_blank" class="text-white underline hover:text-yellow-300 transition duration-300">
+<!-- WWBC Banner (now green) -->
+<section class="py-4 text-center animate-slidefade-in bg-gradient-to-r from-[#133f29] via-[#19e37c]/70 to-[#133f29] border-b-2 border-[#91ffbf] shadow-lg">
+  <h2 class="text-[#91ffbf] text-xl sm:text-2xl font-bold">New Content on WWBC</h2>
+  <a href="https://funnytom777.github.io/WWBC.github.io/" target="_blank" class="text-[#cafada] underline hover:text-[#19e37c] transition duration-300">
     Check it out here!
   </a>
 </section>
 
-<!-- Obsidian Industries Banner -->
-<section class="bg-blue-900 py-4 text-center animate-slidefade-in">
-  <h2 class="text-white text-2xl font-bold">Obsidian Industries</h2>
-  <p class="text-gray-300 mt-1 mb-2">Obsidian Industries, leading Innovation</p>
-  <a href="ObsidianIndustries.html" class="text-white underline hover:text-yellow-300 transition duration-300">
+<!-- Obsidian Industries Banner (now green) -->
+<section class="py-4 text-center animate-slidefade-in bg-gradient-to-r from-[#16271b] via-[#19e37c]/50 to-[#16271b] border-b-2 border-[#91ffbf] shadow-lg">
+  <h2 class="text-[#91ffbf] text-xl sm:text-2xl font-bold">Obsidian Industries</h2>
+  <p class="text-[#cafada] mt-1 mb-2">Obsidian Industries, leading Innovation</p>
+  <a href="ObsidianIndustries.html" class="text-[#cafada] underline hover:text-[#19e37c] transition duration-300">
     Visit Obsidian Industries
   </a>
 </section>
 
-<!-- Custom animation -->
-<style>
-  @keyframes slidefade-in {
-    0% {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .animate-slidefade-in {
-    animation: slidefade-in 1s ease-out forwards;
-  }
-</style>
-
-
-  <!-- Projects -->
-  <section id="projects" class="py-12 bg-gradient-to-b from-gray-900 to-black">
-    <div class="container mx-auto">
-      <h2 class="text-2xl font-bold text-green-400 text-center mb-8">Projects</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- MTT Card -->
-        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
-          <h3 class="text-xl font-bold text-green-400 mb-2">Milk🥛, Toast🍞, TACO!🌮 (MTT)</h3>
-          <p class="text-gray-300 mb-4">An open-world driving simulator where you explore quirky landscapes and engage in unique challenges.</p>
-          <button onclick="openModal('mtt-modal')" class="text-green-400 hover:underline">Learn More</button>
+<!-- BarkWorks MotherRoad Overview - Steam Style -->
+<section class="py-10 sm:py-12 bg-gradient-to-b from-[#13281b]/80 via-[#142d20]/80 to-[#101d16]/80">
+  <div class="container mx-auto max-w-3xl px-3 sm:px-0">
+    <div class="barkworks-panel rounded-xl p-6 sm:p-8 mb-10 bg-gradient-to-br from-[#1c2f23] via-[#133f29] to-[#121812] relative overflow-hidden">
+      <h2 class="text-2xl sm:text-3xl font-bold text-[#19e37c] mb-2 tracking-wide flex items-center gap-2">
+        <svg width="30" height="30" fill="none"><circle cx="15" cy="15" r="14" stroke="#19e37c" stroke-width="3"/><rect x="10" y="8" width="10" height="14" rx="4" fill="#19e37c" opacity="0.16"/></svg>
+        BarkWorks MotherRoad <span class="text-base ml-2 font-mono bg-[#133f29]/60 px-2 py-1 rounded text-[#91ffbf]">Server Overview</span>
+      </h2>
+      <div class="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-center mt-4 sm:mt-6 mb-2 text-base sm:text-lg">
+        <div>
+          <span class="font-bold text-[#91ffbf]">Progects:</span>
+          <span id="bw-projects" class="text-[#cafada] font-mono"></span>
         </div>
-        <!-- The Great Doggy War -->
-        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
-          <h3 class="text-xl font-bold text-green-400 mb-2">The Great Doggy War</h3>
-          <p class="text-gray-300 mb-4">A thrilling tale of canines in a world full of adventure, battles, and alliances.</p>
-          <button onclick="openModal('doggy-war-modal')" class="text-green-400 hover:underline">Learn More</button>
+        <div>
+          <span class="font-bold text-[#91ffbf]">Load:</span>
+          <span id="bw-load" class="text-[#cafada] font-mono"></span>
         </div>
-        <!-- Barkipelago Adventures -->
-        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
-          <h3 class="text-xl font-bold text-green-400 mb-2">Barkipelago Adventures</h3>
-          <p class="text-gray-300 mb-4">Embark on a journey across the Barkipelago, filled with exciting quests and surprises.</p>
-          <button onclick="openModal('barkipelago-modal')" class="text-green-400 hover:underline">Learn More</button>
+        <div>
+          <span class="font-bold text-[#91ffbf]">Power:</span>
+          <span id="bw-power" class="text-[#cafada] font-mono"></span> W
         </div>
-        <!-- THING™️ -->
-        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
-          <h3 class="text-xl font-bold text-green-400 mb-2">THING™️</h3>
-          <p class="text-gray-300 mb-4">The next evolution in trading card games, blending physical and digital in one device!</p>
-          <button onclick="openModal('thing-modal')" class="text-green-400 hover:underline">Learn More</button>
+        <div>
+          <span class="font-bold text-[#91ffbf]">BarkWorks Employees:</span>
+          <span id="bw-employees" class="text-[#cafada] font-mono"></span>
         </div>
-        <!-- WoofTech & Quantum OS -->
-        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
-          <h3 class="text-xl font-bold text-green-400 mb-2">WoofTech & Quantum OS</h3>
-          <p class="text-gray-300 mb-4">Developing Quantum OS, a Linux-based OS with no ads, and other innovative software included for free!.</p>
-          <button onclick="openModal('quantum-os-modal')" class="text-green-400 hover:underline">Learn More</button>
-        </div>
-        <!-- M1 calculator -->
-        <!-- WoofTech M1 Card -->
-       <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
-         <h3 class="text-xl font-bold text-green-400 mb-2">WoofTech M1 Calculator</h3>
-         <p class="text-gray-300 mb-4">A sleek, powerful calculator designed to streamline your calculations with advanced features and intuitive controls.</p>
-         <button onclick="openModal('wooftech-m1-modal')" class="text-green-400 hover:underline">Learn More</button>
-       </div>
-
-        <!-- Happy Havoc!!!! -->
-        <div class="bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-gray-700 transition">
-          <h3 class="text-xl font-bold text-green-400 mb-2">Happy Havoc!!!!</h3>
-          <p class="text-gray-300 mb-4">A 2D sidescrolling platformer with smooth movement, a dynamic camera, and classic style gameplay.</p>
-          <button onclick="openModal('happy-havoc-modal')" class="text-green-400 hover:underline">Learn More</button>
+        <div>
+          <span class="font-bold text-[#91ffbf]">Active Lights:</span>
+          <span id="bw-lights">
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+            <span class="bw-light"></span>
+          </span>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- Modals -->
-  <div id="mtt-modal" class="modal">
-    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
-      <h2 class="text-2xl font-bold text-green-400 mb-4">Milk🥛, Toast🍞, TACO!🌮 (MTT)</h2>
-      <p class="text-gray-300 mb-6">An open-world driving simulator where players embark on wacky adventures, explore quirky landscapes, and complete challenging missions.</p>
-      <button onclick="closeModal('mtt-modal')" class="text-green-400 hover:underline">Close</button>
+      <div class="text-[#b6e9c9] text-xs sm:text-sm mt-5 sm:mt-6 italic border-t border-[#133f29] pt-2 opacity-80">
+        BarkWorks MotherRoad is your hub for big barky ideas, running at peak wackiness and efficiency!
+      </div>
+      <div class="absolute top-0 right-0 opacity-20 pointer-events-none" style="font-size:5rem;line-height:1;">🐾</div>
     </div>
   </div>
+</section>
 
-  <div id="doggy-war-modal" class="modal">
-    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
-      <h2 class="text-2xl font-bold text-green-400 mb-4">The Great Doggy War</h2>
-      <p class="text-gray-300 mb-6">A thrilling tale of canines in a world full of adventure, battles, and alliances.</p>
-      <button onclick="closeModal('doggy-war-modal')" class="text-green-400 hover:underline">Close</button>
+<!-- Projects -->
+<section id="projects" class="py-10 sm:py-12 bg-gradient-to-b from-[#16271b] via-[#13281b] to-[#0d1b13]">
+  <div class="container mx-auto px-3 sm:px-0">
+    <h2 class="text-xl sm:text-2xl font-bold text-[#19e37c] text-center mb-8">Projects</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      <!-- MTT Card -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">Milk🥛, Toast🍞, TACO!🌮 (MTT)</h3>
+        <p class="text-gray-200 mb-4">An open-world driving simulator where you explore quirky landscapes and engage in unique challenges.</p>
+        <button onclick="openModal('mtt-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- The Great Doggy War -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">The Great Doggy War</h3>
+        <p class="text-gray-200 mb-4">A thrilling tale of canines in a world full of adventure, battles, and alliances.</p>
+        <button onclick="openModal('doggy-war-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- Barkipelago Adventures -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">Barkipelago Adventures</h3>
+        <p class="text-gray-200 mb-4">Embark on a journey across the Barkipelago, filled with exciting quests and surprises.</p>
+        <button onclick="openModal('barkipelago-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- THING™️ -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">THING™️</h3>
+        <p class="text-gray-200 mb-4">The next evolution in trading card games, blending physical and digital in one device!</p>
+        <button onclick="openModal('thing-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- WoofTech & Quantum OS -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">WoofTech & Quantum OS</h3>
+        <p class="text-gray-200 mb-4">Developing Quantum OS, a Linux-based OS with no ads, and other innovative software included for free!.</p>
+        <button onclick="openModal('quantum-os-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- WoofTech M1 Card -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">WoofTech M1 Calculator</h3>
+        <p class="text-gray-200 mb-4">A sleek, powerful calculator designed to streamline your calculations with advanced features and intuitive controls.</p>
+        <button onclick="openModal('wooftech-m1-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
+      <!-- Happy Havoc!!!! -->
+      <div class="bg-[#1c2f23] rounded-lg shadow-md p-4 hover:shadow-lg hover:bg-[#204931] transition">
+        <h3 class="text-lg sm:text-xl font-bold text-[#19e37c] mb-2">Happy Havoc!!!!</h3>
+        <p class="text-gray-200 mb-4">A 2D sidescrolling platformer with smooth movement, a dynamic camera, and classic style gameplay.</p>
+        <button onclick="openModal('happy-havoc-modal')" class="text-[#91ffbf] hover:underline">Learn More</button>
+      </div>
     </div>
   </div>
+</section>
 
-  <div id="barkipelago-modal" class="modal">
-    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
-      <h2 class="text-2xl font-bold text-green-400 mb-4">Barkipelago Adventures</h2>
-      <p class="text-gray-300 mb-6">Embark on a journey across the Barkipelago, filled with exciting quests and surprises.</p>
-      <button onclick="closeModal('barkipelago-modal')" class="text-green-400 hover:underline">Close</button>
+<!-- Teaser/Upcoming Section styled steam-like -->
+<section class="py-10 sm:py-12 bg-gradient-to-tr from-[#121812] via-[#133f29]/50 to-[#101e14]">
+  <div class="container mx-auto max-w-2xl px-3 sm:px-0">
+    <div class="rounded-xl border-2 border-[#19e37c]/40 shadow-lg p-5 sm:p-7 bg-gradient-to-br from-[#142d20] via-[#133f29] to-[#101e14]">
+      <h2 class="text-xl sm:text-2xl font-bold text-[#19e37c] mb-4 flex items-center gap-2">
+        <svg width="26" height="26" fill="none"><circle cx="13" cy="13" r="11" stroke="#19e37c" stroke-width="3"/><rect x="7" y="9" width="12" height="8" rx="4" fill="#19e37c" opacity="0.16"/></svg>
+        Upcoming Teasers
+      </h2>
+      <ul class="list-disc ml-7 text-base sm:text-lg space-y-2">
+        <li>
+          <span class="font-bold text-[#91ffbf]">BarkWorks YouTube Channel</span>
+          <span class="ml-2 text-[#cafada]">– Sneak peeks, devlogs, and fun videos are coming soon!</span>
+        </li>
+        <li>
+          <span class="font-bold text-[#91ffbf]">BarkWorks AppThing Major Update</span>
+          <span class="ml-2 text-[#cafada]">– Revamped UI, more barks, more fun.</span>
+        </li>
+        <li>
+          <span class="font-bold text-[#91ffbf]">Another Top Secret Project</span>
+          <span class="ml-2 text-[#cafada]">– Stay tuned for something wild and unexpected.</span>
+        </li>
+      </ul>
+      <div class="mt-6 text-xs sm:text-sm text-[#b6e9c9] italic border-t border-[#133f29] pt-2 opacity-80">
+        Want to see more? Subscribe to our upcoming YouTube channel and watch this space!
+      </div>
     </div>
   </div>
+</section>
 
-  <div id="thing-modal" class="modal">
-    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
-      <h2 class="text-2xl font-bold text-green-400 mb-4">THING™️</h2>
-      <p class="text-gray-300 mb-6">The next evolution in trading card games, blending physical and digital in one device!</p>
-      <button onclick="closeModal('thing-modal')" class="text-green-400 hover:underline">Close</button>
-    </div>
+<!-- Modals -->
+<div id="mtt-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">Milk🥛, Toast🍞, TACO!🌮 (MTT)</h2>
+    <p class="text-gray-200 mb-6">An open-world driving simulator where players embark on wacky adventures, explore quirky landscapes, and complete challenging missions.</p>
+    <button onclick="closeModal('mtt-modal')" class="text-[#91ffbf] hover:underline">Close</button>
   </div>
-
-  <div id="quantum-os-modal" class="modal">
-    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
-      <h2 class="text-2xl font-bold text-green-400 mb-4">WoofTech & Quantum OS</h2>
-      <p class="text-gray-300 mb-6">Developing Quantum OS, a Linux-based OS with no ads or bloat, and other innovative products.</p>
-      <button onclick="closeModal('quantum-os-modal')" class="text-green-400 hover:underline">Close</button>
-    </div>
+</div>
+<div id="doggy-war-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">The Great Doggy War</h2>
+    <p class="text-gray-200 mb-6">A thrilling tale of canines in a world full of adventure, battles, and alliances.</p>
+    <button onclick="closeModal('doggy-war-modal')" class="text-[#91ffbf] hover:underline">Close</button>
   </div>
-
-  <div id="happy-havoc-modal" class="modal">
-    <div class="bg-gray-800 p-8 rounded-lg max-w-2xl text-center">
-      <h2 class="text-2xl font-bold text-green-400 mb-4">Happy Havoc!!!!</h2>
-      <p class="text-gray-300 mb-6">A 2D sidescrolling platformer with smooth movement, a dynamic camera, and classic style gameplay.</p>
-      <button onclick="closeModal('happy-havoc-modal')" class="text-green-400 hover:underline">Close</button>
-    </div>
+</div>
+<div id="barkipelago-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">Barkipelago Adventures</h2>
+    <p class="text-gray-200 mb-6">Embark on a journey across the Barkipelago, filled with exciting quests and surprises.</p>
+    <button onclick="closeModal('barkipelago-modal')" class="text-[#91ffbf] hover:underline">Close</button>
   </div>
+</div>
+<div id="thing-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">THING™️</h2>
+    <p class="text-gray-200 mb-6">The next evolution in trading card games, blending physical and digital in one device!</p>
+    <button onclick="closeModal('thing-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+<div id="quantum-os-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">WoofTech & Quantum OS</h2>
+    <p class="text-gray-200 mb-6">Developing Quantum OS, a Linux-based OS with no ads or bloat, and other innovative products.</p>
+    <button onclick="closeModal('quantum-os-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+<div id="wooftech-m1-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">WoofTech M1 Calculator</h2>
+    <p class="text-gray-200 mb-6">A sleek, powerful calculator designed to streamline your calculations with advanced features and intuitive controls.</p>
+    <button onclick="closeModal('wooftech-m1-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
+<div id="happy-havoc-modal" class="modal">
+  <div class="bg-[#1c2f23] p-8 rounded-lg max-w-2xl text-center">
+    <h2 class="text-2xl font-bold text-[#19e37c] mb-4">Happy Havoc!!!!</h2>
+    <p class="text-gray-200 mb-6">A 2D sidescrolling platformer with smooth movement, a dynamic camera, and classic style gameplay.</p>
+    <button onclick="closeModal('happy-havoc-modal')" class="text-[#91ffbf] hover:underline">Close</button>
+  </div>
+</div>
 
-  <!-- Footer -->
-  <footer class="bg-gray-800 py-4 text-center">
-    <p class="text-gray-400">© 2025 FunnyTom777. All rights reserved.</p>
-  </footer>
+<!-- Footer -->
+<footer class="bg-[#16271b] py-4 text-center border-t border-[#133f29]">
+  <p class="text-[#b6e9c9] text-sm">© 2025 FunnyTom777. All rights reserved.</p>
+</footer>
 
-  <!-- JavaScript -->
-  <script>
-    function openModal(id) {
-      document.getElementById(id).classList.add('active');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
-    }
-  </script>
+<!-- JavaScript -->
+<script>
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+
+  // BarkWorks MotherRoad dynamic values
+  let bwProjects = 180 + Math.floor(Math.random() * 20);
+  let bwLoad = 0.30 + Math.random() * 0.40;
+  let bwPower = 2000 + Math.floor(Math.random() * 1500);
+  let bwEmployees = 3500 + Math.floor(Math.random() * 2000);
+
+  function fluctuate(val, min, max, maxDelta) {
+    let delta = (Math.random() - 0.5) * maxDelta;
+    let newVal = val + delta;
+    if (newVal > max) newVal = max;
+    if (newVal < min) newVal = min;
+    return newVal;
+  }
+
+  function updateBWPanel() {
+    bwProjects = Math.round(fluctuate(bwProjects, 100, 300, 2.2));
+    bwLoad = fluctuate(bwLoad, 0.15, 0.82, 0.014);
+    bwPower = Math.round(fluctuate(bwPower, 1200, 4200, 30));
+    bwEmployees = Math.round(fluctuate(bwEmployees, 1000, 7000, 35));
+    document.getElementById('bw-projects').innerText = bwProjects;
+    document.getElementById('bw-load').innerText = (bwLoad * 100).toFixed(1) + "%";
+    document.getElementById('bw-power').innerText = bwPower;
+    document.getElementById('bw-employees').innerText = bwEmployees;
+  }
+
+  let lights = document.querySelectorAll('.bw-light');
+  function randomizeLights() {
+    lights.forEach(light => {
+      if (Math.random() > 0.38) {
+        light.classList.remove('off');
+      } else {
+        light.classList.add('off');
+      }
+    });
+  }
+
+  setInterval(updateBWPanel, 1100);
+  setInterval(randomizeLights, 420);
+  updateBWPanel();
+  randomizeLights();
+</script>
 </body>
 </html>
