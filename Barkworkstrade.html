@@ -17,6 +17,7 @@
       --good: #27ef6a;
       --fair: #f9c846;
       --bad: #ff595e;
+      --event: #ffe066;
     }
     html, body { background: var(--bg); color: var(--text); margin: 0; height: 100%; font-family: 'Inter', Arial, sans-serif;}
     #container { max-width: 470px; margin: 48px auto 0 auto; padding: 0 16px;}
@@ -78,14 +79,99 @@
     .logo { display: block; margin: 0 auto 12px auto; width: 64px;}
     .day-row {font-size: 1.09em; font-weight: 500; margin: 6px 0 16px 0;}
     .reset-btn {background: #222; color: #eee; border: 1px solid var(--border); margin-top: 12px;}
+    #howToBtn {
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      background: #232a35;
+      color: var(--accent);
+      font-size: 1.18em;
+      padding: 5px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      z-index: 10;
+      font-weight: 600;
+    }
+    #howToModal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #000a;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #howToModal .modal-card {
+      background: var(--card);
+      color: var(--text);
+      padding: 30px 20px 18px 20px;
+      border-radius: 16px;
+      max-width: 390px;
+      box-shadow: 0 4px 24px 0 #0005;
+      border: 1.5px solid var(--border);
+      animation: fadeIn 0.4s;
+    }
+    #howToModal h2 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 1.24em;
+      color: var(--accent);
+    }
+    #howToModal ul {
+      margin-top: 0;
+      margin-bottom: 0;
+      padding-left: 19px;
+    }
+    #howToModal button {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      padding: 7px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      margin-top: 18px;
+    }
+    .event-msg {
+      background: var(--event);
+      color: #333;
+      padding: 7px 10px;
+      border-radius: 7px;
+      margin: 7px 0 0 0;
+      font-weight: 600;
+      box-shadow: 0 1px 4px #0001;
+      text-align: center;
+      font-size: 1.01em;
+      display: inline-block;
+      line-height: 1.35;
+    }
     @media (max-width: 640px) {
       #container { max-width: 99vw; }
       .card { padding: 20px 8px 14px 8px; }
       .stock-table th, .stock-table td, .portfolio-table th, .portfolio-table td { padding: 6px 2px;}
+      #howToBtn { top: 8px; right: 8px; font-size: 1em;}
+      #howToModal .modal-card { max-width: 97vw;}
     }
   </style>
 </head>
 <body>
+  <button id="howToBtn" onclick="showHowTo()">How to play?</button>
+  <div id="howToModal" onclick="hideHowTo(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <h2>How to Play</h2>
+      <ul>
+        <li>You start with $1000 and no stocks.</li>
+        <li>Each stock has a price and a rating (chance to rise).</li>
+        <li>Buy low, sell high! Try to grow your wealth.</li>
+        <li>Click "Progress 1 Day" to update stock prices and ratings.</li>
+        <li>Occasionally, <b>market events</b> will affect certain stocks!</li>
+        <li>Restart anytime with the Restart button.</li>
+      </ul>
+      <button onclick="hideHowTo()">OK, Got it!</button>
+    </div>
+  </div>
   <div id="container">
     <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/paid/v11/24px.svg" class="logo" alt="logo">
     <h1>BarkWorks<br>Trade Simulator</h1>
@@ -118,17 +204,28 @@
       <div class="portfolio-header">Your Portfolio</div>
       <div id="userStocks"></div>
       <div id="msg" style="margin-top:12px;text-align:center;font-weight:500;"></div>
+      <div id="eventMsg" style="margin-top:9px;text-align:center;"></div>
     </div>
     <div class="footer">
-      <em>Made with 💸 + 🔥 by FunnyTom777 & Copilot</em><br>
+      <em>Made with by FunnyTom777</em><br>
       <span class="muted" style="font-size:0.95em;">Pure JS, reload to play again!</span>
     </div>
   </div>
   <script>
+    // ======= How To Play Modal =======
+    function showHowTo() {
+      document.getElementById('howToModal').style.display = "flex";
+    }
+    function hideHowTo(e) {
+      if (!e || e.target === document.getElementById('howToModal'))
+        document.getElementById('howToModal').style.display = "none";
+    }
+
     // ======= Game State =======
     const STOCK_SYMBOLS = [
       "ABC", "XYZ", "PQR", "FUN", "LOL",
-      "CAT", "DOG", "SUN", "MOON", "STAR"
+      "CAT", "DOG", "SUN", "MOON", "STAR",
+      "BEE", "OWL", "APE", "GEM", "ICE"
     ];
     const stockNames = {
       ABC: "Alpha Beta Co.",
@@ -140,7 +237,12 @@
       DOG: "Dogmatic Energy",
       SUN: "Sunrise Micro",
       MOON: "Moonbase Motors",
-      STAR: "Starfruit Digital"
+      STAR: "Starfruit Digital",
+      BEE: "Beeswax Biotech",
+      OWL: "Owlwise Analytics",
+      APE: "Apeiron Games",
+      GEM: "Gemstone Finance",
+      ICE: "Icecap Insurance"
     };
     let game = {};
     function randomStock(start) {
@@ -148,7 +250,7 @@
       return {
         price: +(Math.random()*50+50).toFixed(2), // $50-$100
         rating: +(Math.random()*0.7+0.15).toFixed(2), // 0.15-0.85
-        history: [start] // for graphing in future
+        history: [start]
       };
     }
     function initialGameState() {
@@ -158,8 +260,9 @@
         day: 1,
         balance: 1000,
         stocks: stocks,
-        portfolio: {}, // symbol -> shares
-        msg: ""
+        portfolio: {},
+        msg: "",
+        eventMsg: ""
       };
     }
     function resetGame() {
@@ -167,24 +270,76 @@
       render();
     }
 
+    // ======= Market Event Mechanic =======
+    // Once every 4-8 days, a random stock or sector has a special event!
+    function maybeMarketEvent() {
+      // 1 in 5 chance of event; makes events not too frequent
+      if (Math.random() < 0.22) {
+        const eventType = Math.random();
+        let chosen, msg = "";
+        if (eventType < 0.40) {
+          // Single stock surge/crash
+          chosen = STOCK_SYMBOLS[Math.floor(Math.random()*STOCK_SYMBOLS.length)];
+          let up = Math.random() < 0.5;
+          let factor = up ? (1 + Math.random()*0.25 + 0.15) : (1 - Math.random()*0.18 - 0.08);
+          let old = game.stocks[chosen].price;
+          game.stocks[chosen].price = +(game.stocks[chosen].price * factor).toFixed(2);
+          msg = up
+            ? `🚀 <b>${chosen}</b> (${stockNames[chosen]}) <b>skyrocketed</b> <span style="color:var(--good)">+$${(game.stocks[chosen].price-old).toFixed(2)}</span>!`
+            : `💥 <b>${chosen}</b> (${stockNames[chosen]}) <b>crashed</b> <span style="color:var(--bad)">-$${(old-game.stocks[chosen].price).toFixed(2)}</span>!`;
+        } else if (eventType < 0.72) {
+          // Sector event (animal stocks or fruit/element stocks)
+          let animalSyms = ["CAT","DOG","OWL","APE","BEE"];
+          let fruitElemSyms = ["SUN","MOON","STAR","GEM","ICE"];
+          let group = Math.random()<0.5 ? animalSyms : fruitElemSyms;
+          let up = Math.random() < 0.5;
+          let factor = up ? (1 + Math.random()*0.12 + 0.04) : (1 - Math.random()*0.08 - 0.03);
+          for (let sym of group) {
+            let old = game.stocks[sym].price;
+            game.stocks[sym].price = +(game.stocks[sym].price * factor).toFixed(2);
+          }
+          msg = up
+            ? `🌟 <b>${group.map(s=>stockNames[s]).join(", ")}</b> <b>sector boomed!</b>`
+            : `🌑 <b>${group.map(s=>stockNames[s]).join(", ")}</b> <b>sector slumped!</b>`;
+        } else {
+          // "Market Fad": All stocks with rating >0.7 jump, <0.3 drop
+          let winners = [], losers = [];
+          for (let sym of STOCK_SYMBOLS) {
+            if (game.stocks[sym].rating > 0.7) {
+              let change = 1 + Math.random()*0.16 + 0.11;
+              game.stocks[sym].price = +(game.stocks[sym].price * change).toFixed(2);
+              winners.push(sym);
+            }
+            if (game.stocks[sym].rating < 0.3) {
+              let change = 1 - Math.random()*0.11 - 0.05;
+              game.stocks[sym].price = +(game.stocks[sym].price * change).toFixed(2);
+              losers.push(sym);
+            }
+          }
+          msg = `🎲 <b>Market Fad:</b> High-rated stocks <span style="color:var(--good)">jump</span>, low-rated <span style="color:var(--bad)">drop</span>!`;
+        }
+        game.eventMsg = `<span class="event-msg">${msg}</span>`;
+      } else {
+        game.eventMsg = "";
+      }
+    }
+
     // ======= Stock Market Math =======
     function progressDay() {
       game.day++;
       game.msg = "";
+      maybeMarketEvent(); // new mechanic!
       for (const sym of STOCK_SYMBOLS) {
         let s = game.stocks[sym];
         // Determine if price goes up or down based on rating
-        // Up chance: rating, Down: 1-rating. Bigger moves if rating extreme
         const up = Math.random() < s.rating;
-        // Math: Higher rating = more likely up, lower = more likely down
         let baseMove = (Math.random()*0.04 + 0.01); // 1%-5%
-        // If rating is very high or low, more volatility
         if (s.rating > 0.8 || s.rating < 0.2) baseMove *= 1.7;
         let priceChange = up ? (1+baseMove) : (1-baseMove);
         s.price = Math.max(1, +(s.price * priceChange).toFixed(2));
         // Add randomness: rare big swings!
         if (Math.random() < 0.03) {
-          let jump = (Math.random()*0.4+0.15); // 15%-55%
+          let jump = (Math.random()*0.4+0.15);
           if (Math.random()<0.5) jump = -jump;
           s.price = Math.max(1, +(s.price*(1+jump)).toFixed(2));
           game.msg += `🌠 ${sym} had a wild swing!<br>`;
@@ -258,6 +413,7 @@
       }
       document.getElementById('userStocks').innerHTML = html;
       document.getElementById('msg').innerHTML = game.msg;
+      document.getElementById('eventMsg').innerHTML = game.eventMsg || "";
     }
 
     window.buyStock = buyStock;
