@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BarkWorks Trade Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; background: #181c22; color: #f2f2f2; margin: 0; padding: 0;}
+    #container { max-width: 700px; margin: auto; padding: 24px;}
+    h1 { text-align: center; }
+    #loginDiv, #appDiv { margin-top: 40px; }
+    button { padding: 8px 16px; margin: 4px; background: #2d8cf0; color: white; border: none; border-radius: 4px; cursor: pointer;}
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    table { width: 100%; border-collapse: collapse; background: #222; margin-top: 24px;}
+    th, td { padding: 10px; border-bottom: 1px solid #333;}
+    th { background: #333;}
+    tr:hover { background: #242d36;}
+    .rating-good { color: #27ef6a; font-weight: bold; }
+    .rating-fair { color: #f9c846; font-weight: bold; }
+    .rating-bad { color: #ff595e; font-weight: bold; }
+    #userStocks { margin-top: 20px; }
+    .balance { font-size: 1.2em; font-weight: bold; }
+    .footer { margin-top: 48px; text-align: center; color: #555;}
+    a { color: #2d8cf0; }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>🚀 BarkWorks Trade Simulator</h1>
+    <div id="loginDiv">
+      <button onclick="signIn()">Sign In with Google</button>
+    </div>
+    <div id="appDiv" style="display:none;">
+      <div style="display: flex; justify-content: space-between; align-items:center;">
+        <span id="userDetails"></span>
+        <button onclick="signOut()">Sign Out</button>
+      </div>
+      <div class="balance">Balance: $<span id="userBalance">0.00</span></div>
+      <h2>Stocks</h2>
+      <table id="stocksTable">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Rating</th>
+            <th>Buy</th>
+            <th>Sell</th>
+          </tr>
+        </thead>
+        <tbody id="stocksBody"></tbody>
+      </table>
+      <div id="userStocks"></div>
+    </div>
+    <div class="footer">
+      <em>Made with 💸 + 🔥 by FunnyTom777</em>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs (v9.0+ compat mode) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script>
+    // ======= 1. Your Firebase Config =======
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2sLm4NHJ3TqMSppkX5LLCjRRTPAtrQY0",
+      authDomain: "barkworkstradesimulator.firebaseapp.com",
+      projectId: "barkworkstradesimulator",
+      storageBucket: "barkworkstradesimulator.appspot.com",
+      messagingSenderId: "581566971233",
+      appId: "1:581566971233:web:04049b9f43498e9b8a9920"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // ======= 2. Auth Logic =======
+    function signIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider);
+    }
+    function signOut() {
+      auth.signOut();
+    }
+
+    // ======= 3. State =======
+    let currentUser = null;
+    let userDoc = null;
+    let stocks = {};
+    const STOCK_SYMBOLS = ["ABC", "XYZ", "PQR", "FUN", "LOL", "CAT", "DOG", "SUN", "MOON", "STAR"];
+
+    // ======= 4. UI Helpers =======
+    function show(id) { document.getElementById(id).style.display = "block"; }
+    function hide(id) { document.getElementById(id).style.display = "none"; }
+    function setText(id, text) { document.getElementById(id).textContent = text; }
+
+    // ======= 5. On Auth Change =======
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        currentUser = user;
+        hide('loginDiv'); show('appDiv');
+        setText('userDetails', `Welcome, ${user.displayName}`);
+        await loadOrCreateUser();
+        await loadOrInitStocks();
+        await updateStockPricesIfNeeded();
+        render();
+      } else {
+        currentUser = null;
+        show('loginDiv'); hide('appDiv');
+      }
+    });
+
+    // ======= 6. User Data =======
+    async function loadOrCreateUser() {
+      const userRef = db.collection('users').doc(currentUser.uid);
+      let doc = await userRef.get();
+      if (!doc.exists) {
+        await userRef.set({ balance: 1000, stocks: {} });
+        doc = await userRef.get();
+      }
+      userDoc = doc.data();
+    }
+
+    // ======= 7. Stocks Data (auto-create if missing) =======
+    async function loadOrInitStocks() {
+      const stocksSnap = await db.collection('stocks').get();
+      if (stocksSnap.empty) {
+        // Auto-create stocks if not present (first run)
+        const batch = db.batch();
+        for (const sym of STOCK_SYMBOLS) {
+          const rating = Math.random() * 0.7 + 0.15; // 0.15 to 0.85
+          batch.set(db.collection('stocks').doc(sym), {
+            price: Math.floor(Math.random()*50)+50, // $50-$100
+            rating: Math.round(rating*100)/100,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+        await batch.commit();
+        return loadOrInitStocks(); // Try again
+      }
+      stocks = {};
+      stocksSnap.forEach(doc => { stocks[doc.id] = doc.data(); });
+    }
+
+    // ======= 8. Fluctuate Stocks Per Hour =======
+    async function updateStockPricesIfNeeded() {
+      // Only update if more than 1 hour since last update
+      const now = Date.now();
+      const updates = [];
+      for (const sym of STOCK_SYMBOLS) {
+        const s = stocks[sym];
+        if (!s.lastUpdated || (now - s.lastUpdated.toDate().getTime()) > 60*60*1000) {
+          // Fluctuate
+          const up = Math.random() < s.rating;
+          const change = (Math.random()*0.04 + 0.01); // 1%-5%
+          let newPrice = s.price * (up ? (1+change) : (1-change));
+          newPrice = Math.max(1, Math.round(newPrice*100)/100); // min $1, round cents
+          // Randomize rating a little (simulating changing "market confidence")
+          let newRating = Math.min(0.95, Math.max(0.05, Math.round((s.rating + (Math.random()-0.5)*0.1)*100)/100));
+          updates.push(
+            db.collection('stocks').doc(sym).update({
+              price: newPrice,
+              rating: newRating,
+              lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+            })
+          );
+        }
+      }
+      if (updates.length) {
+        await Promise.all(updates);
+        // Reload stocks after update
+        await loadOrInitStocks();
+      }
+    }
+
+    // ======= 9. Buy/Sell Logic =======
+    async function buyStock(sym) {
+      const price = stocks[sym].price;
+      if (userDoc.balance >= price) {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        await db.runTransaction(async (tx) => {
+          const doc = await tx.get(userRef);
+          let d = doc.data();
+          d.balance -= price; d.balance = Math.round(d.balance*100)/100;
+          d.stocks = d.stocks || {};
+          d.stocks[sym] = (d.stocks[sym]||0) + 1;
+          tx.set(userRef, d);
+        });
+        await loadOrCreateUser();
+        render();
+      } else alert("Not enough balance!");
+    }
+    async function sellStock(sym) {
+      if ((userDoc.stocks && userDoc.stocks[sym]) > 0) {
+        const price = stocks[sym].price;
+        const userRef = db.collection('users').doc(currentUser.uid);
+        await db.runTransaction(async (tx) => {
+          const doc = await tx.get(userRef);
+          let d = doc.data();
+          d.balance += price; d.balance = Math.round(d.balance*100)/100;
+          d.stocks = d.stocks || {};
+          d.stocks[sym] = d.stocks[sym]-1;
+          if (d.stocks[sym] <= 0) delete d.stocks[sym];
+          tx.set(userRef, d);
+        });
+        await loadOrCreateUser();
+        render();
+      } else alert("You don't own any " + sym + " shares!");
+    }
+
+    // ======= 10. Render UI =======
+    function render() {
+      setText('userBalance', userDoc.balance.toFixed(2));
+      // Stocks Table
+      const tbody = document.getElementById('stocksBody');
+      tbody.innerHTML = '';
+      for (const sym of STOCK_SYMBOLS) {
+        const s = stocks[sym];
+        if (!s) continue;
+        // Rating: color code
+        let ratingText = '';
+        if (s.rating >= 0.7) ratingText = `<span class="rating-good">Good (${Math.round(s.rating*100)}%)</span>`;
+        else if (s.rating >= 0.4) ratingText = `<span class="rating-fair">Fair (${Math.round(s.rating*100)}%)</span>`;
+        else ratingText = `<span class="rating-bad">Poor (${Math.round(s.rating*100)}%)</span>`;
+        tbody.innerHTML += `<tr>
+          <td>${sym}</td>
+          <td>$${s.price.toFixed(2)}</td>
+          <td>${ratingText}</td>
+          <td><button onclick="buyStock('${sym}')" ${userDoc.balance < s.price ? 'disabled' : ''}>Buy</button></td>
+          <td><button onclick="sellStock('${sym}')" ${(userDoc.stocks && userDoc.stocks[sym]) ? '' : 'disabled'}>Sell</button></td>
+        </tr>`;
+      }
+      // User stocks
+      let owned = Object.entries(userDoc.stocks||{}).filter(([k,v])=>v>0);
+      let html = `<h3>Your Portfolio</h3>`;
+      if (!owned.length) html += `<div>You don't own any stocks yet.</div>`;
+      else {
+        html += `<table><thead><tr><th>Symbol</th><th>Shares</th><th>Value</th></tr></thead><tbody>`;
+        let total = 0;
+        for (const [sym, n] of owned) {
+          const value = n * (stocks[sym]?.price || 0);
+          html += `<tr><td>${sym}</td><td>${n}</td><td>$${value.toFixed(2)}</td></tr>`;
+          total += value;
+        }
+        html += `</tbody></table><div>Total Portfolio Value: $${total.toFixed(2)}</div>`;
+      }
+      document.getElementById('userStocks').innerHTML = html;
+    }
+
+    // ======= 11. Expose Buy/Sell for Buttons =======
+    window.buyStock = buyStock;
+    window.sellStock = sellStock;
+
+    // ======= 12. Refresh Prices Every 5 Min (optional auto-refresh) =======
+    setInterval(async ()=>{
+      if (currentUser) {
+        await updateStockPricesIfNeeded();
+        render();
+      }
+    }, 5*60*1000); // every 5 min
+  </script>
+</body>
+</html>
