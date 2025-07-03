@@ -4,59 +4,137 @@
   <meta charset="UTF-8">
   <title>BarkWorks Trade Simulator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google Fonts for better style -->
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; background: #181c22; color: #f2f2f2; margin: 0; padding: 0;}
-    #container { max-width: 700px; margin: auto; padding: 24px;}
-    h1 { text-align: center; }
-    #loginDiv, #appDiv { margin-top: 40px; }
-    button { padding: 8px 16px; margin: 4px; background: #2d8cf0; color: white; border: none; border-radius: 4px; cursor: pointer;}
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    table { width: 100%; border-collapse: collapse; background: #222; margin-top: 24px;}
-    th, td { padding: 10px; border-bottom: 1px solid #333;}
-    th { background: #333;}
-    tr:hover { background: #242d36;}
-    .rating-good { color: #27ef6a; font-weight: bold; }
-    .rating-fair { color: #f9c846; font-weight: bold; }
-    .rating-bad { color: #ff595e; font-weight: bold; }
-    #userStocks { margin-top: 20px; }
-    .balance { font-size: 1.2em; font-weight: bold; }
-    .footer { margin-top: 48px; text-align: center; color: #555;}
-    a { color: #2d8cf0; }
+    :root {
+      --bg: #10151c;
+      --card: #181c22;
+      --accent: #5e9cff;
+      --accent-hover: #3887ff;
+      --text: #f2f2f2;
+      --muted: #b1b5bb;
+      --border: #232a35;
+      --good: #27ef6a;
+      --fair: #f9c846;
+      --bad: #ff595e;
+    }
+    html, body { background: var(--bg); color: var(--text); margin: 0; height: 100%; font-family: 'Inter', Arial, sans-serif;}
+    #container { max-width: 460px; margin: 48px auto 0 auto; padding: 0 16px;}
+    h1 { text-align: center; font-weight: 600; letter-spacing: -1px; margin-bottom: 8px;}
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: 0 3px 18px 0 #0002;
+      padding: 32px 24px 24px 24px;
+      margin: 24px 0;
+      border: 1px solid var(--border);
+      min-width: 0;
+      animation: fadeIn 0.8s;
+    }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(40px);} to{opacity:1; transform:none;} }
+    button, .btn {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      padding: 10px 22px;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      margin: 6px 0;
+      font-size: 1em;
+      transition: background 0.18s;
+      box-shadow: 0 2px 6px #0002;
+    }
+    button:disabled, .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    button:hover:not(:disabled), .btn:hover:not(:disabled) { background: var(--accent-hover);}
+    .user-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;}
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; margin-right: 10px; vertical-align: middle;}
+    .user-name { font-weight: 500; font-size: 1.08em;}
+    .balance { font-size: 1.22em; font-weight: 600; margin-bottom: 8px; }
+    .stock-table, .portfolio-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0 8px 0;
+      background: transparent;
+    }
+    .stock-table th, .stock-table td, .portfolio-table th, .portfolio-table td {
+      padding: 10px 6px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 1em;
+    }
+    .stock-table th, .portfolio-table th {
+      font-size: 1.05em;
+      color: var(--muted);
+      font-weight: 500;
+      background: none;
+    }
+    .stock-table tr:last-child td, .portfolio-table tr:last-child td {
+      border-bottom: none;
+    }
+    .rating-good { color: var(--good); font-weight: bold; }
+    .rating-fair { color: var(--fair); font-weight: bold; }
+    .rating-bad { color: var(--bad); font-weight: bold; }
+    .portfolio-header { font-weight: 600; font-size: 1.05em; margin-top: 24px;}
+    .muted { color: var(--muted);}
+    .actions-cell { white-space: nowrap;}
+    .footer { margin: 32px 0 0 0; text-align: center; color: #666;}
+    .logo { display: block; margin: 0 auto 12px auto; width: 64px;}
+    @media (max-width: 640px) {
+      #container { max-width: 99vw; }
+      .card { padding: 20px 8px 14px 8px; }
+      .stock-table th, .stock-table td, .portfolio-table th, .portfolio-table td { padding: 6px 2px;}
+    }
   </style>
 </head>
 <body>
   <div id="container">
-    <h1>🚀 BarkWorks Trade Simulator</h1>
-    <div id="loginDiv">
-      <button onclick="signIn()">Sign In with Google</button>
+    <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/paid/v11/24px.svg" class="logo" alt="logo">
+    <h1>BarkWorks<br>Trade Simulator</h1>
+
+    <!-- Login Card -->
+    <div id="loginDiv" class="card" style="display:block;">
+      <button onclick="signIn()" class="btn" style="width:100%;font-size:1.06em;">
+        <img src="https://fonts.gstatic.com/s/i/materialiconsoutlined/login/v12/24px.svg" style="vertical-align:middle;width:22px;margin-right:8px;">
+        Sign In with Google
+      </button>
     </div>
-    <div id="appDiv" style="display:none;">
-      <div style="display: flex; justify-content: space-between; align-items:center;">
-        <span id="userDetails"></span>
-        <button onclick="signOut()">Sign Out</button>
+
+    <!-- App Card -->
+    <div id="appDiv" class="card" style="display:none;">
+      <div class="user-row">
+        <span>
+          <img id="userAvatar" class="user-avatar" src="" alt="user" style="display:none;">
+          <span id="userDetails" class="user-name"></span>
+        </span>
+        <button onclick="signOut()" class="btn" style="padding:7px 13px;font-size:0.98em;">Sign Out</button>
       </div>
-      <div class="balance">Balance: $<span id="userBalance">0.00</span></div>
-      <h2>Stocks</h2>
-      <table id="stocksTable">
+      <div class="balance">
+        Balance: $<span id="userBalance">0.00</span>
+      </div>
+      <div class="portfolio-header">Stocks</div>
+      <table class="stock-table">
         <thead>
           <tr>
             <th>Symbol</th>
             <th>Price</th>
             <th>Rating</th>
-            <th>Buy</th>
-            <th>Sell</th>
+            <th class="actions-cell">Buy</th>
+            <th class="actions-cell">Sell</th>
           </tr>
         </thead>
         <tbody id="stocksBody"></tbody>
       </table>
+      <div class="portfolio-header">Your Portfolio</div>
       <div id="userStocks"></div>
     </div>
+
     <div class="footer">
-      <em>Made with 💸 + 🔥 by FunnyTom777</em>
+      <em>Made with 💸 + 🔥 by FunnyTom777</em><br>
+      <span class="muted" style="font-size:0.95em;">(Run on <b>localhost</b> for Google sign-in to work!)</span>
     </div>
   </div>
 
-  <!-- Firebase SDKs (v9.0+ compat mode) -->
+  <!-- Firebase SDKs (v10+ compat mode) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -76,9 +154,8 @@
 
     // ======= 2. Auth Logic =======
     function signIn() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider);
-}
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithRedirect(provider);
     }
     function signOut() {
       auth.signOut();
@@ -95,12 +172,24 @@
     function hide(id) { document.getElementById(id).style.display = "none"; }
     function setText(id, text) { document.getElementById(id).textContent = text; }
 
-    // ======= 5. On Auth Change =======
+    // ======= 5. Google Redirect Handler (MUST for signInWithRedirect) =======
+    // This must run early to resolve the redirect result, otherwise you might get stuck in a login loop.
+    window.onload = async () => {
+      try {
+        await auth.getRedirectResult(); // resolves pending login, if any
+      } catch (e) {
+        // Ignore if no pending login.
+      }
+    }
+
+    // ======= 6. On Auth Change =======
     auth.onAuthStateChanged(async user => {
       if (user) {
         currentUser = user;
         hide('loginDiv'); show('appDiv');
-        setText('userDetails', `Welcome, ${user.displayName}`);
+        document.getElementById('userAvatar').src = user.photoURL || "";
+        document.getElementById('userAvatar').style.display = user.photoURL ? "inline-block" : "none";
+        setText('userDetails', `${user.displayName || user.email || "User"}`);
         await loadOrCreateUser();
         await loadOrInitStocks();
         await updateStockPricesIfNeeded();
@@ -111,7 +200,7 @@
       }
     });
 
-    // ======= 6. User Data =======
+    // ======= 7. User Data =======
     async function loadOrCreateUser() {
       const userRef = db.collection('users').doc(currentUser.uid);
       let doc = await userRef.get();
@@ -122,7 +211,7 @@
       userDoc = doc.data();
     }
 
-    // ======= 7. Stocks Data (auto-create if missing) =======
+    // ======= 8. Stocks Data (auto-create if missing) =======
     async function loadOrInitStocks() {
       const stocksSnap = await db.collection('stocks').get();
       if (stocksSnap.empty) {
@@ -143,7 +232,7 @@
       stocksSnap.forEach(doc => { stocks[doc.id] = doc.data(); });
     }
 
-    // ======= 8. Fluctuate Stocks Per Hour =======
+    // ======= 9. Fluctuate Stocks Per Hour =======
     async function updateStockPricesIfNeeded() {
       // Only update if more than 1 hour since last update
       const now = Date.now();
@@ -174,7 +263,7 @@
       }
     }
 
-    // ======= 9. Buy/Sell Logic =======
+    // ======= 10. Buy/Sell Logic =======
     async function buyStock(sym) {
       const price = stocks[sym].price;
       if (userDoc.balance >= price) {
@@ -209,7 +298,7 @@
       } else alert("You don't own any " + sym + " shares!");
     }
 
-    // ======= 10. Render UI =======
+    // ======= 11. Render UI =======
     function render() {
       setText('userBalance', userDoc.balance.toFixed(2));
       // Stocks Table
@@ -224,35 +313,35 @@
         else if (s.rating >= 0.4) ratingText = `<span class="rating-fair">Fair (${Math.round(s.rating*100)}%)</span>`;
         else ratingText = `<span class="rating-bad">Poor (${Math.round(s.rating*100)}%)</span>`;
         tbody.innerHTML += `<tr>
-          <td>${sym}</td>
+          <td><b>${sym}</b></td>
           <td>$${s.price.toFixed(2)}</td>
           <td>${ratingText}</td>
-          <td><button onclick="buyStock('${sym}')" ${userDoc.balance < s.price ? 'disabled' : ''}>Buy</button></td>
-          <td><button onclick="sellStock('${sym}')" ${(userDoc.stocks && userDoc.stocks[sym]) ? '' : 'disabled'}>Sell</button></td>
+          <td class="actions-cell"><button onclick="buyStock('${sym}')" ${userDoc.balance < s.price ? 'disabled' : ''}>Buy</button></td>
+          <td class="actions-cell"><button onclick="sellStock('${sym}')" ${(userDoc.stocks && userDoc.stocks[sym]) ? '' : 'disabled'}>Sell</button></td>
         </tr>`;
       }
       // User stocks
       let owned = Object.entries(userDoc.stocks||{}).filter(([k,v])=>v>0);
-      let html = `<h3>Your Portfolio</h3>`;
-      if (!owned.length) html += `<div>You don't own any stocks yet.</div>`;
+      let html = '';
+      if (!owned.length) html += `<span class="muted">You don't own any stocks yet.</span>`;
       else {
-        html += `<table><thead><tr><th>Symbol</th><th>Shares</th><th>Value</th></tr></thead><tbody>`;
+        html += `<table class="portfolio-table"><thead><tr><th>Symbol</th><th>Shares</th><th>Value</th></tr></thead><tbody>`;
         let total = 0;
         for (const [sym, n] of owned) {
           const value = n * (stocks[sym]?.price || 0);
-          html += `<tr><td>${sym}</td><td>${n}</td><td>$${value.toFixed(2)}</td></tr>`;
+          html += `<tr><td><b>${sym}</b></td><td>${n}</td><td>$${value.toFixed(2)}</td></tr>`;
           total += value;
         }
-        html += `</tbody></table><div>Total Portfolio Value: $${total.toFixed(2)}</div>`;
+        html += `</tbody></table><div style="font-weight:500;margin-top:6px;">Total Portfolio Value: $${total.toFixed(2)}</div>`;
       }
       document.getElementById('userStocks').innerHTML = html;
     }
 
-    // ======= 11. Expose Buy/Sell for Buttons =======
+    // ======= 12. Expose Buy/Sell for Buttons =======
     window.buyStock = buyStock;
     window.sellStock = sellStock;
 
-    // ======= 12. Refresh Prices Every 5 Min (optional auto-refresh) =======
+    // ======= 13. Refresh Prices Every 5 Min (optional auto-refresh) =======
     setInterval(async ()=>{
       if (currentUser) {
         await updateStockPricesIfNeeded();
