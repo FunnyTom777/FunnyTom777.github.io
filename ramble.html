@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Markdown Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body {
+      background-color: #111;
+      color: #ddd;
+      font-family: sans-serif;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3 {
+      color: #eee;
+    }
+
+    a {
+      color: #66b0ff;
+    }
+
+    code {
+      background-color: #222;
+      color: #9cf;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    pre {
+      background-color: #222;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    blockquote {
+      border-left: 4px solid #444;
+      padding-left: 1rem;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <h1>Markdown Blog</h1>
+  <div id="markdown-content">Loading...</div>
+
+  <script>
+    fetch('story1.md')
+      .then(res => res.text())
+      .then(text => {
+        document.getElementById('markdown-content').innerHTML = marked.parse(text);
+      })
+      .catch(err => {
+        document.getElementById('markdown-content').innerText = "Failed to load markdown.";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
