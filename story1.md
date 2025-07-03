@@ -1,3 +1,7 @@
+---
+layout: default
+title: A big long ramble!
+---
 # The Endless Projects of FunnyTom: A Chaotic but Brilliant Journey
 
 > *A long, winding ramble through the creative mind of someone who can't stop making things, dreaming big, and building ideas that stretch into wild universes and worlds beyond.*
