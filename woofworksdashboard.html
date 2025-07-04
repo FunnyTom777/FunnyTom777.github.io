@@ -212,9 +212,13 @@
       <button id="send-btn">Send</button>
     </section>
 
-    <section id="admin-tab">
+    <section id="admin-tab" style="display:none;">
       <h2>Admin Panel</h2>
-      <div id="admin-users">Loading...</div>
+      <div>
+        <label for="admin-user-select"><strong>Select User:</strong></label>
+        <select id="admin-user-select"></select>
+      </div>
+      <div id="admin-user-fields" style="margin-top:1em;"></div>
     </section>
   </main>
 
@@ -258,7 +262,8 @@
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
     const chatMessages = document.getElementById('chat-messages');
-    const adminUsers = document.getElementById('admin-users');
+    const adminUserSelect = document.getElementById('admin-user-select');
+    const adminUserFields = document.getElementById('admin-user-fields');
 
     let currentUser, currentUserData;
 
@@ -384,44 +389,57 @@
 
     // --- Admin Panel Functions ---
     async function refreshAdminUsers() {
-      adminUsers.innerHTML = 'Loading...';
+      adminUserSelect.innerHTML = '';
+      adminUserFields.innerHTML = 'Loading...';
       const usersSnap = await getDocs(collection(db, 'users'));
-      let html = '';
-      usersSnap.forEach(userDoc => {
-        const u = userDoc.data();
-        const uid = userDoc.id;
-        html += `
-        <div class="admin-user-block" data-uid="${uid}">
-          <span class="admin-user-name">${escapeHTML(u.name)}</span>
-          <span class="admin-role">${u.role ?? ""}</span><br>
-          <label>WoofCoin: <input type="number" value="${u.woofcoin ?? 0}" data-field="woofcoin"></label>
-          <label>Rank: <input type="text" value="${escapeHTML(u.rank ?? "")}" data-field="rank"></label>
-          <label>Role: <input type="text" value="${escapeHTML(u.role ?? "")}" data-field="role"></label>
-          <label>Admin: 
-            <select data-field="isAdmin">
-              <option value="false"${u.isAdmin ? '' : ' selected'}>No</option>
-              <option value="true"${u.isAdmin ? ' selected' : ''}>Yes</option>
-            </select>
-          </label>
-          <button class="admin-save-btn">Save</button>
-        </div>
-        `;
-      });
-      adminUsers.innerHTML = html;
+      const users = [];
+      usersSnap.forEach(docu => users.push({ id: docu.id, ...docu.data() }));
 
-      // Add save handlers
-      [...adminUsers.querySelectorAll('.admin-user-block')].forEach(block => {
-        const uid = block.dataset.uid;
-        block.querySelector('.admin-save-btn').onclick = async () => {
-          const woofcoin = parseInt(block.querySelector('input[data-field="woofcoin"]').value) || 0;
-          const rank = block.querySelector('input[data-field="rank"]').value;
-          const role = block.querySelector('input[data-field="role"]').value;
-          const isAdmin = block.querySelector('select[data-field="isAdmin"]').value === "true";
-          await updateDoc(doc(db, "users", uid), { woofcoin, rank, role, isAdmin });
-          block.style.boxShadow = '0 0 8px 2px var(--success)';
-          setTimeout(() => block.style.boxShadow = '', 800);
+      // Populate dropdown
+      adminUserSelect.innerHTML = users.map(u =>
+        `<option value="${u.id}">${escapeHTML(u.name)}${u.email ? ' (' + escapeHTML(u.email) + ')' : ''}</option>`
+      ).join('');
+
+      // Load first user by default
+      if (users.length) {
+        loadAdminUserFields(users[0]);
+      } else {
+        adminUserFields.innerHTML = '<em>No users found.</em>';
+      }
+
+      adminUserSelect.onchange = () => {
+        const chosen = users.find(u => u.id === adminUserSelect.value);
+        loadAdminUserFields(chosen);
+      };
+
+      function loadAdminUserFields(user) {
+        if (!user) { adminUserFields.innerHTML = "<em>No user selected.</em>"; return; }
+        adminUserFields.innerHTML = `
+          <div class="admin-user-block" data-uid="${user.id}">
+            <div><strong>${escapeHTML(user.name)}</strong></div>
+            <label>WoofCoin: <input type="number" value="${user.woofcoin ?? 0}" id="admin-wc"></label>
+            <label>Rank: <input type="text" value="${escapeHTML(user.rank ?? "")}" id="admin-rank"></label>
+            <label>Role: <input type="text" value="${escapeHTML(user.role ?? "")}" id="admin-role"></label>
+            <label>Admin:
+              <select id="admin-admin">
+                <option value="false"${user.isAdmin ? '' : ' selected'}>No</option>
+                <option value="true"${user.isAdmin ? ' selected' : ''}>Yes</option>
+              </select>
+            </label>
+            <button class="admin-save-btn" style="margin-top:0.7em;">Save</button>
+            <span id="admin-save-state" style="margin-left:1em;"></span>
+          </div>
+        `;
+        adminUserFields.querySelector('.admin-save-btn').onclick = async () => {
+          const wc = parseInt(adminUserFields.querySelector('#admin-wc').value) || 0;
+          const rank = adminUserFields.querySelector('#admin-rank').value;
+          const role = adminUserFields.querySelector('#admin-role').value;
+          const isAdminVal = adminUserFields.querySelector('#admin-admin').value === 'true';
+          await updateDoc(doc(db, "users", user.id), { woofcoin: wc, rank, role, isAdmin: isAdminVal });
+          adminUserFields.querySelector('#admin-save-state').textContent = "✅ Saved!";
+          setTimeout(() => adminUserFields.querySelector('#admin-save-state').textContent = "", 1000);
         };
-      });
+      }
     }
 
     // --- Utils ---
