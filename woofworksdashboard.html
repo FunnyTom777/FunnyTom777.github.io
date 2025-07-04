@@ -6,133 +6,127 @@
   <title>WoofWorks Dashboard</title>
   <style>
     :root {
-      --bg-dark: #0a0f0a;
-      --bg-panel: #111c11;
-      --green-glow: #00ff99;
-      --green-muted: #00cc88;
-      --text-light: #caffdd;
+      --bg: #0b0f0c;
+      --panel: #111c14;
+      --accent: #00ff88;
+      --text: #d8ffe4;
+      --accent-soft: #00cc77;
+      --msg-0: #1a3d2b;
+      --msg-1: #2e5f47;
+      --msg-2: #3a805c;
+      --msg-3: #4ebf88;
+    }
+    * {
+      box-sizing: border-box;
     }
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-light);
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      min-height: 100vh;
     }
     header {
-      background-color: var(--bg-panel);
-      color: var(--green-glow);
-      padding: 1rem;
-      font-size: 1.8rem;
-      font-weight: bold;
+      background: var(--panel);
+      padding: 1rem 2rem;
+      font-size: 2rem;
+      color: var(--accent);
+      text-shadow: 0 0 10px var(--accent);
     }
-    #login-section, #dashboard {
+    main {
       flex: 1;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 2rem;
     }
-    input, button, textarea {
-      padding: 0.7rem;
-      margin: 0.5rem 0;
+    section {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem;
+      width: 95%;
+      max-width: 800px;
+      box-shadow: 0 0 15px var(--accent-soft);
+    }
+    h2 {
+      margin-top: 0;
+      color: var(--accent);
+    }
+    input, textarea, button {
+      background: #0f1813;
+      border: 1px solid var(--accent);
+      color: var(--text);
       border-radius: 8px;
-      border: none;
-      width: 100%;
-      max-width: 400px;
+      padding: 0.7rem;
+      margin: 0.4rem 0;
       font-size: 1rem;
-    }
-    input, textarea {
-      background-color: var(--bg-panel);
-      color: var(--text-light);
+      width: 100%;
     }
     button {
-      background-color: var(--green-muted);
+      background: var(--accent);
       color: #000;
+      font-weight: bold;
       cursor: pointer;
     }
-    .info-panel, #chat, #admin-panel {
-      background-color: var(--bg-panel);
-      border: 1px solid var(--green-muted);
-      border-radius: 10px;
-      padding: 1rem;
-      margin: 1rem 0;
-      width: 90%;
-      max-width: 800px;
-      box-shadow: 0 0 10px var(--green-muted);
-    }
-    .message-bubble {
-      margin: 0.3rem 0;
+    #chat-messages .message {
       padding: 0.5rem;
       border-radius: 10px;
-      display: inline-block;
-      max-width: 75%;
+      margin: 0.3rem 0;
+      max-width: 80%;
       word-wrap: break-word;
     }
-    .message-bubble.user-0 { background-color: #1f4032; }
-    .message-bubble.user-1 { background-color: #2e593f; }
-    .message-bubble.user-2 { background-color: #3a7c57; }
-    .message-bubble.user-3 { background-color: #49986d; }
-    #chat-input {
-      display: flex;
-    }
-    #chat-input textarea {
-      flex: 1;
-    }
-    #admin-tab {
-      display: none;
-    }
+    .user-0 { background: var(--msg-0); }
+    .user-1 { background: var(--msg-1); }
+    .user-2 { background: var(--msg-2); }
+    .user-3 { background: var(--msg-3); }
+    #admin-tab { display: none; }
   </style>
 </head>
 <body>
-  <header>WoofWorks Dashboard</header>
+  <header>🐾 WoofWorks Dashboard</header>
+  <main>
+    <section id="login">
+      <h2>Login</h2>
+      <input id="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Password">
+      <button id="login-btn">Login</button>
+      <p id="login-error" style="color:#ff8080;"></p>
+    </section>
 
-  <section id="login-section">
-    <h2>Login</h2>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button id="login-btn">Login</button>
-    <p id="login-error" style="color:#ff7b7b;"></p>
-  </section>
-
-  <section id="dashboard" style="display:none;">
-    <div class="info-panel">
+    <section id="dashboard" style="display:none;">
       <h2>Your Info</h2>
-      <p>WoofCoin: <span id="woofcoin">...</span></p>
-      <p>Rank: <span id="rank">...</span></p>
-      <p>Role: <span id="role">...</span></p>
-      <p>Admin: <span id="is-admin">...</span></p>
-    </div>
+      <p><strong>WoofCoin:</strong> <span id="woofcoin"></span></p>
+      <p><strong>Rank:</strong> <span id="rank"></span></p>
+      <p><strong>Role:</strong> <span id="role"></span></p>
+      <p><strong>Admin:</strong> <span id="admin"></span></p>
+      <button id="logout-btn">Logout</button>
+    </section>
 
-    <div class="info-panel">
+    <section id="tasks" style="display:none;">
       <h2>Public Tasks</h2>
       <ul id="tasks-list"></ul>
-    </div>
+    </section>
 
-    <div id="chat" class="info-panel">
-      <h2>Chat</h2>
-      <div id="messages"></div>
-      <div id="chat-input">
-        <textarea id="message-input" rows="2" placeholder="Message..."></textarea>
-        <button id="send-btn">Send</button>
-      </div>
-    </div>
+    <section id="chat" style="display:none;">
+      <h2>Team Chat</h2>
+      <div id="chat-messages"></div>
+      <textarea id="chat-input" placeholder="Type a message..."></textarea>
+      <button id="send-btn">Send</button>
+    </section>
 
-    <div id="admin-tab" class="info-panel">
+    <section id="admin-tab">
       <h2>Admin Panel</h2>
-      <div id="admin-users">Loading users...</div>
-    </div>
-
-    <button id="logout-btn">Logout</button>
-  </section>
+      <div id="admin-users">Loading...</div>
+    </section>
+  </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, getDocs, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyDsFimFgQKXLhpflX4PTfWcpKwfI5qM8I4",
@@ -147,124 +141,124 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const loginSection = document.getElementById("login-section");
-    const dashboard = document.getElementById("dashboard");
-    const loginBtn = document.getElementById("login-btn");
-    const logoutBtn = document.getElementById("logout-btn");
-    const email = document.getElementById("email");
-    const password = document.getElementById("password");
-    const error = document.getElementById("login-error");
-    const tasksList = document.getElementById("tasks-list");
-    const messagesDiv = document.getElementById("messages");
-    const messageInput = document.getElementById("message-input");
-    const sendBtn = document.getElementById("send-btn");
-    const adminTab = document.getElementById("admin-tab");
-    const adminUsers = document.getElementById("admin-users");
+    const emailInput = document.getElementById('email');
+    const passInput = document.getElementById('password');
+    const loginBtn = document.getElementById('login-btn');
+    const loginError = document.getElementById('login-error');
 
-    const woofcoinSpan = document.getElementById("woofcoin");
-    const rankSpan = document.getElementById("rank");
-    const roleSpan = document.getElementById("role");
-    const isAdminSpan = document.getElementById("is-admin");
+    const loginSection = document.getElementById('login');
+    const dashSection = document.getElementById('dashboard');
+    const tasksSection = document.getElementById('tasks');
+    const chatSection = document.getElementById('chat');
+    const adminTab = document.getElementById('admin-tab');
+
+    const logoutBtn = document.getElementById('logout-btn');
+    const woofcoin = document.getElementById('woofcoin');
+    const rank = document.getElementById('rank');
+    const role = document.getElementById('role');
+    const isAdmin = document.getElementById('admin');
+    const tasksList = document.getElementById('tasks-list');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    const adminUsers = document.getElementById('admin-users');
 
     loginBtn.onclick = async () => {
       try {
-        const userCred = await signInWithEmailAndPassword(auth, email.value, password.value);
+        const userCred = await signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
         const uid = userCred.user.uid;
-        const userRef = doc(db, "users", uid);
-        const snap = await getDoc(userRef);
-        if (!snap.exists()) {
+        const userRef = doc(db, 'users', uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
           await setDoc(userRef, {
             woofcoin: 100,
             rank: "Intern",
             role: "Newbie",
             isAdmin: false,
-            name: email.value.split("@")[0]
+            name: emailInput.value.split("@")[0]
           });
         }
       } catch (e) {
-        error.textContent = e.message;
+        loginError.textContent = e.message;
       }
     };
 
     logoutBtn.onclick = () => signOut(auth);
 
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        loginSection.style.display = "none";
-        dashboard.style.display = "block";
+      if (!user) {
+        loginSection.style.display = 'block';
+        dashSection.style.display = 'none';
+        tasksSection.style.display = 'none';
+        chatSection.style.display = 'none';
+        return;
+      }
 
-        const uid = user.uid;
-        const userRef = doc(db, "users", uid);
-        const snap = await getDoc(userRef);
-        const data = snap.data();
+      loginSection.style.display = 'none';
+      dashSection.style.display = 'block';
+      tasksSection.style.display = 'block';
+      chatSection.style.display = 'block';
 
-        woofcoinSpan.textContent = data.woofcoin;
-        rankSpan.textContent = data.rank;
-        roleSpan.textContent = data.role;
-        isAdminSpan.textContent = data.isAdmin;
+      const uid = user.uid;
+      const userRef = doc(db, 'users', uid);
+      const snap = await getDoc(userRef);
+      const data = snap.data();
 
-        if (data.isAdmin) {
-          adminTab.style.display = "block";
-          const userCol = await getDocs(collection(db, "users"));
-          adminUsers.innerHTML = "";
-          userCol.forEach(docu => {
-            const d = docu.data();
-            const div = document.createElement("div");
-            div.innerHTML = `
-              <p><strong>${d.name}</strong></p>
-              <label>WoofCoin: <input value="${d.woofcoin}" data-uid="${docu.id}" data-field="woofcoin"></label>
-              <label>Rank: <input value="${d.rank}" data-uid="${docu.id}" data-field="rank"></label>
-              <label>Role: <input value="${d.role}" data-uid="${docu.id}" data-field="role"></label>
+      woofcoin.textContent = data.woofcoin;
+      rank.textContent = data.rank;
+      role.textContent = data.role;
+      isAdmin.textContent = data.isAdmin ? "✅ Yes" : "❌ No";
+
+      if (data.isAdmin) {
+        adminTab.style.display = 'block';
+        const usersSnap = await getDocs(collection(db, 'users'));
+        adminUsers.innerHTML = '';
+        usersSnap.forEach(userDoc => {
+          const u = userDoc.data();
+          adminUsers.innerHTML += `
+            <div style="margin-bottom:1rem;">
+              <strong>${u.name}</strong><br>
+              <label>WoofCoin: <input value="${u.woofcoin}" data-uid="${userDoc.id}" data-field="woofcoin"></label><br>
+              <label>Rank: <input value="${u.rank}" data-uid="${userDoc.id}" data-field="rank"></label><br>
+              <label>Role: <input value="${u.role}" data-uid="${userDoc.id}" data-field="role"></label>
               <hr>
-            `;
-            adminUsers.appendChild(div);
-          });
+            </div>`;
+        });
 
-          adminUsers.addEventListener("change", async (e) => {
-            const target = e.target;
-            const uid = target.dataset.uid;
-            const field = target.dataset.field;
-            const value = field === "woofcoin" ? parseInt(target.value) : target.value;
-            const ref = doc(db, "users", uid);
-            await setDoc(ref, { [field]: value }, { merge: true });
-          });
+        adminUsers.onchange = async (e) => {
+          const field = e.target.dataset.field;
+          const uid = e.target.dataset.uid;
+          const val = field === "woofcoin" ? parseInt(e.target.value) : e.target.value;
+          await setDoc(doc(db, "users", uid), { [field]: val }, { merge: true });
         }
+      }
 
-        onSnapshot(collection(db, "tasks"), (snap) => {
-          tasksList.innerHTML = "";
-          snap.forEach(doc => {
-            const li = document.createElement("li");
-            li.textContent = doc.data().title;
-            tasksList.appendChild(li);
-          });
+      onSnapshot(collection(db, 'tasks'), snap => {
+        tasksList.innerHTML = '';
+        snap.forEach(doc => {
+          tasksList.innerHTML += `<li>${doc.data().title}</li>`;
         });
+      });
 
-        onSnapshot(collection(db, "messages"), (snap) => {
-          messagesDiv.innerHTML = "";
-          snap.forEach(doc => {
-            const m = doc.data();
-            const div = document.createElement("div");
-            const hash = [...m.uid].reduce((a, b) => a + b.charCodeAt(0), 0) % 4;
-            div.className = `message-bubble user-${hash}`;
-            div.textContent = `${m.name}: ${m.text}`;
-            messagesDiv.appendChild(div);
-          });
+      onSnapshot(collection(db, 'messages'), snap => {
+        chatMessages.innerHTML = '';
+        snap.forEach(doc => {
+          const m = doc.data();
+          const hash = [...m.uid].reduce((a, b) => a + b.charCodeAt(0), 0) % 4;
+          chatMessages.innerHTML += `<div class="message user-${hash}"><strong>${m.name}</strong>: ${m.text}</div>`;
         });
+      });
 
-        sendBtn.onclick = async () => {
-          if (messageInput.value.trim() !== "") {
-            await addDoc(collection(db, "messages"), {
-              uid: user.uid,
-              name: data.name,
-              text: messageInput.value,
-              timestamp: serverTimestamp()
-            });
-            messageInput.value = "";
-          }
-        };
-      } else {
-        loginSection.style.display = "block";
-        dashboard.style.display = "none";
+      sendBtn.onclick = async () => {
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+        await addDoc(collection(db, 'messages'), {
+          uid: user.uid,
+          name: data.name,
+          text: msg,
+          timestamp: serverTimestamp()
+        });
+        chatInput.value = "";
       }
     });
   </script>
