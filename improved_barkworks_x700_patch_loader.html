@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BarkWorks X700 Patch Loader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon: #00ff88;
+      --neon-glow: 0 0 20px #00ff88cc, 0 0 2px #00ff88cc;
+      --accent: #1a2c23;
+      --bg: #010a08;
+      --panel: #082016;
+      --input-bg: #071e18;
+      --input-border: #00ff88;
+      --shadow: 0 0 40px #00ff8866;
+      --radius: 18px;
+      --transition: 0.22s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0; 
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--neon);
+      font-family: 'Orbitron', 'Share Tech Mono', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 2rem;
+      min-height: 100dvh;
+    }
+
+    .neon-border {
+      border: 2px solid var(--neon);
+      border-radius: var(--radius);
+      box-shadow: var(--neon-glow);
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      margin-bottom: 1.8rem;
+      text-shadow: var(--neon-glow), 0 0 80px #00ff8833;
+      letter-spacing: 0.07em;
+      background: linear-gradient(90deg, #00ff88 5%, #00e6ff 95%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+    }
+
+    .main-panel {
+      background: var(--panel);
+      padding: 2.2rem 2rem 2rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 340px;
+      max-width: 420px;
+    }
+
+    .big-btn {
+      padding: 1.15rem 2.5rem;
+      background: linear-gradient(90deg, var(--neon) 75%, #00e6ff 100%);
+      color: #002912;
+      border: none;
+      font-size: 2rem;
+      font-family: 'Orbitron', monospace;
+      border-radius: var(--radius);
+      box-shadow: 0 0 30px #00ff8888, 0 0 8px #00ff8844;
+      cursor: pointer;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      letter-spacing: 0.04em;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+      font-weight: bold;
+    }
+
+    .big-btn:hover, .big-btn:focus {
+      transform: scale(1.06) rotate(-1.5deg);
+      box-shadow: 0 0 60px #00ff88cc, 0 0 14px #00e6ffbb;
+      background: linear-gradient(90deg, #00e6ff 0%, var(--neon) 100%);
+      outline: none;
+    }
+
+    form.form-section {
+      width: 100%;
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.15rem;
+      background: var(--input-bg);
+      border-radius: var(--radius);
+      padding: 1.3rem 1.4rem;
+      box-shadow: 0 0 20px #00ff8822;
+      animation: fadein 0.7s cubic-bezier(.4,0,.2,1);
+    }
+
+    @keyframes fadein {
+      0% { opacity: 0; transform: scale(0.98);}
+      100% { opacity: 1; transform: scale(1);}
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 1.15rem;
+      letter-spacing: 0.03em;
+      margin-bottom: -0.3rem;
+    }
+
+    select, input[type="number"] {
+      padding: 0.65rem 0.5rem;
+      font-size: 1.07rem;
+      margin-top: 0.28rem;
+      background: var(--input-bg);
+      color: var(--neon);
+      border: 1.5px solid var(--input-border);
+      border-radius: 8px;
+      outline: none;
+      box-shadow: 0 0 6px #00ff8822;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      font-family: 'Share Tech Mono', monospace;
+    }
+    select:focus, input[type="number"]:focus {
+      border-color: #00e6ff;
+      box-shadow: 0 0 16px #00e6ff88;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 1000;
+      background: linear-gradient(120deg, #011c17cc 0%, #032c26ee 100%);
+      animation: popup-fadein .2s;
+    }
+
+    @keyframes popup-fadein {
+      from { opacity: 0;}
+      to { opacity: 1;}
+    }
+
+    .popup-box {
+      background: var(--panel);
+      border: 2.5px solid var(--neon);
+      border-radius: var(--radius);
+      box-shadow: var(--neon-glow), 0 0 100px #00ff8822;
+      padding: 2.3rem 2rem;
+      min-width: 320px;
+      max-width: 340px;
+      text-align: center;
+      font-size: 1.18rem;
+      animation: fadein 0.4s;
+      position: relative;
+    }
+
+    .popup-box h2 {
+      font-size: 1.6rem;
+      margin-bottom: 0.5em;
+      text-shadow: var(--neon-glow);
+      letter-spacing: 0.04em;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: transparent;
+      border: none;
+      color: #00ff88cc;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.16s;
+    }
+    .close-btn:hover { color: #00e6ff; }
+
+    .thanks {
+      font-size: 2.1rem;
+      letter-spacing: 0.07em;
+      background: linear-gradient(90deg, #00ff88, #00e6ff 95%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+      text-shadow: var(--neon-glow);
+      line-height: 1.35;
+      margin-bottom: 0.6em;
+      margin-top: 0.3em;
+    }
+
+    .fade-in {
+      animation: fadein 0.55s;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      h1 { font-size: 2rem;}
+      .main-panel, .popup-box { padding: 1rem; min-width: unset; max-width: 97vw;}
+      form.form-section { padding: 0.6rem;}
+    }
+  </style>
+</head>
+<body>
+  <h1>BarkWorks X700 Patch Loader</h1>
+  <div class="main-panel neon-border fade-in">
+    <button class="big-btn" id="startBtn">
+      <span style="filter: drop-shadow(0 0 6px #00ff88);">🚀 PATCH LOADER</span>
+    </button>
+
+    <form id="configForm" class="form-section hidden" autocomplete="off">
+      <label>Device Frequency
+        <select id="frequency" required>
+          <option disabled selected value="">Choose frequency…</option>
+          <option>5kw</option><option>6kw</option><option>7kw</option>
+          <option>8kw</option><option>9kw</option><option>10kw</option>
+          <option>11kw</option><option>12kw</option><option>13kw</option>
+          <option>14kw</option><option>15kw</option>
+        </select>
+      </label>
+
+      <label>Firmware Version
+        <select id="firmwareVersion" required>
+          <option disabled selected value="">Choose version…</option>
+          <option>2.4</option><option>2.3</option><option>2.2</option>
+          <option>2.1</option><option>2.0</option><option>1.5</option>
+          <option>1.0</option><option>0.8</option>
+        </select>
+      </label>
+
+      <label>Firmware Model
+        <select id="firmwareModel" required>
+          <option disabled selected value="">Choose model…</option>
+          <option>Flame</option>
+          <option>Coal</option>
+          <option>Water</option>
+        </select>
+      </label>
+
+      <label>Download Provider
+        <select id="provider" required>
+          <option disabled selected value="">Choose provider…</option>
+          <option>WWBC</option>
+          <option>Local</option>
+        </select>
+      </label>
+
+      <label>Device Model
+        <select id="deviceModel" required>
+          <option disabled selected value="">Choose device…</option>
+          <option>X700</option>
+          <option>X600</option>
+          <option>X800</option>
+          <option>X9000</option>
+        </select>
+      </label>
+
+      <label>Enable Experimental Features?
+        <select id="experimental" required>
+          <option disabled selected value="">Choose…</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </label>
+
+      <button type="button" class="big-btn" id="next1" style="font-size:1.2rem; margin-top:0.7em; margin-bottom:0;">Next ➡️</button>
+    </form>
+  </div>
+
+  <!-- DIP POPUP -->
+  <div class="popup" id="dipPopup">
+    <div class="popup-box neon-border">
+      <button class="close-btn" onclick="document.getElementById('dipPopup').style.display='none'">&times;</button>
+      <p style="font-size:1.2rem;margin-bottom:1.2em;">
+        <span style="font-weight:bold;letter-spacing:0.02em;">Enter Device DIP Code</span><br>
+        <span style="color:#00e6ff;font-size:0.98em;">(Found on the rear of your device or select one)</span>
+      </p>
+      <select id="dipCode" style="margin-bottom:1.2em;">
+        <option>94583D</option>
+        <option>94583B</option>
+        <option>Custom…</option>
+      </select>
+      <input type="text" id="dipCustom" class="hidden" maxlength="12" style="margin-bottom:1.2em;" placeholder="Enter custom DIP code...">
+      <button class="big-btn" id="next2" style="font-size:1rem;">Next</button>
+    </div>
+  </div>
+
+  <!-- REALLY ANNOYING POPUP -->
+  <div class="popup" id="annoyingPopup">
+    <div class="popup-box neon-border">
+      <button class="close-btn" onclick="document.getElementById('annoyingPopup').style.display='none'">&times;</button>
+      <h2>Security Check</h2>
+      <p>
+        To verify this is a secure connection,<br>
+        solve the equation below:
+      </p>
+      <p style="font-size:1.5rem;letter-spacing:0.07em;">
+        3 + 5 + <strong id="mathRand"></strong>
+      </p>
+      <input type="number" id="mathAnswer" placeholder="Your answer..." style="margin-top:0.7em;" autocomplete="off"/>
+      <br><br>
+      <button class="big-btn" id="next3" style="font-size:1rem;">Download Firmware</button>
+    </div>
+  </div>
+
+  <!-- THANK YOU -->
+  <div class="popup" id="thanksPopup">
+    <div class="popup-box neon-border thanks fade-in">
+      ✅ Firmware Downloaded!<br>Thanks for downloading 🔧
+      <div style="margin-top:1.2em;">
+        <button class="big-btn" onclick="location.reload()" style="font-size:1rem;">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // UI element refs
+    const startBtn = document.getElementById('startBtn');
+    const configForm = document.getElementById('configForm');
+    const dipPopup = document.getElementById('dipPopup');
+    const annoyingPopup = document.getElementById('annoyingPopup');
+    const thanksPopup = document.getElementById('thanksPopup');
+
+    const next1 = document.getElementById('next1');
+    const next2 = document.getElementById('next2');
+    const next3 = document.getElementById('next3');
+
+    const dipCode = document.getElementById('dipCode');
+    const dipCustom = document.getElementById('dipCustom');
+    const mathRand = document.getElementById('mathRand');
+    const mathAnswer = document.getElementById('mathAnswer');
+
+    // Show form on PATCH LOADER click
+    startBtn.onclick = () => {
+      startBtn.parentElement.classList.add('fade-in');
+      startBtn.classList.add('hidden');
+      configForm.classList.remove('hidden');
+      configForm.scrollIntoView({behavior:'smooth'});
+    };
+
+    // Pop DIP popup with validation
+    next1.onclick = () => {
+      // Basic check: all selects filled
+      let valid = true;
+      configForm.querySelectorAll('select').forEach(sel => {
+        if (!sel.value) valid = false;
+      });
+      if (!valid) {
+        alert('Please fill out all fields!');
+        return;
+      }
+      dipPopup.style.display = 'flex';
+      dipCode.value = dipCode.options[0].value;
+      dipCustom.classList.add('hidden');
+    };
+
+    // DIP select: show input if Custom
+    dipCode.onchange = () => {
+      if (dipCode.value === 'Custom…') {
+        dipCustom.classList.remove('hidden');
+        dipCustom.focus();
+      } else {
+        dipCustom.classList.add('hidden');
+      }
+    };
+
+    // Pop math popup, random eq, DIP validation
+    next2.onclick = () => {
+      let dipVal = dipCode.value === 'Custom…' ? dipCustom.value.trim().toUpperCase() : dipCode.value;
+      if (!dipVal || (dipCode.value === 'Custom…' && !/^[A-Z0-9]{4,12}$/.test(dipVal))) {
+        alert('Please enter a valid DIP code (4-12 letters/numbers)');
+        dipCustom.focus();
+        return;
+      }
+      dipPopup.style.display = 'none';
+      // Generate a random number for math eq
+      const n = Math.floor(Math.random() * 10) + 2;
+      mathRand.textContent = n;
+      mathAnswer.value = '';
+      mathAnswer.dataset.answer = 3 + 5 + n;
+      annoyingPopup.style.display = 'flex';
+      setTimeout(()=>mathAnswer.focus(), 350);
+    };
+
+    // Math popup, check answer, download
+    next3.onclick = () => {
+      let answer = parseInt(mathAnswer.value, 10);
+      const correct = parseInt(mathAnswer.dataset.answer, 10);
+      if (answer === correct) {
+        annoyingPopup.style.display = 'none';
+
+        // Build firmware data object
+        const data = {
+          frequency: document.getElementById('frequency').value,
+          firmwareVersion: document.getElementById('firmwareVersion').value,
+          firmwareModel: document.getElementById('firmwareModel').value,
+          provider: document.getElementById('provider').value,
+          deviceModel: document.getElementById('deviceModel').value,
+          experimental: document.getElementById('experimental').value,
+          dip: dipCode.value === 'Custom…' ? dipCustom.value.trim().toUpperCase() : dipCode.value
+        };
+
+        // Download JSON as file
+        const fileName = `${data.deviceModel}_firmware.json`;
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+
+        // Show thanks
+        thanksPopup.style.display = 'flex';
+      } else {
+        mathAnswer.classList.add('shake');
+        alert('Wrong answer! Try again.');
+        mathAnswer.focus();
+      }
+    };
+
+    // Close popups on background click (except thanks)
+    document.querySelectorAll('.popup').forEach(popup => {
+      if (popup.id !== 'thanksPopup') {
+        popup.addEventListener('click', e => {
+          if (e.target === popup) popup.style.display = 'none';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
