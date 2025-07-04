@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>BarkWorks Trade Simulator</title>
+  <title>BarkWorks Trade Simulator + Casino</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
   <style>
@@ -210,7 +210,7 @@
     .buy-form button {margin:0;}
     .buy-form input[type=number]::-webkit-inner-spin-button,
     .buy-form input[type=number]::-webkit-outer-spin-button { opacity: 1;}
-    /* Slots Tab Styling */
+    /* Tabs Styling */
     .tabs-bar {
       display: flex;
       justify-content: center;
@@ -242,11 +242,9 @@
     }
     .tab-content { display: none;}
     .tab-content.active { display: block;}
-    /* Slot machine UI, themed to trade sim */
-    .slots-section {
-      text-align: center;
-    }
-    .slots-panel {
+    /* Casino UI */
+    .casino-section { text-align: center; }
+    .casino-panel {
       margin: 0 auto;
       max-width: 375px;
       background: var(--card);
@@ -258,17 +256,44 @@
       margin-top: 10px;
       animation: fadeIn 0.8s;
     }
-    .slots-title {
+    .casino-title {
       font-size: 1.2em;
       font-weight: 600;
       color: var(--accent);
       margin-bottom: 12px;
     }
-    .slots-balance {
+    .casino-balance {
       font-size: 1.13em;
       font-weight: 600;
       margin-bottom: 7px;
     }
+    .casino-games-bar {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin: 0 0 18px 0;
+    }
+    .casino-game-btn {
+      background: #161d26;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      padding: 7px 21px 6px 21px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0;
+      transition: color 0.18s, background 0.18s;
+      outline: none;
+    }
+    .casino-game-btn.active, .casino-game-btn:focus {
+      background: var(--card);
+      color: var(--accent);
+      z-index: 5;
+    }
+    .casino-game-content { display: none;}
+    .casino-game-content.active { display: block;}
+    /* Slot machine UI, themed to trade sim */
     .slots-row {
       display: flex;
       justify-content: center;
@@ -287,21 +312,18 @@
       transition: background 0.16s, border 0.16s;
       animation: none;
     }
-    .slot-symbol.spinning {
-      animation: slotSpinAnim 0.4s;
-    }
-    @keyframes slotSpinAnim {
-      0% { transform: rotateY(0deg);}
-      100% { transform: rotateY(360deg);}
-    }
-    .slots-controls {
+    .slot-symbol.spinning { animation: slotSpinAnim 0.4s; }
+    @keyframes slotSpinAnim { 0% { transform: rotateY(0deg);} 100% { transform: rotateY(360deg);} }
+    .slots-controls, .cf-controls, .dice-controls {
       margin: 0 0 12px 0;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 7px;
     }
-    .slots-controls input[type="number"] {
+    .slots-controls input[type="number"],
+    .cf-controls input[type="number"],
+    .dice-controls input[type="number"] {
       padding: 4px 8px;
       background: var(--slot-symbol-bg);
       border: 1.5px solid var(--border);
@@ -312,7 +334,7 @@
       text-align: center;
       margin-right: 0;
     }
-    .slots-controls button {
+    .slots-controls button, .cf-controls button, .dice-controls button {
       background: var(--slot-btn-bg);
       color: #fff;
       border: none;
@@ -326,22 +348,35 @@
       margin-right: 0;
       box-shadow: 0 2px 6px #0002;
     }
-    .slots-controls button:disabled {
-      opacity: 0.6; cursor: not-allowed;
-    }
-    .slots-controls button:hover:not(:disabled) {
-      background: var(--slot-btn-hover);
-    }
-    .slots-result {
+    .slots-controls button:disabled, .cf-controls button:disabled, .dice-controls button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .slots-controls button:hover:not(:disabled), .cf-controls button:hover:not(:disabled), .dice-controls button:hover:not(:disabled) { background: var(--slot-btn-hover);}
+    .slots-result, .cf-result, .dice-result {
       margin-top: 17px;
       font-size: 1.12em;
       min-height: 1.7em;
       font-weight: 500;
     }
-    .slots-result.jackpot { color: var(--slot-jackpot);}
-    .slots-result.win { color: var(--slot-win);}
-    .slots-result.lose { color: var(--slot-lose);}
-    .slots-howto-btn {
+    .slots-result.jackpot, .dice-result.jackpot { color: var(--slot-jackpot);}
+    .slots-result.win, .cf-result.win, .dice-result.win { color: var(--slot-win);}
+    .slots-result.lose, .cf-result.lose, .dice-result.lose { color: var(--slot-lose);}
+    /* Coin Flip UI */
+    .cf-coin {
+      font-size: 2.6em;
+      margin: 10px 0 7px 0;
+      display: block;
+      transition: transform 0.3s;
+    }
+    .cf-coin.flipping { transform: rotateY(360deg); }
+    /* Dice Roll UI */
+    .dice-die {
+      font-size: 2.6em;
+      margin: 10px 0 7px 0;
+      display: block;
+      transition: transform 0.24s;
+    }
+    .dice-die.rolling { transform: rotateZ(360deg); }
+    /* Casino HowTo Modal */
+    .casino-howto-btn {
       background: #232a35;
       color: var(--accent);
       border-radius: 7px;
@@ -355,16 +390,16 @@
       margin-right: 0;
       margin-left: 0;
     }
-    .slots-howto-btn:hover { background: #1c222c;}
-    .slots-modal-bg {
+    .casino-howto-btn:hover { background: #1c222c;}
+    .casino-modal-bg {
       display: none;
       position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
       background: #000a;
       align-items: center; justify-content: center;
       z-index: 200;
     }
-    .slots-modal-bg.active { display: flex;}
-    .slots-modal-card {
+    .casino-modal-bg.active { display: flex;}
+    .casino-modal-card {
       background: var(--card);
       color: var(--text);
       padding: 20px 15px 15px 15px;
@@ -375,13 +410,13 @@
       text-align: center;
       animation: fadeIn 0.3s;
     }
-    .slots-modal-card h3 {
+    .casino-modal-card h3 {
       color: var(--accent);
       margin-top: 0;
       font-size: 1.13em;
       margin-bottom: 8px;
     }
-    .slots-modal-card button {
+    .casino-modal-card button {
       background: var(--accent);
       color: #fff;
       font-weight: 600;
@@ -400,9 +435,10 @@
       #howToBtn { top: 8px; right: 8px; font-size: 1em;}
       #howToModal .modal-card { max-width: 97vw;}
       .mini-graph { width: 45px;}
-      .slots-panel { max-width: 97vw; }
-      .slots-modal-card { max-width: 95vw; }
+      .casino-panel { max-width: 97vw; }
+      .casino-modal-card { max-width: 95vw; }
       .tabs-bar { flex-direction: row; gap: 1px;}
+      .casino-games-bar { gap: 2px; }
     }
   </style>
 </head>
@@ -419,22 +455,22 @@
         <li>Specify how many shares to buy when you buy.</li>
         <li>See stats on your shares' original value, current value, and profit/loss.</li>
         <li>Occasionally, <b>market events</b> will affect certain stocks!</li>
-        <li>Play the <b>Slot Machine</b> tab for a fun risk to win more cash!</li>
-        <li>Money balance is shared between both games. Try to get rich!</li>
+        <li>Play the <b>Casino</b> tab for fun risk to win more cash!</li>
+        <li>Money balance is shared between all games. Try to get rich!</li>
         <li>Restart anytime with the Restart button.</li>
       </ul>
       <button onclick="hideHowTo()">OK, Got it!</button>
     </div>
   </div>
-  <!-- Slot HowTo Modal -->
-  <div class="slots-modal-bg" id="slotsHowToModal" onclick="closeSlotsHowTo(event)">
-    <div class="slots-modal-card" onclick="event.stopPropagation()">
-      <h3>How to Play - Slot Machine</h3>
-      <p>Enter your bet, then hit Spin!<br>Match 2 or 3 symbols to win cash.<br>
-        <b>💎 is the rarest jackpot!</b><br>
-        <span style="color:var(--bad)">Big wins are much harder here!</span>
-      </p>
-      <button onclick="closeSlotsHowTo()">Close</button>
+  <div class="casino-modal-bg" id="casinoHowToModal" onclick="closeCasinoHowTo(event)">
+    <div class="casino-modal-card" onclick="event.stopPropagation()">
+      <h3>How to Play - Casino</h3>
+      <ul style="text-align:left;line-height:1.5;font-size:1em;padding-left:14px;">
+        <li><b>Slot Machine:</b> Match 2 or 3 symbols to win! 💎 is the rarest jackpot. Big wins are hard!</li>
+        <li><b>Coin Flip:</b> Bet on Heads or Tails. Win double if you guess right, lose your bet otherwise!</li>
+        <li><b>Dice Roll:</b> Bet on a number 1-6. If the dice rolls your number, win 5x your bet!</li>
+      </ul>
+      <button onclick="closeCasinoHowTo()">Close</button>
     </div>
   </div>
   <div id="container">
@@ -442,9 +478,8 @@
     <h1>BarkWorks<br>Trade Simulator</h1>
     <div class="tabs-bar">
       <button class="tab-btn active" id="tabBtn-trade" onclick="showTab('trade')">Trade Sim</button>
-      <button class="tab-btn" id="tabBtn-slots" onclick="showTab('slots')">Slot Machine</button>
+      <button class="tab-btn" id="tabBtn-casino" onclick="showTab('casino')">Casino</button>
     </div>
-    <!-- Trade Sim Tab -->
     <div class="card tab-content active" id="tab-trade">
       <div class="user-row">
         <span class="balance">
@@ -477,23 +512,54 @@
       <div id="msg" style="margin-top:12px;text-align:center;font-weight:500;"></div>
       <div id="eventMsg" style="margin-top:9px;text-align:center;"></div>
     </div>
-    <!-- Slot Machine Tab -->
-    <div class="card tab-content" id="tab-slots">
-      <div class="slots-section">
-        <div class="slots-panel">
-          <div class="slots-title">BarkWorks Slot Machine</div>
-          <div class="slots-balance">Balance: $<span id="slots-balance">1000.00</span></div>
-          <div class="slots-row">
-            <div class="slot-symbol" id="slot1">🍒</div>
-            <div class="slot-symbol" id="slot2">🍋</div>
-            <div class="slot-symbol" id="slot3">🍊</div>
+    <div class="card tab-content" id="tab-casino">
+      <div class="casino-section">
+        <div class="casino-title">BarkWorks Casino</div>
+        <div class="casino-balance">Balance: $<span id="casino-balance">1000.00</span></div>
+        <div class="casino-games-bar">
+          <button class="casino-game-btn active" id="casinoGameBtn-slots" onclick="showCasinoGame('slots')">Slot Machine</button>
+          <button class="casino-game-btn" id="casinoGameBtn-coinflip" onclick="showCasinoGame('coinflip')">Coin Flip</button>
+          <button class="casino-game-btn" id="casinoGameBtn-dice" onclick="showCasinoGame('dice')">Dice Roll</button>
+        </div>
+        <div class="casino-panel">
+          <div class="casino-game-content active" id="casinoGame-slots">
+            <div class="slots-row">
+              <div class="slot-symbol" id="slot1">🍒</div>
+              <div class="slot-symbol" id="slot2">🍋</div>
+              <div class="slot-symbol" id="slot3">🍊</div>
+            </div>
+            <div class="slots-controls">
+              <input type="number" id="slots-bet" value="5" min="1" max="1000" autocomplete="off" />
+              <button onclick="spinSlots()" id="slots-spin-btn">🎰 Spin!</button>
+            </div>
+            <div class="slots-result" id="slots-result"></div>
           </div>
-          <div class="slots-controls">
-            <input type="number" id="slots-bet" value="5" min="1" max="1000" autocomplete="off" />
-            <button onclick="spinSlots()" id="slots-spin-btn">🎰 Spin!</button>
+          <div class="casino-game-content" id="casinoGame-coinflip">
+            <span class="cf-coin" id="cf-coin">🪙</span>
+            <div class="cf-controls">
+              <input type="number" id="cf-bet" value="5" min="1" max="1000" autocomplete="off" />
+              <button onclick="flipCoin('heads')" id="cf-btn-heads">Heads</button>
+              <button onclick="flipCoin('tails')" id="cf-btn-tails">Tails</button>
+            </div>
+            <div class="cf-result" id="cf-result"></div>
           </div>
-          <div class="slots-result" id="slots-result"></div>
-          <button class="slots-howto-btn" onclick="openSlotsHowTo()">How to Play</button>
+          <div class="casino-game-content" id="casinoGame-dice">
+            <span class="dice-die" id="dice-die">🎲</span>
+            <div class="dice-controls">
+              <input type="number" id="dice-bet" value="5" min="1" max="1000" autocomplete="off" />
+              <select id="dice-pick" style="padding:4px 7px;border-radius:7px;background:var(--slot-symbol-bg);color:var(--text);border:1.5px solid var(--border);font-size:1em;">
+                <option value="1">Pick 1</option>
+                <option value="2">Pick 2</option>
+                <option value="3">Pick 3</option>
+                <option value="4">Pick 4</option>
+                <option value="5">Pick 5</option>
+                <option value="6">Pick 6</option>
+              </select>
+              <button onclick="rollDice()" id="dice-roll-btn">Roll!</button>
+            </div>
+            <div class="dice-result" id="dice-result"></div>
+          </div>
+          <button class="casino-howto-btn" onclick="openCasinoHowTo()">How to Play</button>
         </div>
       </div>
     </div>
@@ -503,17 +569,44 @@
     </div>
   </div>
   <script>
-    // ======= Tab Handling =======
+    // ======= Local Storage Keys =======
+    const LS_KEY = "barkworks-tradesim-save-v2";
+    const LS_GAME_VERSION = 2;
+
+    function saveGame() {
+      try {
+        const saveData = {
+          version: LS_GAME_VERSION,
+          game: game,
+          sharedBalance: sharedBalance
+        };
+        localStorage.setItem(LS_KEY, JSON.stringify(saveData));
+      } catch(e) {}
+    }
+    function loadGame() {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return false;
+        const saveData = JSON.parse(raw);
+        if (!saveData || typeof saveData !== "object" || saveData.version !== LS_GAME_VERSION) return false;
+        if (!saveData.game || typeof saveData.sharedBalance !== "number") return false;
+        game = saveData.game;
+        sharedBalance = +saveData.sharedBalance;
+        return true;
+      } catch(e) { return false; }
+    }
+    function clearGameSave() {
+      try { localStorage.removeItem(LS_KEY); } catch(e) {}
+    }
+    function patchOldGameIfNeeded() { /* For future upgrades */ }
+
     function showTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
       document.getElementById('tabBtn-'+tab).classList.add('active');
       document.getElementById('tab-'+tab).classList.add('active');
-      // Update both balances for user!
       updateSharedBalances();
     }
-
-    // ======= How To Play Modal =======
     function showHowTo() {
       document.getElementById('howToModal').style.display = "flex";
     }
@@ -521,17 +614,20 @@
       if (!e || e.target === document.getElementById('howToModal'))
         document.getElementById('howToModal').style.display = "none";
     }
-
-    // ======= SLOTS HowTo Modal =======
-    function openSlotsHowTo() {
-      document.getElementById('slotsHowToModal').classList.add('active');
+    function openCasinoHowTo() {
+      document.getElementById('casinoHowToModal').classList.add('active');
     }
-    function closeSlotsHowTo(e) {
-      if (!e || e.target === document.getElementById('slotsHowToModal'))
-        document.getElementById('slotsHowToModal').classList.remove('active');
+    function closeCasinoHowTo(e) {
+      if (!e || e.target === document.getElementById('casinoHowToModal'))
+        document.getElementById('casinoHowToModal').classList.remove('active');
     }
-
-    // ======= Game State =======
+    function showCasinoGame(game) {
+      document.querySelectorAll('.casino-game-btn').forEach(btn=>btn.classList.remove('active'));
+      document.querySelectorAll('.casino-game-content').forEach(c=>c.classList.remove('active'));
+      document.getElementById('casinoGameBtn-'+game).classList.add('active');
+      document.getElementById('casinoGame-'+game).classList.add('active');
+      updateSharedBalances();
+    }
     const STOCK_SYMBOLS = [
       "ABC", "XYZ", "PQR", "FUN", "LOL",
       "CAT", "DOG", "SUN", "MOON", "STAR",
@@ -555,17 +651,14 @@
       ICE: "Icecap Insurance"
     };
     let game = {};
-    // Shared Money state
     let sharedBalance = 1000;
 
-    // Each time you buy, we record: {sym, shares, price, day}
-    // We'll store: game.purchaseHistory = [ {sym, shares, price, day} ]
     function randomStock() {
       return {
-        price: +(Math.random()*50+50).toFixed(2), // $50-$100
-        rating: +(Math.random()*0.7+0.15).toFixed(2), // 0.15-0.85
-        history: [], // price history
-        trend: 0 // -1 = down, 0 = unchanged, 1 = up (for last day)
+        price: +(Math.random()*50+50).toFixed(2),
+        rating: +(Math.random()*0.7+0.15).toFixed(2),
+        history: [],
+        trend: 0
       };
     }
     function initialGameState() {
@@ -577,28 +670,27 @@
       return {
         day: 1,
         stocks: stocks,
-        portfolio: {}, // symbol -> shares
+        portfolio: {},
         msg: "",
         eventMsg: "",
-        purchaseHistory: [] // for stats
+        purchaseHistory: []
       };
     }
     function resetGame() {
       game = initialGameState();
       sharedBalance = 1000;
+      saveGame();
       updateSharedBalances();
       render();
-      // Reset slot machine
       resetSlotsUI();
+      resetCoinFlipUI();
+      resetDiceUI();
     }
-
-    // ======= Market Event Mechanic =======
     function maybeMarketEvent() {
       if (Math.random() < 0.22) {
         const eventType = Math.random();
         let chosen, msg = "";
         if (eventType < 0.40) {
-          // Single stock surge/crash
           chosen = STOCK_SYMBOLS[Math.floor(Math.random()*STOCK_SYMBOLS.length)];
           let up = Math.random() < 0.5;
           let factor = up ? (1 + Math.random()*0.25 + 0.15) : (1 - Math.random()*0.18 - 0.08);
@@ -608,7 +700,6 @@
             ? `🚀 <b>${chosen}</b> (${stockNames[chosen]}) <b>skyrocketed</b> <span style="color:var(--good)">+$${(game.stocks[chosen].price-old).toFixed(2)}</span>!`
             : `💥 <b>${chosen}</b> (${stockNames[chosen]}) <b>crashed</b> <span style="color:var(--bad)">-$${(old-game.stocks[chosen].price).toFixed(2)}</span>!`;
         } else if (eventType < 0.72) {
-          // Sector event (animal stocks or fruit/element stocks)
           let animalSyms = ["CAT","DOG","OWL","APE","BEE"];
           let fruitElemSyms = ["SUN","MOON","STAR","GEM","ICE"];
           let group = Math.random()<0.5 ? animalSyms : fruitElemSyms;
@@ -622,7 +713,6 @@
             ? `🌟 <b>${group.map(s=>stockNames[s]).join(", ")}</b> <b>sector boomed!</b>`
             : `🌑 <b>${group.map(s=>stockNames[s]).join(", ")}</b> <b>sector slumped!</b>`;
         } else {
-          // "Market Fad": All stocks with rating >0.7 jump, <0.3 drop
           let winners = [], losers = [];
           for (let sym of STOCK_SYMBOLS) {
             if (game.stocks[sym].rating > 0.7) {
@@ -643,8 +733,6 @@
         game.eventMsg = "";
       }
     }
-
-    // ======= Stock Market Math =======
     function progressDay() {
       game.day++;
       game.msg = "";
@@ -653,7 +741,7 @@
         let s = game.stocks[sym];
         let prevPrice = s.price;
         const up = Math.random() < s.rating;
-        let baseMove = (Math.random()*0.04 + 0.01); // 1%-5%
+        let baseMove = (Math.random()*0.04 + 0.01);
         if (s.rating > 0.8 || s.rating < 0.2) baseMove *= 1.7;
         let priceChange = up ? (1+baseMove) : (1-baseMove);
         s.price = Math.max(1, +(s.price * priceChange).toFixed(2));
@@ -663,19 +751,16 @@
           s.price = Math.max(1, +(s.price*(1+jump)).toFixed(2));
           game.msg += `🌠 ${sym} had a wild swing!<br>`;
         }
-        // Save price history and update trend
         s.history.push(s.price);
         if (s.price > prevPrice) s.trend = 1;
         else if (s.price < prevPrice) s.trend = -1;
         else s.trend = 0;
-        // Recalculate rating
         s.rating += (Math.random()-0.5)*0.12 - (s.rating-0.5)*0.03;
         s.rating = +Math.max(0.05, Math.min(0.95, s.rating)).toFixed(2);
       }
+      saveGame();
       render();
     }
-
-    // ======= Buy/Sell =======
     function buyStock(sym, qtyId) {
       let qty = parseInt(document.getElementById(qtyId).value, 10);
       if(isNaN(qty) || qty < 1) qty = 1;
@@ -684,12 +769,12 @@
       if (sharedBalance >= totalCost) {
         sharedBalance = +(sharedBalance - totalCost).toFixed(2);
         game.portfolio[sym] = (game.portfolio[sym]||0) + qty;
-        // Record purchase for stats
         game.purchaseHistory.push({sym, shares: qty, price: s.price, day: game.day});
         game.msg = `Bought ${qty} share${qty>1?'s':''} of ${sym} for $${totalCost.toFixed(2)}.`;
       } else {
         game.msg = "Not enough balance!";
       }
+      saveGame();
       updateSharedBalances();
       render();
     }
@@ -703,18 +788,15 @@
       } else {
         game.msg = `You don't own any ${sym} shares!`;
       }
+      saveGame();
       updateSharedBalances();
       render();
     }
-
-    // ======= Stats =======
     function calcPortfolioStats() {
-      // Get all shares you own, and what you paid for them (original value), and current value
       let originalValue = 0;
       let currentValue = 0;
       let sharesOwned = {};
       for(let sym of STOCK_SYMBOLS) sharesOwned[sym] = game.portfolio[sym]||0;
-      // Go through purchase history, assign bought shares to current holdings
       let leftToAssign = {...sharesOwned};
       for(const purchase of game.purchaseHistory) {
         let assign = Math.min(purchase.shares, leftToAssign[purchase.sym]);
@@ -723,7 +805,6 @@
           leftToAssign[purchase.sym] -= assign;
         }
       }
-      // Current value
       for(const sym of STOCK_SYMBOLS) {
         if(sharesOwned[sym]>0) {
           currentValue += sharesOwned[sym] * game.stocks[sym].price;
@@ -736,10 +817,7 @@
         profit: +profit.toFixed(2)
       };
     }
-
-    // ======= Render =======
     function renderMiniGraph(history) {
-      // Renders a mini sparkline SVG
       if(history.length < 2) return "";
       let lastN = history.slice(-10);
       let min = Math.min(...lastN), max = Math.max(...lastN);
@@ -755,13 +833,10 @@
     function render() {
       document.getElementById('userBalance').textContent = sharedBalance.toFixed(2);
       document.getElementById('dayNum').textContent = game.day;
-      // Stats bar
       let stats = calcPortfolioStats();
       let profitClass = stats.profit > 0 ? "profit" : (stats.profit < 0 ? "loss" : "");
       document.getElementById('statBar').innerHTML =
         `Shares original value: <b>$${stats.originalValue}</b> &mdash; Current value: <b>$${stats.currentValue}</b> &mdash; <span class="${profitClass}">Total profit: $${stats.profit}</span>`;
-
-      // Render stocks table
       let stocksHtml = '';
       for (let sym of STOCK_SYMBOLS) {
         let s = game.stocks[sym];
@@ -784,7 +859,6 @@
         </tr>`;
       }
       document.getElementById('stocksBody').innerHTML = stocksHtml;
-      // Portfolio
       let owned = Object.entries(game.portfolio).filter(([k,v])=>v>0);
       let html = '';
       if (!owned.length) html += `<span class="muted">You don't own any stocks yet.</span>`;
@@ -801,20 +875,17 @@
       document.getElementById('userStocks').innerHTML = html;
       document.getElementById('msg').innerHTML = game.msg;
       document.getElementById('eventMsg').innerHTML = game.eventMsg || "";
-      // Also update slots balance
       updateSharedBalances();
     }
-
     window.buyStock = buyStock;
     window.sellStock = sellStock;
     window.progressDay = progressDay;
     window.resetGame = resetGame;
 
-    // ======= Slot Machine =======
+    // ======= Casino Games =======
+    // --- Slot Machine ---
     const slotSymbols = ['🍒', '🍋', '🍊', '🍇', '🍉', '⭐', '💎'];
-    // Lower the jackpot and win probabilities!
     function getRandomSlotSymbol() {
-      // 💎 is much rarer, ⭐ is rare, others more common
       const weights = [24, 19, 17, 13, 12, 6, 2];
       let total = weights.reduce((a, b) => a + b, 0);
       let r = Math.random() * total;
@@ -835,7 +906,6 @@
         resultText.className = 'slots-result lose';
         return;
       }
-      // Animate
       const slotEls = [
         document.getElementById('slot1'),
         document.getElementById('slot2'),
@@ -853,19 +923,13 @@
           slotEls[i].textContent = val;
           slotEls[i].classList.remove('spinning');
         });
-
-        let winnings = 0;
-        let msg = '';
-        let resultClass = 'slots-result lose';
-        // Much lower odds for big win, smaller multipliers for 2 match, and rare jackpot!
+        let winnings = 0, msg = '', resultClass = 'slots-result lose';
         if (values[0] === values[1] && values[1] === values[2]) {
-          // JACKPOT, but 💎 and ⭐ are much rarer, and multipliers are lower
-          let symbol = values[0];
-          let multiplier = 0;
+          let symbol = values[0], multiplier = 0;
           if (symbol === '💎') multiplier = 15;
           else if (symbol === '⭐') multiplier = 8;
           else if (symbol === '🍉') multiplier = 6;
-          else multiplier = 4; // cherries, lemon, etc
+          else multiplier = 4;
           winnings = bet * multiplier;
           msg = `JACKPOT! ${symbol}${symbol}${symbol} You won $${winnings}!`;
           resultClass = 'slots-result jackpot';
@@ -875,8 +939,6 @@
           (values[1] === values[2] && values[0] !== values[1]) ||
           (values[0] === values[2] && values[0] !== values[1])
         ) {
-          // Two symbols match (not a jackpot)
-          // Only pay 1.3x, no profit if bet is small
           winnings = Math.floor(bet * 1.3);
           msg = winnings > 0 ? `Matched 2! You won $${winnings}.` : 'Matched 2, but too small to win!';
           resultClass = winnings > 0 ? 'slots-result win' : 'slots-result lose';
@@ -885,39 +947,124 @@
           msg = 'Try again!';
         }
         sharedBalance += winnings;
+        saveGame();
         updateSharedBalances();
         resultText.textContent = msg;
         resultText.className = resultClass;
         spinBtn.disabled = false;
       }, 420);
     }
-
     function resetSlotsUI() {
-      document.getElementById('slots-balance').textContent = sharedBalance.toFixed(2);
+      document.getElementById('slots-bet').value = Math.min(5, sharedBalance);
       document.getElementById('slots-result').textContent = '';
       document.getElementById('slots-result').className = 'slots-result';
       document.getElementById('slot1').textContent = '🍒';
       document.getElementById('slot2').textContent = '🍋';
       document.getElementById('slot3').textContent = '🍊';
-      document.getElementById('slots-bet').value = Math.min(5, sharedBalance);
     }
-
-    // Update both balances in both UIs
+    // --- Coin Flip ---
+    function flipCoin(choice) {
+      const betInput = document.getElementById('cf-bet');
+      const bet = parseInt(betInput.value);
+      const resultText = document.getElementById('cf-result');
+      const coinEl = document.getElementById('cf-coin');
+      if (isNaN(bet) || bet > sharedBalance || bet <= 0) {
+        resultText.textContent = 'Invalid bet!';
+        resultText.className = 'cf-result lose';
+        return;
+      }
+      coinEl.textContent = '🪙';
+      coinEl.classList.add('flipping');
+      document.getElementById('cf-btn-heads').disabled = true;
+      document.getElementById('cf-btn-tails').disabled = true;
+      setTimeout(() => {
+        sharedBalance -= bet;
+        const result = Math.random() < 0.5 ? 'heads' : 'tails';
+        coinEl.textContent = result === 'heads' ? '🙂 H' : '🦅 T';
+        coinEl.classList.remove('flipping');
+        let winnings = 0, msg = '';
+        if (choice === result) {
+          winnings = bet * 2;
+          msg = `You won! ${result.toUpperCase()} -- You get $${winnings}.`;
+          resultText.className = 'cf-result win';
+        } else {
+          msg = `You lost! Was ${result.toUpperCase()}.`;
+          resultText.className = 'cf-result lose';
+        }
+        sharedBalance += winnings;
+        saveGame();
+        updateSharedBalances();
+        resultText.textContent = msg;
+        document.getElementById('cf-btn-heads').disabled = false;
+        document.getElementById('cf-btn-tails').disabled = false;
+      }, 500);
+    }
+    function resetCoinFlipUI() {
+      document.getElementById('cf-bet').value = Math.min(5, sharedBalance);
+      document.getElementById('cf-result').textContent = '';
+      document.getElementById('cf-result').className = 'cf-result';
+      document.getElementById('cf-coin').textContent = '🪙';
+    }
+    // --- Dice Roll ---
+    function rollDice() {
+      const betInput = document.getElementById('dice-bet');
+      const bet = parseInt(betInput.value);
+      const pick = parseInt(document.getElementById('dice-pick').value);
+      const resultText = document.getElementById('dice-result');
+      const dieEl = document.getElementById('dice-die');
+      if (isNaN(bet) || bet > sharedBalance || bet <= 0) {
+        resultText.textContent = 'Invalid bet!';
+        resultText.className = 'dice-result lose';
+        return;
+      }
+      dieEl.textContent = '🎲';
+      dieEl.classList.add('rolling');
+      document.getElementById('dice-roll-btn').disabled = true;
+      setTimeout(() => {
+        sharedBalance -= bet;
+        const roll = Math.floor(Math.random() * 6) + 1;
+        let dieFaces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+        dieEl.textContent = dieFaces[roll-1];
+        dieEl.classList.remove('rolling');
+        let winnings = 0, msg = '';
+        if (pick === roll) {
+          winnings = bet * 5;
+          msg = `You WON! Rolled ${roll} - You get $${winnings}.`;
+          resultText.className = 'dice-result jackpot';
+        } else {
+          msg = `You lost! Rolled ${roll}.`;
+          resultText.className = 'dice-result lose';
+        }
+        sharedBalance += winnings;
+        saveGame();
+        updateSharedBalances();
+        resultText.textContent = msg;
+        document.getElementById('dice-roll-btn').disabled = false;
+      }, 550);
+    }
+    function resetDiceUI() {
+      document.getElementById('dice-bet').value = Math.min(5, sharedBalance);
+      document.getElementById('dice-result').textContent = '';
+      document.getElementById('dice-result').className = 'dice-result';
+      document.getElementById('dice-die').textContent = '🎲';
+      document.getElementById('dice-pick').value = "1";
+    }
     function updateSharedBalances() {
       document.getElementById('userBalance').textContent = sharedBalance.toFixed(2);
-      document.getElementById('slots-balance').textContent = sharedBalance.toFixed(2);
-      // Disable slot bet if no money
+      document.getElementById('casino-balance').textContent = sharedBalance.toFixed(2);
       let spinBtn = document.getElementById('slots-spin-btn');
       let betInput = document.getElementById('slots-bet');
-      if (sharedBalance < 1) {
-        spinBtn.disabled = true;
-        betInput.disabled = true;
-      } else {
-        spinBtn.disabled = false;
-        betInput.disabled = false;
-        if (+betInput.value > sharedBalance) betInput.value = Math.max(1, Math.floor(sharedBalance));
-      }
-      // Also disable Buy buttons in trade sim
+      if (sharedBalance < 1) { spinBtn.disabled = true; betInput.disabled = true; }
+      else { spinBtn.disabled = false; betInput.disabled = false; if (+betInput.value > sharedBalance) betInput.value = Math.max(1, Math.floor(sharedBalance)); }
+      document.getElementById('cf-btn-heads').disabled = sharedBalance < 1;
+      document.getElementById('cf-btn-tails').disabled = sharedBalance < 1;
+      let cfBet = document.getElementById('cf-bet');
+      if (sharedBalance < 1) cfBet.disabled = true;
+      else { cfBet.disabled = false; if (+cfBet.value > sharedBalance) cfBet.value = Math.max(1, Math.floor(sharedBalance)); }
+      let diceRollBtn = document.getElementById('dice-roll-btn');
+      let diceBet = document.getElementById('dice-bet');
+      if (sharedBalance < 1) { diceRollBtn.disabled = true; diceBet.disabled = true; }
+      else { diceRollBtn.disabled = false; diceBet.disabled = false; if (+diceBet.value > sharedBalance) diceBet.value = Math.max(1, Math.floor(sharedBalance)); }
       for(let sym of STOCK_SYMBOLS) {
         let s = game.stocks?.[sym];
         if (s) {
@@ -930,19 +1077,31 @@
         }
       }
     }
-
-    // ======= Start Game! =======
-    resetGame();
-
-    // Tabs: update balances on switch
+    // ======= On load: try to restore =======
+    if (!loadGame()) {
+      resetGame();
+    } else {
+      patchOldGameIfNeeded();
+      updateSharedBalances();
+      render();
+      resetSlotsUI();
+      resetCoinFlipUI();
+      resetDiceUI();
+    }
     document.querySelectorAll('.tab-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        updateSharedBalances();
-      });
+      btn.addEventListener('click', ()=>{ updateSharedBalances(); });
     });
-
-    // Ensure slots bet is never above shared balance
     document.getElementById('slots-bet').addEventListener('input', function() {
+      let v = +this.value;
+      if (v > sharedBalance) this.value = Math.floor(sharedBalance);
+      if (v < 1) this.value = 1;
+    });
+    document.getElementById('cf-bet').addEventListener('input', function() {
+      let v = +this.value;
+      if (v > sharedBalance) this.value = Math.floor(sharedBalance);
+      if (v < 1) this.value = 1;
+    });
+    document.getElementById('dice-bet').addEventListener('input', function() {
       let v = +this.value;
       if (v > sharedBalance) this.value = Math.floor(sharedBalance);
       if (v < 1) this.value = 1;
