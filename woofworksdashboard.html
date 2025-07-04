@@ -15,13 +15,15 @@
       --msg-1: #2e5f47;
       --msg-2: #3a805c;
       --msg-3: #4ebf88;
+      --error: #ff5a5a;
+      --success: #8fff8a;
     }
     * {
       box-sizing: border-box;
     }
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', 'Arial', sans-serif;
       background-color: var(--bg);
       color: var(--text);
       display: flex;
@@ -34,6 +36,11 @@
       font-size: 2rem;
       color: var(--accent);
       text-shadow: 0 0 10px var(--accent);
+      letter-spacing: 2px;
+      border-bottom: 2px solid var(--accent-soft);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
     main {
       flex: 1;
@@ -46,16 +53,18 @@
       background: var(--panel);
       border-radius: 12px;
       padding: 1.5rem;
-      margin: 1rem;
+      margin: 1rem 0;
       width: 95%;
       max-width: 800px;
-      box-shadow: 0 0 15px var(--accent-soft);
+      box-shadow: 0 0 15px 2px var(--accent-soft);
+      transition: box-shadow 0.15s;
     }
     h2 {
       margin-top: 0;
       color: var(--accent);
+      letter-spacing: 1px;
     }
-    input, textarea, button {
+    input, textarea, button, select {
       background: #0f1813;
       border: 1px solid var(--accent);
       color: var(--text);
@@ -64,44 +73,130 @@
       margin: 0.4rem 0;
       font-size: 1rem;
       width: 100%;
+      transition: border 0.2s;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent-soft);
+      outline: none;
     }
     button {
       background: var(--accent);
       color: #000;
       font-weight: bold;
       cursor: pointer;
+      width: auto;
+      padding: 0.7rem 2rem;
+      margin-top: 0.7rem;
+      border: none;
+      transition: background 0.15s;
+    }
+    button:hover, button:focus {
+      background: var(--accent-soft);
+    }
+    #chat-messages {
+      background: #17211a;
+      max-height: 260px;
+      min-height: 100px;
+      overflow-y: auto;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      box-shadow: 0 0 4px #222 inset;
     }
     #chat-messages .message {
-      padding: 0.5rem;
+      padding: 0.5rem 1rem;
       border-radius: 10px;
       margin: 0.3rem 0;
       max-width: 80%;
-      word-wrap: break-word;
+      word-break: break-word;
+      box-shadow: 0 1px 3px #0002;
     }
     .user-0 { background: var(--msg-0); }
     .user-1 { background: var(--msg-1); }
     .user-2 { background: var(--msg-2); }
     .user-3 { background: var(--msg-3); }
     #admin-tab { display: none; }
+    #login-error {
+      color: var(--error);
+      min-height: 1.4em;
+    }
+    #login-success {
+      color: var(--success);
+      min-height: 1.4em;
+    }
+    #tasks-list {
+      list-style: disc inside;
+      padding: 0 1em;
+    }
+    @media (max-width: 650px) {
+      section { padding: 1rem; }
+      header { font-size: 1.3rem; }
+    }
+    .flex-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .admin-user-block {
+      margin-bottom: 1.2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #2e5f47;
+    }
+    .admin-user-block label {
+      display: block;
+      font-size: 0.98em;
+      margin-bottom: 0.4em;
+    }
+    .admin-user-block input {
+      width: calc(100% - 10px);
+    }
+    .admin-save-btn {
+      margin-top: 0.5em;
+      background: var(--accent-soft);
+      color: #000;
+      font-weight: bold;
+    }
+    .admin-user-name {
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .admin-role {
+      font-size: 0.95em;
+      padding: 0.2em 0.5em;
+      border-radius: 6px;
+      background: #232c24;
+      margin-left: 0.4em;
+      color: var(--accent-soft);
+    }
+    .chat-my-message {
+      align-self: flex-end;
+      font-style: italic;
+      background: var(--msg-3) !important; /* Your message always green */
+    }
   </style>
 </head>
 <body>
-  <header>🐾 WoofWorks Dashboard</header>
+  <header>
+    <span>🐾 WoofWorks Dashboard</span>
+  </header>
   <main>
     <section id="login">
       <h2>Login</h2>
-      <input id="email" placeholder="Email">
-      <input id="password" type="password" placeholder="Password">
+      <input id="email" type="email" placeholder="Email" autocomplete="username">
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password">
       <button id="login-btn">Login</button>
-      <p id="login-error" style="color:#ff8080;"></p>
+      <div id="login-error"></div>
+      <div id="login-success"></div>
     </section>
 
     <section id="dashboard" style="display:none;">
       <h2>Your Info</h2>
-      <p><strong>WoofCoin:</strong> <span id="woofcoin"></span></p>
-      <p><strong>Rank:</strong> <span id="rank"></span></p>
-      <p><strong>Role:</strong> <span id="role"></span></p>
-      <p><strong>Admin:</strong> <span id="admin"></span></p>
+      <div class="flex-row">
+        <div><strong>WoofCoin:</strong> <span id="woofcoin"></span></div>
+        <div><strong>Rank:</strong> <span id="rank"></span></div>
+        <div><strong>Role:</strong> <span id="role"></span></div>
+      </div>
+      <div><strong>Admin:</strong> <span id="admin"></span></div>
       <button id="logout-btn">Logout</button>
     </section>
 
@@ -126,32 +221,34 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-    import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, onSnapshot, serverTimestamp, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
+    // --- Firebase Config ---
     const firebaseConfig = {
       apiKey: "AIzaSyDsFimFgQKXLhpflX4PTfWcpKwfI5qM8I4",
       authDomain: "woofworks-dashboard.firebaseapp.com",
       projectId: "woofworks-dashboard",
-      storageBucket: "woofworks-dashboard.firebasestorage.app",
+      storageBucket: "woofworks-dashboard.appspot.com",
       messagingSenderId: "150822066679",
       appId: "1:150822066679:web:4b5927a5389d90daa036f2"
     };
 
+    // --- App Init ---
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // --- Elements ---
     const emailInput = document.getElementById('email');
     const passInput = document.getElementById('password');
     const loginBtn = document.getElementById('login-btn');
     const loginError = document.getElementById('login-error');
-
+    const loginSuccess = document.getElementById('login-success');
     const loginSection = document.getElementById('login');
     const dashSection = document.getElementById('dashboard');
     const tasksSection = document.getElementById('tasks');
     const chatSection = document.getElementById('chat');
     const adminTab = document.getElementById('admin-tab');
-
     const logoutBtn = document.getElementById('logout-btn');
     const woofcoin = document.getElementById('woofcoin');
     const rank = document.getElementById('rank');
@@ -163,13 +260,24 @@
     const chatMessages = document.getElementById('chat-messages');
     const adminUsers = document.getElementById('admin-users');
 
+    let currentUser, currentUserData;
+
+    // --- Login ---
     loginBtn.onclick = async () => {
+      loginError.textContent = '';
+      loginSuccess.textContent = '';
+      if (!emailInput.value || !passInput.value) {
+        loginError.textContent = "Please enter both email and password!";
+        return;
+      }
       try {
         const userCred = await signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
+        loginSuccess.textContent = "Login Successful!";
         const uid = userCred.user.uid;
         const userRef = doc(db, 'users', uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) {
+          // Initial user document
           await setDoc(userRef, {
             woofcoin: 100,
             rank: "Intern",
@@ -179,88 +287,180 @@
           });
         }
       } catch (e) {
-        loginError.textContent = e.message;
+        loginError.textContent = e.message.replace('Firebase: ', '');
       }
     };
 
-    logoutBtn.onclick = () => signOut(auth);
+    // --- Logout ---
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+    };
 
+    // --- Auth State Change ---
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         loginSection.style.display = 'block';
         dashSection.style.display = 'none';
         tasksSection.style.display = 'none';
         chatSection.style.display = 'none';
+        adminTab.style.display = 'none';
+        chatMessages.innerHTML = '';
+        tasksList.innerHTML = '';
+        chatInput.value = '';
+        loginSuccess.textContent = '';
+        currentUser = null;
+        currentUserData = null;
         return;
       }
-
+      currentUser = user;
       loginSection.style.display = 'none';
       dashSection.style.display = 'block';
       tasksSection.style.display = 'block';
       chatSection.style.display = 'block';
 
+      // --- User Document ---
       const uid = user.uid;
       const userRef = doc(db, 'users', uid);
       const snap = await getDoc(userRef);
       const data = snap.data();
-
-      woofcoin.textContent = data.woofcoin;
-      rank.textContent = data.rank;
-      role.textContent = data.role;
+      currentUserData = data;
+      woofcoin.textContent = data.woofcoin ?? "0";
+      rank.textContent = data.rank ?? "-";
+      role.textContent = data.role ?? "-";
       isAdmin.textContent = data.isAdmin ? "✅ Yes" : "❌ No";
 
+      // --- Admin Panel ---
       if (data.isAdmin) {
         adminTab.style.display = 'block';
-        const usersSnap = await getDocs(collection(db, 'users'));
-        adminUsers.innerHTML = '';
-        usersSnap.forEach(userDoc => {
-          const u = userDoc.data();
-          adminUsers.innerHTML += `
-            <div style="margin-bottom:1rem;">
-              <strong>${u.name}</strong><br>
-              <label>WoofCoin: <input value="${u.woofcoin}" data-uid="${userDoc.id}" data-field="woofcoin"></label><br>
-              <label>Rank: <input value="${u.rank}" data-uid="${userDoc.id}" data-field="rank"></label><br>
-              <label>Role: <input value="${u.role}" data-uid="${userDoc.id}" data-field="role"></label>
-              <hr>
-            </div>`;
-        });
-
-        adminUsers.onchange = async (e) => {
-          const field = e.target.dataset.field;
-          const uid = e.target.dataset.uid;
-          const val = field === "woofcoin" ? parseInt(e.target.value) : e.target.value;
-          await setDoc(doc(db, "users", uid), { [field]: val }, { merge: true });
-        }
+        refreshAdminUsers();
+      } else {
+        adminTab.style.display = 'none';
       }
 
+      // --- Tasks List ---
       onSnapshot(collection(db, 'tasks'), snap => {
         tasksList.innerHTML = '';
-        snap.forEach(doc => {
-          tasksList.innerHTML += `<li>${doc.data().title}</li>`;
-        });
+        if (snap.empty) {
+          tasksList.innerHTML = "<li>No tasks posted.</li>";
+        } else {
+          snap.forEach(doc => {
+            tasksList.innerHTML += `<li>${escapeHTML(doc.data().title)}</li>`;
+          });
+        }
       });
 
+      // --- Chat Messages ---
       onSnapshot(collection(db, 'messages'), snap => {
         chatMessages.innerHTML = '';
-        snap.forEach(doc => {
-          const m = doc.data();
-          const hash = [...m.uid].reduce((a, b) => a + b.charCodeAt(0), 0) % 4;
-          chatMessages.innerHTML += `<div class="message user-${hash}"><strong>${m.name}</strong>: ${m.text}</div>`;
+        let arr = [];
+        snap.forEach(doc => arr.push({id: doc.id, ...doc.data()}));
+        arr.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+        arr.forEach(m => {
+          const hash = m.uid ? ([...m.uid].reduce((a, b) => a + b.charCodeAt(0), 0) % 4) : 0;
+          const isMine = m.uid === currentUser.uid;
+          chatMessages.innerHTML += `
+            <div class="message user-${hash}${isMine ? ' chat-my-message' : ''}">
+              <strong>${escapeHTML(m.name)}</strong>: ${escapeHTML(m.text)}
+              <div style="font-size:0.85em;color:#aaa;margin-top:0.2em;">${m.timestamp?.seconds ? timeAgo(new Date(m.timestamp.seconds * 1000)) : ''}</div>
+            </div>`;
         });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       });
+    });
 
-      sendBtn.onclick = async () => {
-        const msg = chatInput.value.trim();
-        if (!msg) return;
-        await addDoc(collection(db, 'messages'), {
-          uid: user.uid,
-          name: data.name,
-          text: msg,
-          timestamp: serverTimestamp()
-        });
-        chatInput.value = "";
+    // --- Send Chat Message ---
+    sendBtn.onclick = async () => {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+      if (!currentUser || !currentUserData) return;
+      await addDoc(collection(db, 'messages'), {
+        uid: currentUser.uid,
+        name: currentUserData.name,
+        text: msg,
+        timestamp: serverTimestamp()
+      });
+      chatInput.value = "";
+    };
+
+    // --- Admin Panel Functions ---
+    async function refreshAdminUsers() {
+      adminUsers.innerHTML = 'Loading...';
+      const usersSnap = await getDocs(collection(db, 'users'));
+      let html = '';
+      usersSnap.forEach(userDoc => {
+        const u = userDoc.data();
+        const uid = userDoc.id;
+        html += `
+        <div class="admin-user-block" data-uid="${uid}">
+          <span class="admin-user-name">${escapeHTML(u.name)}</span>
+          <span class="admin-role">${u.role ?? ""}</span><br>
+          <label>WoofCoin: <input type="number" value="${u.woofcoin ?? 0}" data-field="woofcoin"></label>
+          <label>Rank: <input type="text" value="${escapeHTML(u.rank ?? "")}" data-field="rank"></label>
+          <label>Role: <input type="text" value="${escapeHTML(u.role ?? "")}" data-field="role"></label>
+          <label>Admin: 
+            <select data-field="isAdmin">
+              <option value="false"${u.isAdmin ? '' : ' selected'}>No</option>
+              <option value="true"${u.isAdmin ? ' selected' : ''}>Yes</option>
+            </select>
+          </label>
+          <button class="admin-save-btn">Save</button>
+        </div>
+        `;
+      });
+      adminUsers.innerHTML = html;
+
+      // Add save handlers
+      [...adminUsers.querySelectorAll('.admin-user-block')].forEach(block => {
+        const uid = block.dataset.uid;
+        block.querySelector('.admin-save-btn').onclick = async () => {
+          const woofcoin = parseInt(block.querySelector('input[data-field="woofcoin"]').value) || 0;
+          const rank = block.querySelector('input[data-field="rank"]').value;
+          const role = block.querySelector('input[data-field="role"]').value;
+          const isAdmin = block.querySelector('select[data-field="isAdmin"]').value === "true";
+          await updateDoc(doc(db, "users", uid), { woofcoin, rank, role, isAdmin });
+          block.style.boxShadow = '0 0 8px 2px var(--success)';
+          setTimeout(() => block.style.boxShadow = '', 800);
+        };
+      });
+    }
+
+    // --- Utils ---
+    function escapeHTML(str) {
+      return str?.replace(/[&<>"']/g, s => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[s])) ?? '';
+    }
+    function timeAgo(date) {
+      const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (seconds < 60) return "just now";
+      const mins = Math.floor(seconds / 60);
+      if (mins < 60) return mins + " min" + (mins > 1 ? "s" : "") + " ago";
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return hrs + " hour" + (hrs > 1 ? "s" : "") + " ago";
+      const days = Math.floor(hrs / 24);
+      return days + " day" + (days > 1 ? "s" : "") + " ago";
+    }
+
+    // --- Keyboard Shortcuts ---
+    chatInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendBtn.click();
       }
     });
+
+    // --- Autofocus on input fields ---
+    loginSection.addEventListener('keydown', e => {
+      if (e.key === 'Enter') loginBtn.click();
+    });
+
+    // Autofocus email on page load
+    setTimeout(() => emailInput.focus(), 200);
+
   </script>
 </body>
 </html>
