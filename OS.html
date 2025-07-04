@@ -15,70 +15,73 @@
       --text-soft: #b4ceb6;
       --taskbar: #18281e;
       --shadow: 0 4px 28px 0 #0008;
+      --window-min-width: 240px;
+      --window-min-height: 120px;
     }
     html, body {
       height: 100%;
     }
     body {
       margin: 0;
-      height: 100%;
       background: var(--background);
       color: var(--text);
       font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
       font-size: 17px;
-      line-height: 1.5;
       min-height: 100vh;
       box-sizing: border-box;
     }
     #desktop {
       min-height: 100vh;
-      padding-bottom: 56px;
       background: radial-gradient(ellipse at top left, #172319 0%, #141b16 100%);
-      transition: background 0.3s;
+      padding-bottom: 56px;
+      position: relative;
+      overflow: hidden;
     }
-
-    /* Window styles */
     .window {
-      width: 420px;
-      max-width: 96vw;
-      background: var(--window);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
       position: absolute;
-      top: 80px;
-      left: 80px;
-      z-index: 3;
-      display: none;
+      top: 60px;
+      left: 60px;
+      width: 360px;
+      min-width: var(--window-min-width);
+      min-height: var(--window-min-height);
+      max-width: calc(100vw - 24px);
+      max-height: calc(100vh - 90px);
+      background: var(--window);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
       border: 1.5px solid var(--accent-dark);
       overflow: hidden;
-      transition: box-shadow 0.2s, border 0.2s;
-      animation: popIn 0.18s cubic-bezier(.42,0,.58,1.0);
+      display: none;
+      z-index: 3;
+      user-select: none;
+      resize: none;
     }
-    @keyframes popIn {
-      from { transform: scale(.96); opacity: .6; }
-      to   { transform: scale(1);   opacity: 1; }
+    .window.active {
+      box-shadow: 0 0 0 3px var(--accent-dark), var(--shadow);
+      border-color: var(--accent);
     }
     .window-title {
       background: var(--window-title);
       color: var(--accent);
       font-weight: 600;
-      padding: 16px 18px;
+      padding: 13px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 1.1em;
+      font-size: 1.09em;
       user-select: none;
       letter-spacing: .02em;
       border-bottom: 1px solid #1e2d20;
+      cursor: move;
     }
     .window-close {
       background: transparent;
       color: var(--text);
       border: none;
       border-radius: 50%;
-      font-size: 1.5em;
-      width: 36px;
-      height: 36px;
+      font-size: 1.3em;
+      width: 32px;
+      height: 32px;
       cursor: pointer;
       transition: background 0.17s, color 0.13s;
       display: flex;
@@ -90,81 +93,51 @@
       color: #fff;
     }
     .window-content {
-      padding: 18px 16px 16px 16px;
+      padding: 14px 12px 12px 12px;
       background: var(--window);
-      min-height: 180px;
-      border-bottom-left-radius: 18px;
-      border-bottom-right-radius: 18px;
-    }
-
-    /* BarkBrowse styles */
-    #barkbrowse-search-form {
-      display: flex;
-      margin-bottom: 10px;
-      gap: 0;
-    }
-    #barkbrowse-search {
-      flex: 1;
-      padding: 11px 12px;
-      border: none;
-      border-radius: 8px 0 0 8px;
-      background: #18261d;
-      color: var(--text);
+      height: calc(100% - 50px);
+      overflow: auto;
       font-size: 1em;
-      outline: none;
-      transition: box-shadow 0.2s;
-      box-shadow: 0 0 0 1.5px var(--accent-dark) inset;
-    }
-    #barkbrowse-search:focus {
-      box-shadow: 0 0 0 2.5px var(--accent) inset;
-      background: #213d2e;
-    }
-    #barkbrowse-search-form button {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 0 8px 8px 0;
-      padding: 0 18px;
-      font-size: 1.2em;
-      cursor: pointer;
-      transition: background 0.2s;
-      font-weight: 600;
-    }
-    #barkbrowse-search-form button:hover,
-    #barkbrowse-search-form button:focus {
-      background: var(--accent-dark);
-    }
-    #barkbrowse-results {
-      margin-top: 8px;
-      margin-bottom: 10px;
-    }
-    .barkbrowse-result {
-      background: #1e2b22;
-      margin-bottom: 7px;
-      padding: 11px 13px;
-      border-radius: 8px;
-      border: 1.5px solid #213527;
-      cursor: pointer;
       color: var(--text);
-      font-weight: 500;
-      transition: background 0.12s, border 0.14s, color 0.11s;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      user-select: text;
     }
-    .barkbrowse-result:hover {
-      background: var(--accent-dark);
-      color: #fff;
-      border-color: var(--accent);
+    /* Resize handles */
+    .resize-handle {
+      position: absolute;
+      background: transparent;
+      z-index: 20;
     }
-    #barkbrowse-viewer {
-      margin-top: 10px;
-      background: #151d17e0;
-      border-radius: 10px;
-      padding: 13px 13px 9px 13px;
-      min-height: 54px;
-      font-size: 1em;
-      color: var(--text-soft);
-      box-shadow: 0 0 7px #193c2180;
-      word-break: break-word;
+    .resize-handle.e,
+    .resize-handle.w {
+      width: 10px;
+      top: 0;
+      bottom: 0;
+      cursor: ew-resize;
     }
+    .resize-handle.e { right: 0; }
+    .resize-handle.w { left: 0; }
+    .resize-handle.n,
+    .resize-handle.s {
+      height: 10px;
+      left: 0;
+      right: 0;
+      cursor: ns-resize;
+    }
+    .resize-handle.n { top: 0; }
+    .resize-handle.s { bottom: 0; }
+    .resize-handle.nw,
+    .resize-handle.ne,
+    .resize-handle.sw,
+    .resize-handle.se {
+      width: 16px; height: 16px;
+      cursor: nwse-resize;
+    }
+    .resize-handle.nw { left: 0; top: 0; }
+    .resize-handle.ne { right: 0; top: 0; }
+    .resize-handle.sw { left: 0; bottom: 0; }
+    .resize-handle.se { right: 0; bottom: 0; }
 
     /* Taskbar styles */
     #taskbar {
@@ -178,17 +151,17 @@
       display: flex;
       align-items: center;
       box-shadow: 0 -2px 16px #000b;
-      padding: 0 12px;
+      padding: 0 10px;
       z-index: 10;
-      gap: 10px;
+      gap: 8px;
     }
     #taskbar button {
       background: var(--accent-dark);
       color: #fff;
       border: none;
-      border-radius: 10px;
+      border-radius: 9px;
       padding: 10px 24px;
-      font-size: 1.05em;
+      font-size: 1.04em;
       font-weight: 600;
       cursor: pointer;
       box-shadow: 0 1.5px 8px #1118;
@@ -206,179 +179,511 @@
     #taskbar-time {
       margin-left: auto;
       color: var(--accent);
-      font-size: 18px;
+      font-size: 17px;
       font-family: 'Consolas', monospace;
       letter-spacing: 0.5px;
       text-shadow: 0 0 6px #1db95415;
     }
-
     /* Scrollbar styles */
     ::-webkit-scrollbar { width: 8px; background: #191f1a;}
     ::-webkit-scrollbar-thumb { background: #1db95433; border-radius: 8px;}
-
+    /* Notepad app */
+    .notepad-toolbar {
+      display: flex;
+      margin-bottom: 7px;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .notepad-toolbar button {
+      background: var(--accent-dark);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 0.98em;
+      cursor: pointer;
+      transition: background 0.13s;
+    }
+    .notepad-toolbar button:hover { background: var(--accent);}
+    .notepad-toolbar label {
+      color: var(--text-soft);
+      font-size: 0.95em;
+      margin-right: 5px;
+    }
+    .notepad-area {
+      width: 100%;
+      min-height: 120px;
+      height: 110px;
+      resize: vertical;
+      font-size: 1em;
+      padding: 8px 9px;
+      border-radius: 8px;
+      border: 1px solid #233928;
+      outline: none;
+      background: #19241e;
+      color: var(--text);
+      margin-bottom: 10px;
+      font-family: 'Fira Mono', 'Consolas', monospace;
+      box-sizing: border-box;
+    }
+    .notepad-preview {
+      background: #172019;
+      color: var(--text-soft);
+      padding: 11px 13px;
+      border-radius: 7px;
+      min-height: 40px;
+      font-size: 1em;
+      overflow-x: auto;
+      border: 1px solid #213527;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    }
+    /* Settings app */
+    .settings-section {
+      margin-bottom: 12px;
+    }
+    .settings-label {
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 3px;
+      display: block;
+    }
+    .settings-slider {
+      width: 120px;
+      vertical-align: middle;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 7px;
+    }
+    /* Clock app */
+    .clock-digital {
+      font-family: 'Consolas', monospace;
+      color: var(--accent);
+      font-size: 2.1em;
+      text-align: center;
+      margin: 15px 0 8px 0;
+      letter-spacing: 0.09em;
+      text-shadow: 0 0 12px #1db95422;
+    }
+    .clock-date {
+      text-align: center;
+      color: var(--text-soft);
+      font-size: 1.1em;
+      letter-spacing: 0.07em;
+      margin-bottom: 10px;
+    }
+    .clock-analog {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .clock-face {
+      width: 90px;
+      height: 90px;
+      background: #172319;
+      border-radius: 50%;
+      border: 3px solid var(--accent-dark);
+      box-shadow: 0 0 14px #1db95411;
+      position: relative;
+      margin: 0 auto 14px auto;
+    }
+    .clock-hand {
+      position: absolute;
+      left: 50%; top: 50%;
+      background: var(--accent);
+      border-radius: 4px;
+      transform-origin: bottom;
+      transform: translate(-50%, -100%) rotate(0deg);
+    }
+    .hand-hour { width: 6px; height: 28px; background: var(--accent-dark);}
+    .hand-minute { width: 4px; height: 36px;}
+    .hand-second { width: 2.3px; height: 40px; background: #46ff77;}
+    .clock-center-dot {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      box-shadow: 0 0 6px #1db95488;
+    }
     /* Mobile styles */
     @media (max-width: 650px) {
       .window {
-        position: fixed !important;
         left: 0 !important; top: 0 !important;
         right: 0; bottom: 56px;
-        width: 100vw;
-        height: auto;
-        min-height: 63vh;
+        width: 100vw !important;
+        height: auto !important;
+        min-height: 45vh;
         max-width: 100vw;
         max-height: none;
         margin: 0;
-        border-radius: 0 0 18px 18px;
-        box-shadow: 0 10px 36px #000c;
-        animation: popInMobile 0.14s cubic-bezier(.42,0,.58,1.0);
+        border-radius: 0 0 14px 14px;
       }
-      @keyframes popInMobile {
-        from { transform: translateY(18px) scale(.97); opacity: 0.5; }
-        to   { transform: translateY(0)    scale(1);   opacity: 1; }
-      }
-      .window-content { min-height: 45vh; }
-      .window-title { padding: 15px 12px 14px 15px; font-size: 1.12em;}
+      .window-content { min-height: 35vh; }
+      .window-title { padding: 13px 12px 13px 15px; font-size: 1.05em;}
+      .resize-handle { display: none !important; }
     }
     @media (max-width: 430px) {
-      .window { border-radius: 0 0 12px 12px; }
-      .window-title, .window-content { padding-left: 7px; padding-right: 7px;}
-      #barkbrowse-search { font-size: 0.97em; }
-      #taskbar { height: 52px; padding: 0 5px; }
-      #taskbar button { padding: 8px 10px; font-size: .98em;}
-      #taskbar-time { font-size: 14px;}
+      .window { border-radius: 0 0 11px 11px; }
+      .window-title, .window-content { padding-left: 5px; padding-right: 5px;}
+      #taskbar { height: 49px; padding: 0 3px; }
+      #taskbar button { padding: 8px 8px; font-size: .97em;}
+      #taskbar-time { font-size: 13px;}
     }
   </style>
 </head>
 <body>
-  <div id="desktop">
-    <!-- BarkBrowse Window -->
-    <div class="window" id="barkbrowse-window">
-      <div class="window-title" id="barkbrowse-titlebar">
-        <span style="display:flex;align-items:center;gap:9px;">🐾<span>BarkBrowse</span></span>
-        <button class="window-close" aria-label="Close" onclick="closeWindow('barkbrowse-window')">&times;</button>
+<div id="desktop">
+  <!-- Settings Window -->
+  <div class="window" id="settings-window" style="left:60px;top:70px;width:340px;">
+    <div class="window-title" id="settings-titlebar">
+      <span>⚙️ Settings</span>
+      <button class="window-close" aria-label="Close" onclick="closeWindow('settings-window')">&times;</button>
+    </div>
+    <div class="window-content">
+      <div class="settings-section">
+        <span class="settings-label">UI Scale</span>
+        <div class="settings-row">
+          <input type="range" min="80" max="140" value="100" class="settings-slider" id="scale-slider">
+          <span id="scale-value">100%</span>
+        </div>
       </div>
-      <div class="window-content">
-        <form id="barkbrowse-search-form" autocomplete="off">
-          <input type="text" id="barkbrowse-search" placeholder="Search the Quantum Web..." autocomplete="off"/>
-          <button type="submit" title="Search">🔎</button>
-        </form>
-        <div id="barkbrowse-results"></div>
-        <div id="barkbrowse-viewer"></div>
+      <div class="settings-section">
+        <span class="settings-label">Theme</span>
+        <div class="settings-row">
+          <label>
+            <input type="radio" name="theme" value="dark" checked> Dark
+          </label>
+          <label>
+            <input type="radio" name="theme" value="light"> Light
+          </label>
+        </div>
+      </div>
+      <div class="settings-section" style="margin-bottom:2px;">
+        <span class="settings-label">Reset</span>
+        <button onclick="resetSettings()" style="background:#333;color:#fff;">Reset to Default</button>
       </div>
     </div>
+    <!-- Resize handles -->
+    <div class="resize-handle e"></div><div class="resize-handle s"></div>
+    <div class="resize-handle se"></div>
   </div>
-  <!-- Taskbar -->
-  <div id="taskbar">
-    <button onclick="openWindow('barkbrowse-window')">🐾 BarkBrowse</button>
-    <span id="taskbar-time"></span>
+  <!-- Notepad Window -->
+  <div class="window" id="notepad-window" style="left:130px;top:110px;width:400px;height:330px;">
+    <div class="window-title" id="notepad-titlebar">
+      <span>📝 Notepad</span>
+      <button class="window-close" aria-label="Close" onclick="closeWindow('notepad-window')">&times;</button>
+    </div>
+    <div class="window-content" style="display:flex;flex-direction:column;height:100%;">
+      <div class="notepad-toolbar">
+        <button onclick="saveNote()" title="Save note to browser">💾 Save</button>
+        <button onclick="downloadNote()" title="Download as .md">⬇️ Download</button>
+        <button onclick="clearNote()" title="Clear note">🗑️ Clear</button>
+        <span style="margin-left:auto;">
+          <label><input type="checkbox" id="notepad-preview-toggle" checked> Preview</label>
+        </span>
+      </div>
+      <textarea id="notepad-area" class="notepad-area" placeholder="Write notes here... (Markdown supported)" style="flex:1 1 0;min-height:90px;"></textarea>
+      <div id="notepad-preview" class="notepad-preview" style="margin-top:5px;max-height:170px;overflow:auto;"></div>
+    </div>
+    <!-- Resize handles -->
+    <div class="resize-handle e"></div><div class="resize-handle s"></div>
+    <div class="resize-handle se"></div>
   </div>
-  <script>
-    // Taskbar time clock
-    function updateClock() {
-      const now = new Date();
-      document.getElementById('taskbar-time').textContent =
-        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    // Window open/close logic
-    function openWindow(id) {
-      document.getElementById(id).style.display = 'block';
-    }
-    function closeWindow(id) {
-      document.getElementById(id).style.display = 'none';
-    }
-    // Start with BarkBrowse open
-    openWindow('barkbrowse-window');
-
-    // BarkBrowse logic
-    let searchData = [];
-    fetch('search.json')
-      .then(res => res.json())
-      .then(data => { searchData = data; });
-
-    const searchForm = document.getElementById('barkbrowse-search-form');
-    const searchInput = document.getElementById('barkbrowse-search');
-    const resultsDiv = document.getElementById('barkbrowse-results');
-    const viewerDiv = document.getElementById('barkbrowse-viewer');
-
-    searchForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const term = searchInput.value.toLowerCase().trim();
-      resultsDiv.innerHTML = '';
-      viewerDiv.innerHTML = '';
-
-      if (!term) return;
-
-      const matches = searchData.filter(item =>
-        item.title.toLowerCase().includes(term) ||
-        item.keywords.toLowerCase().includes(term)
-      );
-
-      if (matches.length === 0) {
-        resultsDiv.innerHTML = '<div class="barkbrowse-result">No results found.</div>';
-        return;
+  <!-- Clock Window -->
+  <div class="window" id="clock-window" style="left:210px;top:50px;width:260px;height:320px;">
+    <div class="window-title" id="clock-titlebar">
+      <span>🕒 Clock</span>
+      <button class="window-close" aria-label="Close" onclick="closeWindow('clock-window')">&times;</button>
+    </div>
+    <div class="window-content">
+      <div class="clock-digital" id="clock-digital"></div>
+      <div class="clock-date" id="clock-date"></div>
+      <div class="clock-analog">
+        <div class="clock-face" id="clock-analog">
+          <div class="clock-hand hand-hour" id="clock-hour"></div>
+          <div class="clock-hand hand-minute" id="clock-minute"></div>
+          <div class="clock-hand hand-second" id="clock-second"></div>
+          <div class="clock-center-dot"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Resize handles -->
+    <div class="resize-handle e"></div><div class="resize-handle s"></div>
+    <div class="resize-handle se"></div>
+  </div>
+</div>
+<!-- Taskbar -->
+<div id="taskbar">
+  <button onclick="openWindow('settings-window')">⚙️ Settings</button>
+  <button onclick="openWindow('notepad-window')">📝 Notepad</button>
+  <button onclick="openWindow('clock-window')">🕒 Clock</button>
+  <span id="taskbar-time"></span>
+</div>
+<script>
+  // Window logic
+  const windows = [
+    { id: 'settings-window', titlebar: 'settings-titlebar' },
+    { id: 'notepad-window', titlebar: 'notepad-titlebar' },
+    { id: 'clock-window',   titlebar: 'clock-titlebar' }
+  ];
+  function openWindow(id) {
+    const el = document.getElementById(id);
+    el.style.display = 'block';
+    focusWindow(el);
+  }
+  function closeWindow(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+  function focusWindow(el) {
+    document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+    el.classList.add('active');
+    el.style.zIndex = 9 + Math.floor(Math.random() * 10);
+  }
+  // Drag/move windows
+  windows.forEach(w => makeWindowDraggable(w.id, w.titlebar));
+  function makeWindowDraggable(winId, titlebarId) {
+    const win = document.getElementById(winId);
+    const header = document.getElementById(titlebarId);
+    let offsetX, offsetY, dragging = false;
+    header.onmousedown = function(e) {
+      if (window.innerWidth <= 650) return;
+      focusWindow(win);
+      dragging = true;
+      offsetX = e.clientX - win.offsetLeft;
+      offsetY = e.clientY - win.offsetTop;
+      document.body.style.userSelect = "none";
+      document.onmousemove = function(e2) {
+        if (!dragging) return;
+        let nx = e2.clientX - offsetX;
+        let ny = e2.clientY - offsetY;
+        // Boundaries
+        nx = Math.max(0, Math.min(nx, window.innerWidth - win.offsetWidth));
+        ny = Math.max(0, Math.min(ny, window.innerHeight - win.offsetHeight - 56));
+        win.style.left = nx + 'px';
+        win.style.top = ny + 'px';
       }
-
-      matches.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'barkbrowse-result';
-        div.textContent = item.title;
-        div.onclick = () => openPage(item.file);
-        resultsDiv.appendChild(div);
-      });
-    });
-
-    function openPage(file) {
-      fetch(file)
-        .then(res => res.text())
-        .then(html => {
-          viewerDiv.innerHTML = html;
-        })
-        .catch(() => {
-          viewerDiv.innerHTML = "<em>Page not found.</em>";
-        });
+      document.onmouseup = function() {
+        dragging = false;
+        document.body.style.userSelect = "";
+        document.onmousemove = null; document.onmouseup = null;
+      }
     }
-
-    // Make the window draggable on desktop only
-    function isMobile() {
-      return window.innerWidth <= 650;
-    }
-    makeWindowDraggable('barkbrowse-window');
-    function makeWindowDraggable(id) {
-      const win = document.getElementById(id);
-      const header = document.getElementById('barkbrowse-titlebar');
-      let offsetX, offsetY, dragging = false;
-
-      header.onmousedown = function(e) {
-        if (isMobile()) return; // Don't drag on mobile
-        dragging = true;
-        offsetX = e.clientX - win.offsetLeft;
-        offsetY = e.clientY - win.offsetTop;
-        win.style.transition = "none";
+    header.ondblclick = () => { // Maximize/restore
+      if (window.innerWidth <= 650) return;
+      if (!win.dataset.maximized) {
+        win.dataset.oldLeft = win.style.left;
+        win.dataset.oldTop = win.style.top;
+        win.dataset.oldWidth = win.style.width;
+        win.dataset.oldHeight = win.style.height;
+        win.style.left = '0px'; win.style.top = '0px';
+        win.style.width = (window.innerWidth - 2) + 'px';
+        win.style.height = (window.innerHeight - 58) + 'px';
+        win.dataset.maximized = '1';
+      } else {
+        win.style.left = win.dataset.oldLeft || '';
+        win.style.top = win.dataset.oldTop || '';
+        win.style.width = win.dataset.oldWidth || '';
+        win.style.height = win.dataset.oldHeight || '';
+        delete win.dataset.maximized;
+      }
+    };
+    win.onclick = () => focusWindow(win);
+  }
+  // Resize windows
+  document.querySelectorAll('.window').forEach(win => {
+    ['e','s','se'].forEach(dir => {
+      const handle = win.querySelector('.resize-handle.'+dir);
+      if (!handle) return;
+      let resizing = false, startX, startY, startW, startH;
+      handle.onmousedown = function(e) {
+        if (window.innerWidth <= 650) return;
+        e.stopPropagation();
+        resizing = true;
+        startX = e.clientX; startY = e.clientY;
+        startW = win.offsetWidth; startH = win.offsetHeight;
+        focusWindow(win);
         document.body.style.userSelect = "none";
         document.onmousemove = function(e2) {
-          if (!dragging) return;
-          win.style.left = (e2.clientX - offsetX) + 'px';
-          win.style.top = (e2.clientY - offsetY) + 'px';
+          if (!resizing) return;
+          let newW = dir.includes('e') ? startW + (e2.clientX - startX) : startW;
+          let newH = dir.includes('s') ? startH + (e2.clientY - startY) : startH;
+          // Boundaries
+          newW = Math.max(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--window-min-width')), Math.min(newW, window.innerWidth - win.offsetLeft - 6));
+          newH = Math.max(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--window-min-height')), Math.min(newH, window.innerHeight - win.offsetTop - 60));
+          win.style.width = newW + 'px';
+          win.style.height = newH + 'px';
         }
         document.onmouseup = function() {
-          dragging = false;
-          win.style.transition = "";
+          resizing = false;
           document.body.style.userSelect = "";
-          document.onmousemove = null;
-          document.onmouseup = null;
+          document.onmousemove = null; document.onmouseup = null;
         }
       }
-      // Reset window position on resize for mobile
-      window.addEventListener('resize', function() {
-        if (isMobile()) {
-          win.style.left = '';
-          win.style.top = '';
-        }
+    });
+  });
+  // Reset window size/position on mobile resize
+  window.addEventListener('resize', function() {
+    if (window.innerWidth <= 650) {
+      document.querySelectorAll('.window').forEach(win=>{
+        win.style.left = '';
+        win.style.top = '';
+        win.style.width = '';
+        win.style.height = '';
       });
     }
-  </script>
+  });
+  // Taskbar clock
+  function updateTaskbarClock() {
+    const now = new Date();
+    document.getElementById('taskbar-time').textContent =
+      now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  setInterval(updateTaskbarClock, 1000); updateTaskbarClock();
+  // Clock app
+  function updateClockApp() {
+    const now = new Date();
+    // Digital
+    document.getElementById('clock-digital').textContent =
+      now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    document.getElementById('clock-date').textContent =
+      now.toLocaleDateString([], { weekday:'long', year:'numeric', month:'long', day:'2-digit' });
+    // Analog
+    const sec = now.getSeconds(), min = now.getMinutes(), hour = now.getHours();
+    const secDeg = sec*6, minDeg = min*6 + sec*0.1, hourDeg = (hour%12)*30 + min*0.5;
+    document.getElementById('clock-hour').style.transform =
+      `translate(-50%, -100%) rotate(${hourDeg}deg)`;
+    document.getElementById('clock-minute').style.transform =
+      `translate(-50%, -100%) rotate(${minDeg}deg)`;
+    document.getElementById('clock-second').style.transform =
+      `translate(-50%, -100%) rotate(${secDeg}deg)`;
+  }
+  setInterval(updateClockApp, 1000); updateClockApp();
+  // Notepad app: markdown rendering (mini)
+  function renderMarkdown(md) {
+    // Simple markdown: headings, bold, italic, code, links, lists
+    return md
+      .replace(/^### (.*)$/gim, '<h3>$1</h3>')
+      .replace(/^## (.*)$/gim, '<h2>$1</h2>')
+      .replace(/^# (.*)$/gim, '<h1>$1</h1>')
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/\*(.*?)\*/g, '<i>$1</i>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>')
+      .replace(/^[-*] (.*)$/gim, '<li>$1</li>')
+      .replace(/(?:\r\n|\r|\n)/g, '<br>');
+  }
+  // Notepad logic
+  const noteArea = document.getElementById('notepad-area');
+  const notePreview = document.getElementById('notepad-preview');
+  const notePreviewToggle = document.getElementById('notepad-preview-toggle');
+  // Save/load from localStorage
+  function saveNote() {
+    try {
+      localStorage.setItem('quantumos_note', noteArea.value);
+      alert('Note saved!');
+    } catch { alert('Saving failed!'); }
+  }
+  function loadNote() {
+    noteArea.value = localStorage.getItem('quantumos_note') || "";
+    updatePreview();
+  }
+  function clearNote() {
+    if (confirm('Clear note?')) {
+      noteArea.value = "";
+      updatePreview();
+    }
+  }
+  function downloadNote() {
+    const blob = new Blob([noteArea.value], {type:'text/markdown'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'note.md';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>a.remove(),100);
+  }
+  function updatePreview() {
+    if (notePreviewToggle.checked) {
+      notePreview.style.display = '';
+      notePreview.innerHTML = renderMarkdown(noteArea.value);
+    } else {
+      notePreview.style.display = 'none';
+    }
+  }
+  noteArea.addEventListener('input', updatePreview);
+  notePreviewToggle.addEventListener('change', updatePreview);
+  loadNote();
+  // Settings
+  const scaleSlider = document.getElementById('scale-slider');
+  const scaleValue = document.getElementById('scale-value');
+  scaleSlider.addEventListener('input', function() {
+    scaleValue.textContent = scaleSlider.value + '%';
+    document.body.style.fontSize = (scaleSlider.value/100*17) + 'px';
+    localStorage.setItem('quantumos_scale', scaleSlider.value);
+  });
+  // Theme
+  document.querySelectorAll('input[name=theme]').forEach(input=>{
+    input.addEventListener('change', function() {
+      setTheme(this.value);
+      localStorage.setItem('quantumos_theme', this.value);
+    });
+  });
+  function setTheme(theme) {
+    if (theme === 'light') {
+      document.documentElement.style.setProperty('--background', '#e8f5e9');
+      document.documentElement.style.setProperty('--window', '#f8fff8');
+      document.documentElement.style.setProperty('--window-title', '#d0ffdf');
+      document.documentElement.style.setProperty('--text', '#181c14');
+      document.documentElement.style.setProperty('--text-soft', '#395c45');
+      document.documentElement.style.setProperty('--taskbar', '#b7e7c8');
+      document.documentElement.style.setProperty('--accent', '#197c3b');
+      document.documentElement.style.setProperty('--accent-dark', '#195e32');
+    } else {
+      document.documentElement.style.setProperty('--background', '#141b16');
+      document.documentElement.style.setProperty('--window', '#1a2220');
+      document.documentElement.style.setProperty('--window-title', '#15231a');
+      document.documentElement.style.setProperty('--text', '#e3ffe8');
+      document.documentElement.style.setProperty('--text-soft', '#b4ceb6');
+      document.documentElement.style.setProperty('--taskbar', '#18281e');
+      document.documentElement.style.setProperty('--accent', '#1db954');
+      document.documentElement.style.setProperty('--accent-dark', '#15803d');
+    }
+  }
+  // Settings: reset
+  function resetSettings() {
+    if (confirm('Reset all settings?')) {
+      localStorage.removeItem('quantumos_scale');
+      localStorage.removeItem('quantumos_theme');
+      document.body.style.fontSize = '17px';
+      scaleSlider.value = 100; scaleValue.textContent = '100%';
+      setTheme('dark');
+      document.querySelector('input[name=theme][value=dark]').checked = true;
+    }
+  }
+  // Load settings from storage
+  function loadSettings() {
+    let scale = localStorage.getItem('quantumos_scale');
+    if (scale) {
+      scaleSlider.value = scale;
+      scaleValue.textContent = scale + '%';
+      document.body.style.fontSize = (scale/100*17) + 'px';
+    }
+    let theme = localStorage.getItem('quantumos_theme');
+    if (theme) {
+      setTheme(theme);
+      document.querySelector('input[name=theme][value='+theme+']').checked = true;
+    }
+  }
+  loadSettings();
+  // Open notepad & clock on load for demo
+  openWindow('notepad-window');
+  openWindow('clock-window');
+</script>
 </body>
 </html>
