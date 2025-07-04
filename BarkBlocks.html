@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BarkBlocks 🐾</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root {
+      --main-bg: linear-gradient(135deg, #23272f 60%, #2b4450 100%);
+      --block-radius: 9px;
+      --block-pad: 0.55em 0.9em;
+      --block-font: 0.98em;
+      --sidebar-width: 230px;
+      --workspace-pad: 1.2em;
+    }
+    body {
+      background: var(--main-bg);
+      color: #f9f9f9;
+      font-family: 'Fira Mono', monospace, monospace;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      background: linear-gradient(90deg, #489fb5 0%, #23272f 95%);
+      padding: 1.1em 1.2em;
+      font-size: 1.3em;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      border-bottom: 2px solid #444;
+      text-shadow: 0 2px 10px #0005;
+    }
+    .container {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .sidebar {
+      background: linear-gradient(135deg, #23272f 70%, #2b4450 100%);
+      width: var(--sidebar-width);
+      min-width: 150px;
+      max-width: 90vw;
+      padding: 1em 0.5em;
+      border-right: 2px solid #489fb5;
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+      box-shadow: 0 0 10px #489fb533;
+      z-index: 2;
+      overflow-y: auto;
+      /* Always show scrollbar for block selector */
+      max-height: 100vh;
+    }
+    .blocks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35em;
+      /* Sidebar scrolling */
+      overflow-y: auto;
+      max-height: 72vh;
+      min-height: 40vh;
+      padding-right: 7px;
+    }
+    .block {
+      background: linear-gradient(90deg, #3a4151 60%, #23272f 100%);
+      color: #fff;
+      border-radius: var(--block-radius);
+      padding: var(--block-pad);
+      margin: 0.13em 0;
+      cursor: grab;
+      font-size: var(--block-font);
+      border-left: 7px solid #62b6cb;
+      box-shadow: 0 2px 7px #0002, 0 1.3px 0.5px #fff1 inset;
+      user-select: none;
+      min-width: 86px;
+      min-height: 1.3em;
+      transition: background 0.1s, box-shadow 0.14s;
+      display: flex;
+      align-items: center;
+      gap: 0.55em;
+      flex-wrap: wrap;
+      word-break: break-all;
+      position: relative;
+    }
+    .block[data-type="print"] { border-left-color: #ffb703; }
+    .block[data-type="input"] { border-left-color: #90be6d; }
+    .block[data-type="math"]  { border-left-color: #f94144; }
+    .block[data-type="set"]   { border-left-color: #577590; }
+    .block[data-type="if"]    { border-left-color: #f8961e; background: linear-gradient(90deg, #b8860b 60%, #23272f 100%);}
+    .block[data-type="else"]  { border-left-color: #f3722c; background: linear-gradient(90deg, #50412e 60%, #23272f 100%);}
+    .block[data-type="logic"] { border-left-color: #43aa8b; background: linear-gradient(90deg, #00897b 60%, #23272f 100%);}
+    .block input, .block select {
+      background: #181c23;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 3px;
+      font-size: 0.96em;
+      padding: 0.13em 0.39em;
+      margin-left: 0.2em;
+      outline: none;
+      min-width: 48px;
+      max-width: 70vw;
+    }
+    .block select { min-width: 38px; }
+    .block.selected { outline: 2.5px solid #ffb703cc; z-index: 1; }
+    .block .block-nest {
+      margin-left: 1.5em;
+      margin-right: 0.2em;
+      margin-top: 0.4em;
+      margin-bottom: 0.4em;
+      padding-left: 0.3em;
+      border-left: 2.5px solid #e0c36e88;
+      background: #23272f55;
+      border-radius: 5px;
+      min-height: 28px;
+      min-width: 95px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4em;
+    }
+    .workspace {
+      flex: 1;
+      background: var(--main-bg);
+      min-width: 0;
+      padding: var(--workspace-pad);
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+      align-items: stretch;
+      min-height: 0;
+      min-width: 0;
+      position: relative;
+      height: 100%;
+    }
+    .workspace-drop {
+      border: 2.5px dashed #62b6cb;
+      border-radius: 12px;
+      min-height: 240px;
+      padding: 0.5em 1em 0.7em 1em;
+      background: #23272fcc;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35em;
+      transition: border 0.18s;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto 1em auto;
+      overflow-x: auto;
+    }
+    .toolbar {
+      display: flex;
+      gap: 0.5em;
+      margin: 0.6em 0 0.2em 0;
+      align-items: center;
+      flex-wrap: wrap;
+      z-index: 3;
+    }
+    .toolbar button, .toolbar label {
+      background: linear-gradient(90deg,#62b6cb 70%, #489fb5);
+      color: #1a1a1a;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: bold;
+      padding: 0.4em 1.2em;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #0004;
+      letter-spacing: .04em;
+      transition: background 0.12s, color 0.12s;
+      border: 1.5px solid #23272f;
+      outline: none;
+      margin-right: 0.18em;
+      margin-bottom: 0.18em;
+      display: inline-block;
+    }
+    .toolbar button:hover, .toolbar label:hover { background: #489fb5; color: #fff; }
+    .toolbar input[type=file] { display: none; }
+    .run-btn {
+      background: linear-gradient(90deg,#62b6cb 70%, #489fb5);
+      color: #1a1a1a;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.08em;
+      font-weight: bold;
+      padding: 0.66em 2.2em;
+      margin: 0.8em 0 0 0;
+      cursor: pointer;
+      align-self: flex-start;
+      box-shadow: 0 2px 8px #0004;
+      letter-spacing: .07em;
+      transition: background 0.12s, color 0.12s, box-shadow 0.12s;
+      border: 1.5px solid #23272f;
+      outline: none;
+    }
+    .run-btn:hover { background: #489fb5; color: #fff; box-shadow: 0 2px 18px #489fb544; }
+    .terminal {
+      background: #15181a;
+      color: #d1ffd6;
+      border-radius: 8px;
+      margin: 0.5em 1em 1em 1em;
+      padding: 1em;
+      min-height: 110px;
+      font-size: 1.02em;
+      font-family: 'Fira Mono', monospace, monospace;
+      white-space: pre-wrap;
+      box-shadow: 0 2px 10px #0008 inset;
+      border: 1.5px solid #333;
+      overflow-x: auto;
+      max-height: 240px;
+      line-height: 1.45em;
+      backdrop-filter: blur(1.5px);
+    }
+    ::selection { background: #489fb566; }
+    /* --- Scrollbars --- */
+    ::-webkit-scrollbar {
+      width: 0.57em;
+      background: #181c2389;
+      border-radius: 6px;
+      height: 0.57em;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #489fb5aa;
+      border-radius: 7px;
+    }
+    /* --- MOBILE --- */
+    @media (max-width: 900px) {
+      .container { flex-direction: column; }
+      .sidebar { 
+        flex-direction: row;
+        width: 100vw; min-width: 0; 
+        border-right: none; 
+        border-bottom: 2px solid #489fb5;
+        gap: 0.3em;
+        padding: 0.6em 0.2em 0.6em 0.2em;
+        overflow-x: auto;
+        overflow-y: visible;
+        max-height: 18vh;
+      }
+      .blocks-list { 
+        flex-direction: row; 
+        flex-wrap: nowrap; 
+        gap: 0.18em;
+        overflow-x: auto;
+        max-height: none;
+        min-height: 1.5em;
+        padding-bottom: 10px;
+      }
+      .block { font-size: 0.94em; min-width: 84px; }
+      .workspace { padding: 0.6em 0.2em 0.7em 0.2em; }
+      .workspace-drop { padding: 0.5em; min-height: 130px; }
+      .toolbar { flex-wrap: wrap; }
+      .run-btn { align-self: stretch; width: 100%; margin: 0.6em 0 0 0; }
+      .terminal { font-size: 0.97em; margin: 0.4em 0.1em 0.7em 0.1em; padding: 0.7em; }
+    }
+    @media (max-width: 510px) {
+      header { font-size: 1.08em; padding: 0.8em 0.26em; }
+      .block { font-size: 0.88em; min-width: 60px; }
+      .workspace-drop { min-width: 0; }
+      .terminal { font-size: 0.91em; }
+    }
+    /* Fancier effect */
+    .block:hover, .block:active {
+      background: linear-gradient(90deg,#2b4450 10%, #489fb5 120%);
+      box-shadow: 0 2px 22px #489fb566;
+      color: #fff;
+    }
+    .block:active { box-shadow: 0 2px 16px #ffb70344; }
+    /* Block drag visual */
+    .block.dragging { opacity: 0.43; }
+    /* File load button style */
+    .toolbar label { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    🐾 BarkBlocks — Drag to code! <span style="font-size:.8em;font-weight:normal">text/terminal style</span>
+  </header>
+  <div class="container">
+    <aside class="sidebar">
+      <div style="font-weight:bold; margin-bottom:.4em;">Blocks</div>
+      <div class="blocks-list" id="blocks-list"></div>
+    </aside>
+    <main class="workspace">
+      <div class="toolbar">
+        <button id="run-btn" class="run-btn">▶ Run</button>
+        <button id="save-btn">💾 Save</button>
+        <label for="load-input" style="margin-bottom:0;">
+          📂 Load
+          <input type="file" id="load-input" accept=".waca">
+        </label>
+      </div>
+      <div class="workspace-drop" id="workspace-drop"></div>
+      <div class="terminal" id="terminal"></div>
+    </main>
+  </div>
+  <script>
+    // --- Block Definitions ---
+    const BLOCKS = [
+      {
+        type: 'print',
+        label: 'Print',
+        create: () => {
+          let el = document.createElement('div');
+          el.className = 'block';
+          el.dataset.type = 'print';
+          el.innerHTML = `print <input type="text" placeholder="text">`;
+          return el;
+        }
+      },
+      {
+        type: 'input',
+        label: 'Input',
+        create: () => {
+          let el = document.createElement('div');
+          el.className = 'block';
+          el.dataset.type = 'input';
+          el.innerHTML = `input <input type="text" placeholder="prompt"> as <input type="text" placeholder="var" style="width:48px">`;
+          return el;
+        }
+      },
+      {
+        type: 'math',
+        label: 'Math',
+        create: () => {
+          let el = document.createElement('div');
+          el.className = 'block';
+          el.dataset.type = 'math';
+          el.innerHTML = `set <input type="text" placeholder="var" style="width:48px">
+            = <input type="text" placeholder="expr" style="width:58px">`;
+          return el;
+        }
+      },
+      {
+        type: 'logic',
+        label: 'Logic (AND/OR)',
+        create: () => {
+          let el = document.createElement('div');
+          el.className = 'block';
+          el.dataset.type = 'logic';
+          el.innerHTML = `
+            <select>
+              <option>AND</option>
+              <option>OR</option>
+            </select>
+            (<input type="text" placeholder="A" style="width:32px">,
+            <input type="text" placeholder="B" style="width:32px">)
+            &rarr; <input type="text" placeholder="var" style="width:45px">
+          `;
+          return el;
+        }
+      },
+      {
+        type: 'if',
+        label: 'If',
+        create: () => {
+          let el = document.createElement('div');
+          el.className = 'block';
+          el.dataset.type = 'if';
+          el.innerHTML = `
+            if <input type="text" placeholder="condition" style="width:75px">
+            <div class="block-nest"></div>
+          `;
+          return el;
+        }
+      },
+      {
+        type: 'else',
+        label: 'Else',
+        create: () => {
+          let el = document.createElement('div');
+          el.className = 'block';
+          el.dataset.type = 'else';
+          el.innerHTML = `
+            else
+            <div class="block-nest"></div>
+          `;
+          return el;
+        }
+      }
+      // Add more blocks here!
+    ];
+
+    // --- Populate Sidebar ---
+    const blocksList = document.getElementById('blocks-list');
+    for (const block of BLOCKS) {
+      let b = block.create();
+      b.draggable = true;
+      b.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('block-type', block.type);
+        setTimeout(() => b.classList.add('dragging'), 0);
+      });
+      b.addEventListener('dragend', () => b.classList.remove('dragging'));
+      b.addEventListener('click', () => addBlockToWorkspace(block.type)); // Mobile
+      b.title = `Drag or tap to add "${block.label}" block`;
+      blocksList.appendChild(b);
+    }
+
+    // --- Workspace Drag & Drop ---
+    const workspace = document.getElementById('workspace-drop');
+    workspace.addEventListener('dragover', e => {
+      e.preventDefault();
+      workspace.style.borderColor = "#ffb703";
+    });
+    workspace.addEventListener('dragleave', e => {
+      workspace.style.borderColor = "#62b6cb";
+    });
+    workspace.addEventListener('drop', e => {
+      e.preventDefault();
+      workspace.style.borderColor = "#62b6cb";
+      const type = e.dataTransfer.getData('block-type');
+      if (type) addBlockToWorkspace(type, workspace);
+      const dragging = workspace.querySelector('.block.dragging');
+      if (dragging) dragging.classList.remove('dragging');
+    });
+
+    // --- Drag & Drop for Nested Blocks ---
+    function addNestDnD(nest) {
+      nest.addEventListener('dragover', e => {
+        e.preventDefault();
+        nest.style.borderColor = "#f8961e";
+      });
+      nest.addEventListener('dragleave', e => {
+        nest.style.borderColor = "#e0c36e88";
+      });
+      nest.addEventListener('drop', e => {
+        e.preventDefault();
+        nest.style.borderColor = "#e0c36e88";
+        const type = e.dataTransfer.getData('block-type');
+        if (type) addBlockToWorkspace(type, nest);
+        const dragging = nest.querySelector('.block.dragging');
+        if (dragging) dragging.classList.remove('dragging');
+      });
+    }
+
+    // --- Add Block to Workspace/Nest ---
+    function addBlockToWorkspace(type, target = workspace) {
+      const def = BLOCKS.find(b => b.type === type);
+      if (!def) return;
+      let blockEl = def.create();
+      blockEl.draggable = true;
+      blockEl.addEventListener('dragstart', blockDragStart);
+      blockEl.addEventListener('dragend', () => blockEl.classList.remove('dragging'));
+      blockEl.addEventListener('click', selectBlock);
+      blockEl.addEventListener('dblclick', () => blockEl.remove());
+      let nest = blockEl.querySelector('.block-nest');
+      if (nest) addNestDnD(nest);
+      target.appendChild(blockEl);
+    }
+
+    // --- Reorder/Remove Blocks ---
+    function blockDragStart(e) {
+      e.dataTransfer.setData('text/plain', '');
+      setTimeout(() => { e.target.classList.add('dragging'); }, 0);
+    }
+    function workspaceDragOver(e, container) {
+      e.preventDefault();
+      const after = getDragAfterElement(container, e.clientY);
+      const dragging = container.querySelector('.block.dragging');
+      if (dragging && after != dragging) {
+        if (after == null) {
+          container.appendChild(dragging);
+        } else {
+          container.insertBefore(dragging, after);
+        }
+      }
+    }
+    workspace.addEventListener('dragover', e => workspaceDragOver(e, workspace));
+    workspace.addEventListener('drop', e => {
+      const dragging = workspace.querySelector('.block.dragging');
+      if (dragging) dragging.classList.remove('dragging');
+    });
+    function getDragAfterElement(container, y) {
+      const blocks = [...container.querySelectorAll('.block:not(.dragging)')];
+      return blocks.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: -Infinity }).element;
+    }
+
+    // --- Select Block (for mobile) ---
+    function selectBlock(e) {
+      workspace.querySelectorAll('.block.selected').forEach(b => b.classList.remove('selected'));
+      e.currentTarget.classList.add('selected');
+      setTimeout(() => e.currentTarget.classList.remove('selected'), 380);
+    }
+
+    // --- Run Code ---
+    document.getElementById('run-btn').addEventListener('click', async function() {
+      const terminal = document.getElementById('terminal');
+      terminal.textContent = '';
+      const ast = parseBlocks(Array.from(workspace.children).filter(b => b.classList.contains('block')));
+      let vars = {};
+      await executeAST(ast, vars, terminal);
+    });
+
+    // --- Parse Blocks into AST ---
+    function parseBlocks(blocks) {
+      let ast = [];
+      for (let i = 0; i < blocks.length; ++i) {
+        let block = blocks[i];
+        let type = block.dataset.type;
+        let node = { type, block, children: [] };
+        if (type === 'if' || type === 'else') {
+          let nest = block.querySelector('.block-nest');
+          if (nest) node.children = parseBlocks(Array.from(nest.children).filter(b => b.classList.contains('block')));
+        }
+        ast.push(node);
+      }
+      return ast;
+    }
+
+    // --- Execution Logic ---
+    async function executeAST(ast, vars, terminal, skip=false) {
+      for (let node of ast) {
+        if (skip && node.type !== 'else') continue;
+        if (node.type === 'print') {
+          let val = node.block.querySelector('input').value;
+          val = substituteVars(val, vars);
+          terminal.textContent += val + '\n';
+        } else if (node.type === 'input') {
+          let prompt = node.block.querySelectorAll('input')[0].value || '';
+          let varname = node.block.querySelectorAll('input')[1].value || '';
+          let user = window.prompt(prompt);
+          vars[varname] = user;
+        } else if (node.type === 'math') {
+          let varname = node.block.querySelectorAll('input')[0].value || '';
+          let expr = node.block.querySelectorAll('input')[1].value || '';
+          try {
+            let safeExpr = expr.replace(/\b[a-zA-Z_]\w*\b/g, v => (vars[v] !== undefined ? vars[v] : v));
+            let val = eval(safeExpr);
+            vars[varname] = val;
+          } catch {
+            vars[varname] = NaN;
+          }
+        } else if (node.type === 'logic') {
+          let op = node.block.querySelector('select').value;
+          let a = node.block.querySelectorAll('input')[0].value;
+          let b = node.block.querySelectorAll('input')[1].value;
+          let out = node.block.querySelectorAll('input')[2].value;
+          let va = parseBool(substituteVars(a, vars));
+          let vb = parseBool(substituteVars(b, vars));
+          vars[out] = op === 'AND' ? (va && vb) : (va || vb);
+        } else if (node.type === 'if') {
+          let cond = node.block.querySelector('input').value;
+          let condVal = false;
+          try {
+            let safeCond = cond.replace(/\b[a-zA-Z_]\w*\b/g, v => (vars[v] !== undefined ? vars[v] : v));
+            condVal = !!eval(safeCond);
+          } catch {}
+          if (condVal) {
+            await executeAST(node.children, vars, terminal, false);
+            // skip else if present
+            if (ast.length && ast[ast.indexOf(node)+1] && ast[ast.indexOf(node)+1].type==='else') break;
+          } else {
+            if (ast.length && ast[ast.indexOf(node)+1] && ast[ast.indexOf(node)+1].type==='else') {
+              await executeAST(ast[ast.indexOf(node)+1].children, vars, terminal, false);
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    function parseBool(val) {
+      if (typeof val === 'boolean') return val;
+      val = (""+val).toLowerCase();
+      return (val === "true" || val === "1" || val === "yes" || val === "on");
+    }
+
+    // --- Substitute Variables in Text ---
+    function substituteVars(str, vars) {
+      return str.replace(/\$\{?([a-zA-Z_]\w*)\}?/g, (m, v) => (vars[v] !== undefined ? vars[v] : m));
+    }
+
+    // --- Initial Welcome Output ---
+    document.getElementById('terminal').textContent =
+      "🐾 Welcome to BarkBlocks!\n" +
+      "- Drag blocks and build your program!\n" +
+      "- Double-tap/double-click a block to remove\n" +
+      "- Use If/Else/Logic for conditions\n" +
+      "- Use ${varname} in Print to show variable values\n" +
+      "- 'Run' executes your blocks, top to bottom\n\n" +
+      "🌟 Now with if/else/logic blocks & fancy UI!\n" +
+      "💾 Try Save/Load for .waca script!";
+
+    // --- DnD to all nests on startup (for demo) ---
+    setTimeout(() => {
+      document.querySelectorAll('.block-nest').forEach(addNestDnD);
+    }, 50);
+
+    // === WACA Export/Import ===
+    function blocksToWaca(ast, depth=0) {
+      let lines = [];
+      let indent = "  ".repeat(depth);
+      for (let i = 0; i < ast.length; ++i) {
+        let node = ast[i];
+        if (node.type === "print") {
+          let val = node.block.querySelector('input').value.replace(/"/g,'\\"');
+          lines.push(`${indent}PRINT "${val}"`);
+        } else if (node.type === "input") {
+          let prompt = node.block.querySelectorAll('input')[0].value.replace(/"/g,'\\"');
+          let varname = node.block.querySelectorAll('input')[1].value;
+          lines.push(`${indent}INPUT "${prompt}" AS ${varname}`);
+        } else if (node.type === "math") {
+          let varname = node.block.querySelectorAll('input')[0].value;
+          let expr = node.block.querySelectorAll('input')[1].value.replace(/"/g,'\\"');
+          lines.push(`${indent}SET ${varname} = ${expr}`);
+        } else if (node.type === "logic") {
+          let op = node.block.querySelector('select').value;
+          let a = node.block.querySelectorAll('input')[0].value;
+          let b = node.block.querySelectorAll('input')[1].value;
+          let out = node.block.querySelectorAll('input')[2].value;
+          lines.push(`${indent}LOGIC ${op} ${a} ${b} AS ${out}`);
+        } else if (node.type === "if") {
+          let cond = node.block.querySelector('input').value.replace(/"/g,'\\"');
+          lines.push(`${indent}IF ${cond}`);
+          lines = lines.concat(blocksToWaca(node.children, depth+1));
+        } else if (node.type === "else") {
+          lines.push(`${indent}else`);
+          lines = lines.concat(blocksToWaca(node.children, depth+1));
+        }
+      }
+      return lines;
+    }
+
+    function wacaToBlocks(lines, parent) {
+      let i = 0;
+      function parseBlock(level) {
+        let blocks = [];
+        while (i < lines.length) {
+          let line = lines[i];
+          let thisLevel = line.match(/^(\s*)/)[1].length/2;
+          if (thisLevel < level) break;
+          if (thisLevel > level) { i++; continue; }
+          let content = line.trim();
+          if (content.startsWith("PRINT ")) {
+            let m = content.match(/^PRINT\s+"(.*)"$/);
+            let val = m ? m[1].replace(/\\"/g, '"') : "";
+            let el = BLOCKS.find(b=>b.type==='print').create();
+            el.querySelector('input').value = val;
+            blocks.push(el);
+          } else if (content.startsWith("INPUT ")) {
+            let m = content.match(/^INPUT\s+"(.*)"\s+AS\s+(\w+)$/);
+            let prompt = m ? m[1].replace(/\\"/g, '"') : "";
+            let varname = m ? m[2] : "";
+            let el = BLOCKS.find(b=>b.type==='input').create();
+            el.querySelectorAll('input')[0].value = prompt;
+            el.querySelectorAll('input')[1].value = varname;
+            blocks.push(el);
+          } else if (content.startsWith("SET ")) {
+            let m = content.match(/^SET\s+(\w+)\s*=\s*(.*)$/);
+            let varname = m ? m[1] : "";
+            let expr = m ? m[2] : "";
+            let el = BLOCKS.find(b=>b.type==='math').create();
+            el.querySelectorAll('input')[0].value = varname;
+            el.querySelectorAll('input')[1].value = expr;
+            blocks.push(el);
+          } else if (content.startsWith("LOGIC ")) {
+            let m = content.match(/^LOGIC\s+(AND|OR)\s+([^\s]+)\s+([^\s]+)\s+AS\s+(\w+)$/);
+            let op = m ? m[1] : "";
+            let a = m ? m[2] : "";
+            let b = m ? m[3] : "";
+            let out = m ? m[4] : "";
+            let el = BLOCKS.find(b=>b.type==='logic').create();
+            el.querySelector('select').value = op;
+            el.querySelectorAll('input')[0].value = a;
+            el.querySelectorAll('input')[1].value = b;
+            el.querySelectorAll('input')[2].value = out;
+            blocks.push(el);
+          } else if (content.startsWith("IF ")) {
+            let m = content.match(/^IF\s+(.*)$/);
+            let cond = m ? m[1].replace(/\\"/g, '"') : "";
+            let el = BLOCKS.find(b=>b.type==='if').create();
+            el.querySelector('input').value = cond;
+            i++;
+            let nest = el.querySelector('.block-nest');
+            let children = parseBlock(level+1);
+            children.forEach(c => nest.appendChild(c));
+            blocks.push(el);
+            continue;
+          } else if (content.startsWith("else")) {
+            let el = BLOCKS.find(b=>b.type==='else').create();
+            i++;
+            let nest = el.querySelector('.block-nest');
+            let children = parseBlock(level+1);
+            children.forEach(c => nest.appendChild(c));
+            blocks.push(el);
+            continue;
+          }
+          i++;
+        }
+        return blocks;
+      }
+      let blocks = parseBlock(0);
+      blocks.forEach(b => parent.appendChild(b));
+    }
+
+    // --- Save/Load Handlers ---
+    document.getElementById('save-btn').addEventListener('click', function() {
+      const ast = parseBlocks(Array.from(workspace.children).filter(b => b.classList.contains('block')));
+      let lines = blocksToWaca(ast);
+      let script = lines.join("\n");
+      let blob = new Blob([script], {type: 'text/plain'});
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = "program.waca";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    });
+
+    document.getElementById('load-input').addEventListener('change', function(e) {
+      let file = e.target.files[0];
+      if (!file) return;
+      let reader = new FileReader();
+      reader.onload = function(evt) {
+        let lines = evt.target.result.split(/\r?\n/);
+        workspace.innerHTML = '';
+        wacaToBlocks(lines, workspace);
+        // Attach drag/drop etc to new block nests
+        setTimeout(() => {
+          workspace.querySelectorAll('.block-nest').forEach(addNestDnD);
+        }, 10);
+      };
+      reader.readAsText(file);
+      // Reset input for next load
+      e.target.value = '';
+    });
+  </script>
+</body>
+</html>
