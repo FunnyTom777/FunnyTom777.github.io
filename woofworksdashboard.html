@@ -4,31 +4,180 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WoofWorks Dashboard</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:700,400|Fira+Mono:400,700|Noto+Color+Emoji">
   <style>
     :root {
-      --bg: #0b0f0c;
-      --panel: #111c14;
+      --bg: #10191a;
+      --panel: #18282b;
       --accent: #00ff88;
-      --text: #d8ffe4;
       --accent-soft: #00cc77;
-      --msg-0: #1a3d2b;
-      --msg-1: #2e5f47;
-      --msg-2: #3a805c;
-      --msg-3: #4ebf88;
+      --text: #e6fff0;
+      --sidebar: #0b1517;
+      --sidebar-active: #1ebd82;
+      --border: #1e2d2c;
       --error: #ff5a5a;
       --success: #8fff8a;
+      --bubble-0: #1a3d2b;
+      --bubble-1: #2b4386;
+      --bubble-2: #7e1e6a;
+      --bubble-3: #ff8c42;
+      --bubble-4: #adf7b6;
+      --bubble-5: #f7b6b6;
+      --bubble-6: #a3bffa;
+      --bubble-7: #faffb6;
+      --bubble-8: #b6faff;
+      --bubble-9: #ffb6e1;
+      --self-bubble: #00ff8877;
+      --grey: #a2b0b8;
+      --font-main: 'Montserrat', Arial, sans-serif;
+      --font-mono: 'Fira Mono', monospace;
+      --font-emoji: 'Noto Color Emoji', sans-serif;
     }
-    * {
-      box-sizing: border-box;
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      overflow: hidden;
     }
     body {
-      margin: 0;
-      font-family: 'Segoe UI', 'Arial', sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      width: 100vw;
+    }
+
+    /* --- Sidebar --- */
+    .sidebar {
+      width: 210px;
+      background: var(--sidebar);
+      border-right: 2px solid var(--border);
       display: flex;
       flex-direction: column;
+      align-items: stretch;
+      padding-top: 2rem;
       min-height: 100vh;
+      transition: transform 0.28s cubic-bezier(.7,0,.3,1), box-shadow 0.22s;
+      z-index: 50;
+      box-shadow: 0 0 0 transparent;
+    }
+    .sidebar.closed {
+      transform: translateX(-101%);
+      box-shadow: none;
+    }
+    .sidebar.open {
+      transform: translateX(0);
+      box-shadow: 2px 0 16px #00ff8833;
+    }
+    .sidebar-toggle-btn {
+      display: none;
+      position: fixed;
+      top: 18px;
+      left: 14px;
+      z-index: 999;
+      background: var(--accent);
+      border: none;
+      color: #111;
+      font-size: 1.5em;
+      border-radius: 7px;
+      padding: 0.4em 0.6em;
+      box-shadow: 0 0 8px #00ff8885;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .sidebar-toggle-btn:active {
+      background: var(--accent-soft);
+    }
+    .sidebar .sidebar-title {
+      text-align: left;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-size: 1.6em;
+      margin: 0 0 2.2em 1.1em;
+      font-family: var(--font-main);
+      user-select: none;
+    }
+    .sidebar .tab-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7em;
+      margin-top: 0.5em;
+      margin-left: 0.8em;
+      margin-right: 1.2em;
+    }
+    .sidebar .tab-btn {
+      background: none;
+      border: none;
+      color: var(--grey);
+      padding: 0.9em 1em;
+      border-radius: 8px;
+      font-size: 1.08em;
+      font-weight: 700;
+      font-family: var(--font-main);
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.18s, color 0.15s;
+      letter-spacing: 0.5px;
+      outline: none;
+    }
+    .sidebar .tab-btn.active,
+    .sidebar .tab-btn:focus {
+      background: var(--accent-soft);
+      color: #000;
+    }
+    .sidebar .tab-btn:active {
+      background: var(--accent);
+      color: #000;
+    }
+    @media (max-width: 850px) {
+      .sidebar {
+        position: fixed;
+        left: 0; top: 0;
+        height: 100vh;
+        width: 200px;
+        min-width: 0;
+        box-shadow: 2px 0 18px #00ff8865;
+      }
+      .sidebar-toggle-btn {
+        display: block;
+      }
+      .sidebar-overlay {
+        display: block;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: #0007;
+        z-index: 30;
+        transition: opacity 0.22s;
+        opacity: 0.6;
+      }
+      .sidebar.closed + .sidebar-overlay {
+        display: none;
+      }
+    }
+    @media (max-width: 600px) {
+      .sidebar, .sidebar.open {
+        width: 100vw;
+        max-width: 320px;
+      }
+      .sidebar .sidebar-title {
+        font-size: 1.3em;
+        margin-bottom: 1.5em;
+      }
+    }
+
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
     }
     header {
       background: var(--panel);
@@ -36,56 +185,90 @@
       font-size: 2rem;
       color: var(--accent);
       text-shadow: 0 0 10px var(--accent);
-      letter-spacing: 2px;
       border-bottom: 2px solid var(--accent-soft);
+      letter-spacing: 2px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 1rem;
+      font-family: var(--font-main);
+      min-height: 65px;
+      width: 100%;
     }
-    main {
-      flex: 1;
-      padding: 1rem;
-      display: flex;
+    @media (max-width: 600px) {
+      header { font-size: 1.05em; min-height: 45px; padding: 0.7rem 1rem;}
+    }
+
+    .tab-section {
+      display: none;
       flex-direction: column;
       align-items: center;
+      width: 100%;
+      height: calc(100vh - 65px);
+      overflow-y: auto;
+      padding: 2.5rem 0;
+      background: var(--bg);
+      animation: fadeIn 0.5s;
     }
-    section {
+    .tab-section.active {
+      display: flex;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(25px);}
+      to { opacity:1; transform: none;}
+    }
+    .panel {
       background: var(--panel);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin: 1rem 0;
-      width: 95%;
-      max-width: 800px;
-      box-shadow: 0 0 15px 2px var(--accent-soft);
-      transition: box-shadow 0.15s;
+      border-radius: 16px;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 0 20px 2px var(--accent-soft);
+      margin-bottom: 1.5rem;
+      min-width: 280px;
+      width: 100%;
+      max-width: 550px;
+      border: 1.5px solid var(--border);
+      font-family: var(--font-main);
+      animation: fadeIn 0.5s;
+    }
+    @media (max-width: 700px) {
+      .panel { padding: 1em 0.6em; min-width: 0; }
+      .tab-section { padding: 1.1em 0 1.2em 0;}
     }
     h2 {
       margin-top: 0;
       color: var(--accent);
       letter-spacing: 1px;
+      font-size: 1.6em;
+      margin-bottom: 1.2em;
+      font-weight: 700;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5em;
+      font-weight: 600;
     }
     input, textarea, button, select {
-      background: #0f1813;
-      border: 1px solid var(--accent);
+      background: #18282b;
+      border: 1.2px solid var(--accent-soft);
       color: var(--text);
       border-radius: 8px;
-      padding: 0.7rem;
-      margin: 0.4rem 0;
-      font-size: 1rem;
+      padding: 0.8rem;
+      margin-bottom: 1em;
+      font-size: 1.05em;
       width: 100%;
+      font-family: var(--font-main);
       transition: border 0.2s;
+      outline: none;
     }
     input:focus, textarea:focus, select:focus {
-      border-color: var(--accent-soft);
-      outline: none;
+      border-color: var(--accent);
     }
     button {
       background: var(--accent);
       color: #000;
       font-weight: bold;
       cursor: pointer;
-      width: auto;
-      padding: 0.7rem 2rem;
+      width: 100%;
       margin-top: 0.7rem;
       border: none;
       transition: background 0.15s;
@@ -93,49 +276,33 @@
     button:hover, button:focus {
       background: var(--accent-soft);
     }
-    #chat-messages {
-      background: #17211a;
-      max-height: 260px;
-      min-height: 100px;
-      overflow-y: auto;
-      margin-bottom: 0.5rem;
-      padding: 0.5rem;
-      border-radius: 8px;
-      box-shadow: 0 0 4px #222 inset;
-    }
-    #chat-messages .message {
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      margin: 0.3rem 0;
-      max-width: 80%;
-      word-break: break-word;
-      box-shadow: 0 1px 3px #0002;
-    }
-    .user-0 { background: var(--msg-0); }
-    .user-1 { background: var(--msg-1); }
-    .user-2 { background: var(--msg-2); }
-    .user-3 { background: var(--msg-3); }
-    #admin-tab { display: none; }
-    #login-error {
+    .error {
       color: var(--error);
       min-height: 1.4em;
+      margin-top: 0.5em;
     }
-    #login-success {
+    .success {
       color: var(--success);
       min-height: 1.4em;
-    }
-    #tasks-list {
-      list-style: disc inside;
-      padding: 0 1em;
-    }
-    @media (max-width: 650px) {
-      section { padding: 1rem; }
-      header { font-size: 1.3rem; }
+      margin-top: 0.5em;
     }
     .flex-row {
       display: flex;
-      gap: 1rem;
+      gap: 1.5rem;
       align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1em;
+    }
+    .info-item {
+      background: #202e2b;
+      border-radius: 7px;
+      padding: 0.5em 1em;
+      font-size: 1.05em;
+      margin-right: 0.8em;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-weight: 600;
+      display: inline-block;
     }
     .admin-user-block {
       margin-bottom: 1.2rem;
@@ -147,81 +314,244 @@
       font-size: 0.98em;
       margin-bottom: 0.4em;
     }
-    .admin-user-block input {
-      width: calc(100% - 10px);
-    }
     .admin-save-btn {
       margin-top: 0.5em;
       background: var(--accent-soft);
       color: #000;
       font-weight: bold;
+      width: auto;
+      padding: 0.5em 2em;
     }
     .admin-user-name {
       font-weight: bold;
       letter-spacing: 1px;
+      font-size: 1.08em;
+      color: var(--accent);
     }
     .admin-role {
-      font-size: 0.95em;
+      font-size: 0.97em;
       padding: 0.2em 0.5em;
       border-radius: 6px;
       background: #232c24;
       margin-left: 0.4em;
       color: var(--accent-soft);
     }
-    .chat-my-message {
-      align-self: flex-end;
-      font-style: italic;
-      background: var(--msg-3) !important; /* Your message always green */
+    .chat-container {
+      width: 100%;
+      max-width: 700px;
+      min-width: 230px;
+      background: var(--panel);
+      border-radius: 20px;
+      box-shadow: 0 0 18px 3px #00ff8873;
+      padding: 2.2em 2em 1.3em 2em;
+      display: flex;
+      flex-direction: column;
+      height: 520px;
+      margin: 0 auto 2em auto;
+      border: 1.5px solid var(--border);
     }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      background: #16221b;
+      border-radius: 11px;
+      padding: 1.1em 1em 1em 1em;
+      margin-bottom: 1.1em;
+      box-shadow: 0 0 7px #00ff8887 inset;
+      font-size: 1.09em;
+      display: flex;
+      flex-direction: column;
+      gap: 0.63em;
+    }
+    .bubble {
+      padding: 0.7em 1.1em 0.8em 1.1em;
+      border-radius: 16px 16px 16px 7px;
+      margin-bottom: 0.25em;
+      max-width: 74%;
+      min-width: 90px;
+      word-break: break-word;
+      font-family: var(--font-main);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 8px #0002;
+      font-size: 1.07em;
+      position: relative;
+      transition: background 0.13s;
+      border: 1px solid #0c1815;
+      animation: fadeIn 0.25s;
+    }
+    .bubble.self {
+      align-self: flex-end;
+      background: var(--self-bubble) !important;
+      border-color: var(--accent);
+      font-style: italic;
+      color: #222;
+    }
+    /* Up to 10 different user colors, based on user hash (user-0 ... user-9) */
+    .bubble.user-0 { background: var(--bubble-0); color: #e6ffe7;}
+    .bubble.user-1 { background: var(--bubble-1); color: #d6ebfc;}
+    .bubble.user-2 { background: var(--bubble-2); color: #ffd6fc;}
+    .bubble.user-3 { background: var(--bubble-3); color: #fff5e6;}
+    .bubble.user-4 { background: var(--bubble-4); color: #222;}
+    .bubble.user-5 { background: var(--bubble-5); color: #222;}
+    .bubble.user-6 { background: var(--bubble-6); color: #222;}
+    .bubble.user-7 { background: var(--bubble-7); color: #222;}
+    .bubble.user-8 { background: var(--bubble-8); color: #222;}
+    .bubble.user-9 { background: var(--bubble-9); color: #222;}
+    .bubble .bubble-header {
+      font-family: var(--font-main);
+      font-size: 1em;
+      font-weight: 700;
+      margin-bottom: 0.15em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    .bubble .bubble-name {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-right: 0.5em;
+    }
+    .bubble .bubble-time {
+      color: #b9cdbe;
+      font-size: 0.92em;
+      font-family: var(--font-mono);
+      font-weight: 400;
+      margin-left: auto;
+    }
+    .bubble .bubble-emoji {
+      font-family: var(--font-emoji);
+      font-size: 1.13em;
+      margin-right: 0.15em;
+      display: none;
+    }
+    .bubble .bubble-text {
+      margin-left: 0.2em;
+      word-break: break-word;
+      font-size: 1.07em;
+      font-family: var(--font-main), var(--font-emoji);
+      line-height: 1.4;
+      margin-top: 0.1em;
+    }
+    .chat-input-row {
+      display: flex;
+      gap: 0.6em;
+      align-items: center;
+      margin-top: 0.5em;
+      width: 100%;
+    }
+    .chat-input {
+      flex: 1;
+      resize: none;
+      border-radius: 9px;
+      padding: 0.9em 1em;
+      font-size: 1.07em;
+      height: 2.8em;
+      background: #18282b;
+      font-family: var(--font-main), var(--font-emoji);
+      border: 1.5px solid var(--accent-soft);
+      color: var(--text);
+      transition: border 0.2s;
+    }
+    .chat-input:focus {
+      border-color: var(--accent);
+    }
+    .chat-send-btn {
+      background: var(--accent-soft);
+      color: #000;
+      border: none;
+      border-radius: 50%;
+      font-size: 2em;
+      width: 2.5em;
+      height: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: 0 0 8px #00ff888c;
+      margin-right: 2px;
+    }
+    .chat-send-btn:active { background: var(--accent); }
+    @media (max-width: 700px) {
+      .chat-container { padding: 1.2em 0.2em 1em 0.2em;}
+    }
+    @media (max-width: 500px) {
+      .chat-container { min-width: 0; height: 95vw; max-width: 99vw;}
+      .chat-messages { font-size: 0.94em;}
+      .tab-section { padding: 0.7em 0 1em 0;}
+    }
+
   </style>
 </head>
 <body>
-  <header>
-    <span>🐾 WoofWorks Dashboard</span>
-  </header>
-  <main>
-    <section id="login">
-      <h2>Login</h2>
-      <input id="email" type="email" placeholder="Email" autocomplete="username">
-      <input id="password" type="password" placeholder="Password" autocomplete="current-password">
-      <button id="login-btn">Login</button>
-      <div id="login-error"></div>
-      <div id="login-success"></div>
-    </section>
-
-    <section id="dashboard" style="display:none;">
-      <h2>Your Info</h2>
-      <div class="flex-row">
-        <div><strong>WoofCoin:</strong> <span id="woofcoin"></span></div>
-        <div><strong>Rank:</strong> <span id="rank"></span></div>
-        <div><strong>Role:</strong> <span id="role"></span></div>
+  <button class="sidebar-toggle-btn" id="sidebar-open-btn" title="Open Menu" style="display:none;">☰ Menu</button>
+  <nav class="sidebar closed" id="sidebar">
+    <div class="sidebar-title">WoofWorks</div>
+    <div class="tab-list">
+      <button class="tab-btn active" data-tab="login-tab">Login</button>
+      <button class="tab-btn" data-tab="dashboard-tab">Dashboard</button>
+      <button class="tab-btn" data-tab="tasks-tab">Tasks</button>
+      <button class="tab-btn" data-tab="chat-tab">Team Chat</button>
+      <button class="tab-btn" data-tab="admin-tab" id="admin-tab-btn" style="display:none;">Admin</button>
+    </div>
+  </nav>
+  <div class="sidebar-overlay" id="sidebar-overlay" style="display:none;"></div>
+  <div class="main-content">
+    <header>
+      <span id="header-title">🐾 WoofWorks Dashboard</span>
+    </header>
+    <div class="tab-section active" id="login-tab">
+      <form class="panel" id="login-form" autocomplete="on">
+        <h2>Login</h2>
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="Email" autocomplete="username" required>
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Password" autocomplete="current-password" required>
+        <button id="login-btn" type="submit">Login</button>
+        <div id="login-error" class="error"></div>
+        <div id="login-success" class="success"></div>
+      </form>
+    </div>
+    <div class="tab-section" id="dashboard-tab">
+      <div class="panel">
+        <h2>Your Info</h2>
+        <div class="flex-row">
+          <div class="info-item">WoofCoin: <span id="woofcoin"></span></div>
+          <div class="info-item">Rank: <span id="rank"></span></div>
+          <div class="info-item">Role: <span id="role"></span></div>
+        </div>
+        <div class="info-item" style="margin-top:0.6em;">Admin: <span id="admin"></span></div>
+        <button id="logout-btn" style="width:auto;margin-top:2em;">Logout</button>
       </div>
-      <div><strong>Admin:</strong> <span id="admin"></span></div>
-      <button id="logout-btn">Logout</button>
-    </section>
-
-    <section id="tasks" style="display:none;">
-      <h2>Public Tasks</h2>
-      <ul id="tasks-list"></ul>
-    </section>
-
-    <section id="chat" style="display:none;">
-      <h2>Team Chat</h2>
-      <div id="chat-messages"></div>
-      <textarea id="chat-input" placeholder="Type a message..."></textarea>
-      <button id="send-btn">Send</button>
-    </section>
-
-    <section id="admin-tab" style="display:none;">
-      <h2>Admin Panel</h2>
-      <div>
-        <label for="admin-user-select"><strong>Select User:</strong></label>
-        <select id="admin-user-select"></select>
+    </div>
+    <div class="tab-section" id="tasks-tab">
+      <div class="panel">
+        <h2>Public Tasks</h2>
+        <ul id="tasks-list" style="margin-left:1.4em;"></ul>
       </div>
-      <div id="admin-user-fields" style="margin-top:1em;"></div>
-    </section>
-  </main>
-
+    </div>
+    <div class="tab-section" id="chat-tab">
+      <div class="chat-container">
+        <h2 style="margin-top:0;margin-bottom:0.8em;">Team Chat</h2>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-row">
+          <textarea id="chat-input" class="chat-input" placeholder="Type a message... (Shift+Enter for new line)" rows="1"></textarea>
+          <button id="send-btn" class="chat-send-btn" title="Send">➡️</button>
+        </div>
+      </div>
+    </div>
+    <div class="tab-section" id="admin-tab">
+      <div class="panel">
+        <h2>Admin Panel</h2>
+        <div>
+          <label for="admin-user-select"><strong>Select User:</strong></label>
+          <select id="admin-user-select"></select>
+        </div>
+        <div id="admin-user-fields" style="margin-top:1em;"></div>
+      </div>
+    </div>
+  </div>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -243,15 +573,16 @@
     const db = getFirestore(app);
 
     // --- Elements ---
+    const loginForm = document.getElementById('login-form');
     const emailInput = document.getElementById('email');
     const passInput = document.getElementById('password');
     const loginBtn = document.getElementById('login-btn');
     const loginError = document.getElementById('login-error');
     const loginSuccess = document.getElementById('login-success');
-    const loginSection = document.getElementById('login');
-    const dashSection = document.getElementById('dashboard');
-    const tasksSection = document.getElementById('tasks');
-    const chatSection = document.getElementById('chat');
+    const loginSection = document.getElementById('login-tab');
+    const dashSection = document.getElementById('dashboard-tab');
+    const tasksSection = document.getElementById('tasks-tab');
+    const chatSection = document.getElementById('chat-tab');
     const adminTab = document.getElementById('admin-tab');
     const logoutBtn = document.getElementById('logout-btn');
     const woofcoin = document.getElementById('woofcoin');
@@ -264,11 +595,79 @@
     const chatMessages = document.getElementById('chat-messages');
     const adminUserSelect = document.getElementById('admin-user-select');
     const adminUserFields = document.getElementById('admin-user-fields');
+    const adminTabBtn = document.getElementById('admin-tab-btn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOpenBtn = document.getElementById('sidebar-open-btn');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const headerTitle = document.getElementById('header-title');
+    const mainTabs = [
+      { section: loginSection, btn: sidebar.querySelectorAll('.tab-btn')[0], label: "Login" },
+      { section: dashSection, btn: sidebar.querySelectorAll('.tab-btn')[1], label: "Dashboard" },
+      { section: tasksSection, btn: sidebar.querySelectorAll('.tab-btn')[2], label: "Tasks" },
+      { section: chatSection, btn: sidebar.querySelectorAll('.tab-btn')[3], label: "Team Chat" },
+      { section: adminTab, btn: adminTabBtn, label: "Admin" }
+    ];
 
     let currentUser, currentUserData;
 
+    // --- Sidebar open/close (mobile) ---
+    function openSidebar() {
+      sidebar.classList.remove('closed');
+      sidebar.classList.add('open');
+      sidebarOverlay.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      sidebar.classList.add('closed');
+      sidebar.classList.remove('open');
+      sidebarOverlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+    sidebarOpenBtn.onclick = openSidebar;
+    sidebarOverlay.onclick = closeSidebar;
+    // Sidebar tab click (close on mobile)
+    sidebar.addEventListener('click', e => {
+      if (e.target.closest('.tab-btn')) {
+        const tabBtn = e.target.closest('.tab-btn');
+        const tabId = tabBtn.dataset.tab;
+        showTab(tabId);
+        if (window.innerWidth < 900) closeSidebar();
+      }
+    });
+
+    // Show sidebar toggle button on mobile
+    function updateSidebarToggleBtn() {
+      if (window.innerWidth < 900) {
+        sidebarOpenBtn.style.display = 'block';
+        sidebar.classList.add('closed');
+      } else {
+        sidebarOpenBtn.style.display = 'none';
+        sidebar.classList.remove('closed');
+        sidebar.classList.remove('open');
+        sidebarOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    }
+    window.addEventListener('resize', updateSidebarToggleBtn);
+    updateSidebarToggleBtn();
+
+    // --- TABS ---
+    function showTab(tabId) {
+      mainTabs.forEach(({ section, btn, label }) => {
+        if (section.id === tabId) {
+          section.classList.add('active');
+          btn.classList.add('active');
+          headerTitle.textContent = "🐾 WoofWorks " + (label !== "Login" ? `- ${label}` : "Dashboard");
+        } else {
+          section.classList.remove('active');
+          btn.classList.remove('active');
+        }
+      });
+    }
+
     // --- Login ---
-    loginBtn.onclick = async () => {
+    loginForm.onsubmit = async (e) => {
+      e.preventDefault();
       loginError.textContent = '';
       loginSuccess.textContent = '';
       if (!emailInput.value || !passInput.value) {
@@ -282,13 +681,13 @@
         const userRef = doc(db, 'users', uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) {
-          // Initial user document
           await setDoc(userRef, {
             woofcoin: 100,
             rank: "Intern",
             role: "Newbie",
             isAdmin: false,
-            name: emailInput.value.split("@")[0]
+            name: emailInput.value.split("@")[0],
+            email: emailInput.value
           });
         }
       } catch (e) {
@@ -304,25 +703,21 @@
     // --- Auth State Change ---
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        loginSection.style.display = 'block';
-        dashSection.style.display = 'none';
-        tasksSection.style.display = 'none';
-        chatSection.style.display = 'none';
-        adminTab.style.display = 'none';
+        showTab('login-tab');
+        adminTabBtn.style.display = 'none';
+        currentUser = null;
+        currentUserData = null;
+        // Clear everything
         chatMessages.innerHTML = '';
         tasksList.innerHTML = '';
         chatInput.value = '';
         loginSuccess.textContent = '';
-        currentUser = null;
-        currentUserData = null;
+        emailInput.value = '';
+        passInput.value = '';
         return;
       }
       currentUser = user;
-      loginSection.style.display = 'none';
-      dashSection.style.display = 'block';
-      tasksSection.style.display = 'block';
-      chatSection.style.display = 'block';
-
+      showTab('dashboard-tab');
       // --- User Document ---
       const uid = user.uid;
       const userRef = doc(db, 'users', uid);
@@ -334,12 +729,11 @@
       role.textContent = data.role ?? "-";
       isAdmin.textContent = data.isAdmin ? "✅ Yes" : "❌ No";
 
-      // --- Admin Panel ---
       if (data.isAdmin) {
-        adminTab.style.display = 'block';
+        adminTabBtn.style.display = '';
         refreshAdminUsers();
       } else {
-        adminTab.style.display = 'none';
+        adminTabBtn.style.display = 'none';
       }
 
       // --- Tasks List ---
@@ -354,20 +748,24 @@
         }
       });
 
-      // --- Chat Messages ---
+      // --- Chat Messages (improved UI) ---
       onSnapshot(collection(db, 'messages'), snap => {
         chatMessages.innerHTML = '';
         let arr = [];
         snap.forEach(doc => arr.push({id: doc.id, ...doc.data()}));
         arr.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
         arr.forEach(m => {
-          const hash = m.uid ? ([...m.uid].reduce((a, b) => a + b.charCodeAt(0), 0) % 4) : 0;
+          const hash = getBubbleHash(m.uid, m.name);
           const isMine = m.uid === currentUser.uid;
           chatMessages.innerHTML += `
-            <div class="message user-${hash}${isMine ? ' chat-my-message' : ''}">
-              <strong>${escapeHTML(m.name)}</strong>: ${escapeHTML(m.text)}
-              <div style="font-size:0.85em;color:#aaa;margin-top:0.2em;">${m.timestamp?.seconds ? timeAgo(new Date(m.timestamp.seconds * 1000)) : ''}</div>
-            </div>`;
+            <div class="bubble user-${hash}${isMine ? ' self' : ''}">
+              <div class="bubble-header">
+                <span class="bubble-name">${escapeHTML(m.name)}</span>
+                <span class="bubble-time">${m.timestamp?.seconds ? timeAgo(new Date(m.timestamp.seconds * 1000)) : ''}</span>
+              </div>
+              <div class="bubble-text">${linkifyAndEmojify(escapeHTML(m.text))}</div>
+            </div>
+          `;
         });
         chatMessages.scrollTop = chatMessages.scrollHeight;
       });
@@ -385,7 +783,14 @@
         timestamp: serverTimestamp()
       });
       chatInput.value = "";
+      chatInput.focus();
     };
+    chatInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendBtn.click();
+      }
+    });
 
     // --- Admin Panel Functions ---
     async function refreshAdminUsers() {
@@ -395,11 +800,9 @@
       const users = [];
       usersSnap.forEach(docu => users.push({ id: docu.id, ...docu.data() }));
 
-      // Populate dropdown
       adminUserSelect.innerHTML = users.map(u =>
         `<option value="${u.id}">${escapeHTML(u.name)}${u.email ? ' (' + escapeHTML(u.email) + ')' : ''}</option>`
       ).join('');
-
       // Load first user by default
       if (users.length) {
         loadAdminUserFields(users[0]);
@@ -445,39 +848,51 @@
     // --- Utils ---
     function escapeHTML(str) {
       return str?.replace(/[&<>"']/g, s => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       }[s])) ?? '';
     }
     function timeAgo(date) {
-      const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-      if (seconds < 60) return "just now";
+      const now = new Date();
+      const seconds = Math.floor((now - date) / 1000);
+      if (seconds < 10) return "now";
+      if (seconds < 60) return seconds + "s ago";
       const mins = Math.floor(seconds / 60);
       if (mins < 60) return mins + " min" + (mins > 1 ? "s" : "") + " ago";
       const hrs = Math.floor(mins / 60);
-      if (hrs < 24) return hrs + " hour" + (hrs > 1 ? "s" : "") + " ago";
+      if (hrs < 24) return hrs + " hr" + (hrs > 1 ? "s" : "") + " ago";
       const days = Math.floor(hrs / 24);
-      return days + " day" + (days > 1 ? "s" : "") + " ago";
+      if (days < 7) return days + " day" + (days > 1 ? "s" : "") + " ago";
+      return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    // Each user gets a color by hashing their UID or name to 0-9
+    function getBubbleHash(uid, name) {
+      if (!uid && !name) return 0;
+      let s = String(uid || name);
+      let h = 0;
+      for (let i = 0; i < s.length; ++i) h = (h + s.charCodeAt(i) * (i+1)) % 10;
+      return h;
+    }
+    // Convert :smile: or emoji shortcodes to emoji, and links to clickable
+    function linkifyAndEmojify(text) {
+      // Linkify
+      text = text.replace(
+        /((https?:\/\/|www\.)[^\s]+)/g,
+        s => `<a href="${s.startsWith('http') ? s : 'http://' + s}" target="_blank" style="color:#00ff88;text-decoration:underline;">${s}</a>`
+      );
+      // Basic emoji shortcode (expand as needed)
+      const emojiMap = {
+        ":smile:": "😄", ":wave:": "👋", ":fire:": "🔥", ":star:": "⭐", ":dog:": "🐶", ":cat:": "🐱", ":unicorn:": "🦄", ":fox:": "🦊", ":check:": "✅", ":x:": "❌", ":heart:": "❤️"
+      };
+      text = text.replace(/:\w+:/g, m => emojiMap[m] || m);
+      return text;
     }
 
-    // --- Keyboard Shortcuts ---
-    chatInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendBtn.click();
-      }
-    });
-
-    // --- Autofocus on input fields ---
+    // --- Autofocus login
+    setTimeout(() => emailInput.focus(), 300);
+    // Keyboard login
     loginSection.addEventListener('keydown', e => {
-      if (e.key === 'Enter') loginBtn.click();
+      if (e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA') loginBtn.click();
     });
-
-    // Autofocus email on page load
-    setTimeout(() => emailInput.focus(), 200);
 
   </script>
 </body>
