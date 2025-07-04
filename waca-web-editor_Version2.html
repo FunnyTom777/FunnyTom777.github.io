@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WACA Web Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --main-bg: #191e23;
+      --sidebar-bg: #20262d;
+      --accent: #73f6ca;
+      --accent2: #7fdbff;
+      --toolbar-bg: #232c39;
+      --border: #232a2f;
+      --editor-bg: #232c39;
+      --terminal-bg: #10161a;
+      --terminal-title-bg: #1a232a;
+      --terminal-accent: #ffd700;
+      --terminal-error: #fb4856;
+      --terminal-log: #c0e8a0;
+      --btn-bg: #222c30;
+      --btn-hover: #2e4251;
+      --doc-bg: #181f27;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background: var(--main-bg);
+      color: #e3e3e3;
+      font-family: 'Fira Mono', 'Consolas', 'monospace', monospace;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--toolbar-bg);
+      padding: 1rem 2rem;
+      font-size: 1.4rem;
+      letter-spacing: 1.5px;
+      font-weight: bold;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header span {
+      font-size: 1rem;
+      color: #b9f;
+      font-weight: normal;
+      margin-left: 1.5em;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    #sidebar {
+      width: 52px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 0.3rem;
+      gap: 0.5rem;
+      z-index: 2;
+    }
+    #sidebar button {
+      background: var(--btn-bg);
+      color: var(--accent2);
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      margin: 0.2em 0;
+      font-size: 1.25em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .13s;
+      position: relative;
+    }
+    #sidebar button:hover {
+      background: var(--btn-hover);
+    }
+    #sidebar button[title]:after {
+      content: attr(title);
+      position: absolute;
+      left: 48px;
+      background: #222d32;
+      color: #baf6e5;
+      font-size: 0.95em;
+      padding: 0.19em 0.7em;
+      border-radius: 4px;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity .2s;
+      z-index: 100;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #sidebar button:focus,
+    #sidebar button:hover:after {
+      opacity: 1;
+    }
+    #sidebar hr {
+      width: 80%;
+      border: 0;
+      border-top: 1px solid #2b3740;
+      margin: 1em auto 0.4em auto;
+    }
+    #main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+    #editor-toolbar {
+      background: var(--toolbar-bg);
+      padding: 0.2rem 0.8rem 0.2rem 1rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      min-height: 48px;
+    }
+    #editor-toolbar button {
+      background: var(--btn-bg);
+      color: var(--accent2);
+      border: none;
+      border-radius: 6px;
+      padding: 0.32rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .13s;
+      margin-right: 0.3em;
+      margin-left: 0.1em;
+    }
+    #editor-toolbar button:hover {
+      background: var(--btn-hover);
+    }
+    #editor-toolbar .file-label {
+      color: #baf6e5;
+      font-size: 1.04em;
+      margin-right: 1.5em;
+      margin-left: 0.2em;
+      opacity: .85;
+      letter-spacing: 0.5px;
+    }
+    #editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+      overflow: hidden;
+    }
+    #editor {
+      flex: 1;
+      background: var(--editor-bg);
+      font-size: 1.09rem;
+      border: none;
+      outline: none;
+      color: #eee;
+      min-width: 0;
+      white-space: pre;
+      overflow: auto;
+      font-family: 'Fira Mono', 'Consolas', monospace;
+      caret-color: #f9d923;
+      line-height: 1.55;
+      tab-size: 2;
+      padding: 1.1em 1em 0.8em 1.4em;
+      border-radius: 0 0 0 0;
+    }
+    .token-op    { color: #f9d923; }
+    .token-fn    { color: #7fdbff; }
+    .token-key   { color: #ff8a65; }
+    .token-num   { color: #c3e88d; }
+    .token-str   { color: #ffd700; }
+    .token-com   { color: #6a758a; font-style: italic; }
+    .token-label { color: #85e89d; }
+    .token-reg   { color: #f48fb1; }
+    .token-bad   { background: #8a2b2b; color: #fff; }
+    .token-macro { color: #ffb86c; }
+    .token-sys   { color: #d6acff; }
+    #editor::-webkit-scrollbar { width: 7px; background: #232c39; }
+    #editor::-webkit-scrollbar-thumb { background: #444f5a; border-radius: 3px; }
+    /* --- Terminal --- */
+    #terminal-container {
+      background: var(--terminal-bg);
+      border-top: 2px solid #20262d;
+      min-height: 90px;
+      max-height: 200px;
+      padding: 0;
+      font-size: 1.03rem;
+      font-family: 'Fira Mono', monospace;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 -2px 8px #0003;
+      border-radius: 0 0 0 0;
+      position: relative;
+      z-index: 1;
+    }
+    #terminal-title {
+      background: var(--terminal-title-bg);
+      color: #8cf7c5;
+      padding: 0.23em 1.1em;
+      font-size: 0.97em;
+      font-weight: bold;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #1d2730;
+      display: flex;
+      align-items: center;
+    }
+    #terminal-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.65em 1.1em 0.55em 1.5em;
+      font-size: 1.02em;
+      background: none;
+      color: var(--terminal-log);
+      min-height: 40px;
+      max-height: 110px;
+      word-break: break-all;
+    }
+    #terminal-panel .log {
+      color: var(--terminal-log);
+    }
+    #terminal-panel .out {
+      color: var(--terminal-accent);
+      font-weight: bold;
+    }
+    #terminal-panel .err {
+      color: var(--terminal-error);
+      background: #2b1a1a;
+      border-radius: 2px;
+      padding: 0 0.3em;
+      font-weight: bold;
+    }
+    #terminal-panel .info {
+      color: #d6acff;
+      font-style: italic;
+    }
+    #terminal-panel .input {
+      color: #7fdbff;
+    }
+    #terminal-panel .step {
+      color: #baf6e5;
+      opacity: 0.7;
+      font-size: 0.97em;
+    }
+    #terminal-controls {
+      display: flex;
+      align-items: center;
+      padding: 0.3em 1em;
+      background: none;
+      gap: 0.7em;
+      border-top: 1px solid #232c39;
+    }
+    #terminal-input {
+      flex: 1;
+      background: #232c39;
+      color: #e0e0e0;
+      border: 1px solid #252e39;
+      padding: 0.23rem 0.7rem;
+      font-size: 1em;
+      font-family: 'Fira Mono', monospace;
+      border-radius: 4px;
+      margin-right: 0.45em;
+    }
+    #run-btn, #clear-terminal-btn {
+      background: var(--btn-bg);
+      color: var(--accent2);
+      border: none;
+      border-radius: 5px;
+      padding: 0.3em 1.1em;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background .13s;
+    }
+    #run-btn:hover, #clear-terminal-btn:hover {
+      background: var(--btn-hover);
+    }
+    /* --- Docs panel --- */
+    #doc-panel {
+      overflow-y: auto;
+      background: var(--doc-bg);
+      color: #e6e6e6;
+      font-size: 1.05rem;
+      padding: 1.1em 1.35em 2em 1.2em;
+      border-left: 1px solid var(--border);
+      width: 375px;
+      min-width: 190px;
+      max-width: 450px;
+      display: flex;
+      flex-direction: column;
+      z-index: 5;
+      box-shadow: 0 0 16px #0002;
+    }
+    #doc-panel h1, #doc-panel h2, #doc-panel h3 {
+      color: #85e89d;
+      margin-top: 1.15em;
+      margin-bottom: 0.6em;
+    }
+    #doc-panel code,
+    #doc-panel pre {
+      background: #232c39;
+      color: #ffd700;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-size: 0.98em;
+    }
+    #doc-panel pre {
+      display: block;
+      padding: 1em;
+      white-space: pre-wrap;
+      margin: 0.4em 0 1.5em 0;
+    }
+    #show-doc-btn {
+      margin-left: auto;
+      background: var(--btn-bg);
+      color: var(--accent2);
+      border: 1px solid #2e4251;
+      border-radius: 4px;
+      padding: 0.48em 1.2em;
+      font-size: 1.08em;
+      cursor: pointer;
+      transition: background .16s;
+    }
+    #show-doc-btn:hover {
+      background: #2e4251;
+    }
+    #doc-panel {
+      display: none;
+      position: relative;
+    }
+    #doc-panel.visible {
+      display: flex;
+    }
+    @media (max-width: 1100px) {
+      #doc-panel { display: none !important; }
+    }
+    @media (max-width: 900px) {
+      #sidebar { display: none; }
+    }
+    @media (max-width: 700px) {
+      main { flex-direction: column; }
+      #sidebar { display: none; }
+      #doc-panel { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span>WACA Web Editor</span>
+    <span style="font-size:1rem;color:#b9f;">(WoofWorks Advanced Coding Architecture)</span>
+  </header>
+  <main>
+    <!-- Compact Sidebar -->
+    <nav id="sidebar">
+      <button id="new-file-btn" title="New File"><span>🗎</span></button>
+      <button id="load-btn" title="Load (.waca)"><span>📂</span></button>
+      <button id="save-btn" title="Save (.waca)"><span>💾</span></button>
+      <input type="file" id="file-input" accept=".waca" style="display:none">
+      <hr>
+      <button id="show-doc-btn" title="Show Documentation"><span>📖</span></button>
+    </nav>
+    <!-- Editor/main content -->
+    <section id="main-content">
+      <div id="editor-toolbar">
+        <span class="file-label" id="file-label">untitled.waca</span>
+      </div>
+      <div id="editor-container">
+        <div id="editor" contenteditable="true" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></div>
+      </div>
+      <div id="terminal-container">
+        <div id="terminal-title">Terminal</div>
+        <div id="terminal-panel"></div>
+        <div id="terminal-controls">
+          <input id="terminal-input" placeholder="Input values (comma-separated)">
+          <button id="run-btn" title="Run WACA code">▶ Run</button>
+          <button id="clear-terminal-btn" title="Clear terminal">⟳</button>
+        </div>
+      </div>
+    </section>
+    <!-- Docs panel (hidden by default) -->
+    <aside id="doc-panel"></aside>
+  </main>
+  <script>
+    // --- Config ---
+    const sampleCode =
+`start:
+  print "Welcome to WACA!"
+  set A, 0
+loop:
+  print "Counter: "
+  print A
+  add A, 1
+  cmp A, 5
+  jlt loop
+  print "Done!"
+  end
+; Try editing or running this code!`;
+
+    // --- Syntax Highlighting ---
+    const WACA_KEYWORDS = [
+      'print','input','set','add','sub','mul','div','mod','jmp','jeq','jne','jgt','jlt','call','ret','end','push','pop','store','load','cmp','halt','label','goto','random','pause','sleep'
+    ];
+    const WACA_REGISTERS = ['A','B','C','D','E','F','SP','IP','OUT','IN'];
+    const WACA_MACROS = ['.data','.text','.string','.macro','.include'];
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])
+      );
+    }
+    function highlightWACA(line) {
+      let html = '';
+      let commentIdx = line.indexOf(';');
+      let codePart = commentIdx !== -1 ? line.slice(0, commentIdx) : line;
+      let commentPart = commentIdx !== -1 ? line.slice(commentIdx) : "";
+      // Labels
+      if (/^\s*[a-zA-Z_][\w]*:/.test(codePart)) {
+        let match = codePart.match(/^(\s*)([a-zA-Z_][\w]*)(:)/);
+        if (match) {
+          html += match[1] + '<span class="token-label">' + match[2] + '</span><span class="token-op">:</span>';
+          codePart = codePart.slice(match[0].length);
+        }
+      }
+      let tokens = codePart.match(/\s+|".*?"|[a-zA-Z_][\w]*|[\+\-\*\/%=,()]|\-?\d+(\.\d+)?/g) || [];
+      for (let t of tokens) {
+        if (/^\s+$/.test(t)) {
+          html += t;
+        } else if (t[0] === '"' && t[t.length-1] === '"') {
+          html += '<span class="token-str">' + t + '</span>';
+        } else if (WACA_KEYWORDS.includes(t)) {
+          html += '<span class="token-key">' + t + '</span>';
+        } else if (WACA_REGISTERS.includes(t)) {
+          html += '<span class="token-reg">' + t + '</span>';
+        } else if (WACA_MACROS.includes(t)) {
+          html += '<span class="token-macro">' + t + '</span>';
+        } else if (/^\-?\d+(\.\d+)?$/.test(t)) {
+          html += '<span class="token-num">' + t + '</span>';
+        } else if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(t)) {
+          html += '<span class="token-fn">' + t + '</span>';
+        } else {
+          html += '<span class="token-op">' + t + '</span>';
+        }
+      }
+      if (commentPart) {
+        html += '<span class="token-com">' + escapeHtml(commentPart) + '</span>';
+      }
+      return html;
+    }
+    // --- Editor Logic ---
+    const editor = document.getElementById('editor');
+    function setEditorValue(val) {
+      editor.innerText = val;
+      updateHighlight();
+      setTimeout(placeCaretAtEnd, 0, editor);
+    }
+    function updateHighlight() {
+      const lines = editor.innerText.replace(/\r\n/g, '\n').split('\n');
+      editor.innerHTML = lines.map(highlightWACA).join('<br>');
+    }
+    // Caret handling (simple)
+    function placeCaretAtEnd(el) {
+      el.focus();
+      if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+    let skipInput = false;
+    editor.addEventListener('input', ()=> {
+      if(skipInput) return;
+      skipInput = true;
+      updateHighlight();
+      skipInput = false;
+    });
+    editor.addEventListener('paste', function(e){
+      e.preventDefault();
+      let text = (e.clipboardData || window.clipboardData).getData('text/plain');
+      document.execCommand('insertText', false, text);
+    });
+    setEditorValue(sampleCode);
+
+    // --- File Handling ---
+    let currentFileName = "untitled.waca";
+    function updateFileLabel() {
+      document.getElementById('file-label').textContent = currentFileName;
+    }
+    document.getElementById('save-btn').onclick = () => {
+      let blob = new Blob([editor.innerText], {type: 'text/plain'});
+      let a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = currentFileName;
+      a.click();
+    };
+    document.getElementById('new-file-btn').onclick = () => {
+      if(confirm('Clear current code?')) {
+        setEditorValue(sampleCode);
+        currentFileName = "untitled.waca";
+        updateFileLabel();
+      }
+    };
+    document.getElementById('load-btn').onclick = () => {
+      document.getElementById('file-input').click();
+    };
+    document.getElementById('file-input').addEventListener('change', function(e){
+      let file = e.target.files[0];
+      if(file) {
+        let reader = new FileReader();
+        reader.onload = function(e){
+          setEditorValue(e.target.result);
+          currentFileName = file.name;
+          updateFileLabel();
+        };
+        reader.readAsText(file);
+      }
+    });
+    updateFileLabel();
+
+    // --- Terminal ---
+    const terminalPanel = document.getElementById('terminal-panel');
+    const terminalInput = document.getElementById('terminal-input');
+    function terminalPrint(txt, klass="log") {
+      let div = document.createElement('div');
+      div.className = klass;
+      div.innerHTML = txt;
+      terminalPanel.appendChild(div);
+      terminalPanel.scrollTop = terminalPanel.scrollHeight;
+    }
+    function terminalClear() {
+      terminalPanel.innerHTML = '';
+    }
+    document.getElementById('clear-terminal-btn').onclick = terminalClear;
+
+    // --- WACA Interpreter (user-friendly terminal output) ---
+    function runWACA(code, input=[]) {
+      // Mini WACA interpreter
+      let lines = code.replace(/\r\n/g, '\n').split('\n');
+      let labels = {}, output = [], reg = {A:0,B:0,C:0,D:0,E:0,F:0,SP:0,IP:0,OUT:0,IN:0};
+      let ip = 0, cmpFlag = 0, running = true, stepCount = 0, inputs = Array.from(input);
+      // Find labels
+      lines.forEach((l,idx)=>{
+        let m = l.match(/^\s*([A-Za-z_][\w]*):/);
+        if(m) labels[m[1]] = idx;
+      });
+      function argVal(arg) {
+        if(arg[0] === '"' && arg[arg.length-1] === '"') return arg.slice(1,-1);
+        if(arg in reg) return reg[arg];
+        if(/^-?\d+$/.test(arg)) return parseInt(arg);
+        return arg;
+      }
+      while(ip < lines.length && running) {
+        let lineRaw = lines[ip];
+        let line = lineRaw.trim();
+        if (!line || line.startsWith(';')) { ip++; continue; }
+        // Remove label
+        if(line.match(/^([A-Za-z_][\w]*):/)) {
+          line = line.replace(/^([A-Za-z_][\w]*):/, '').trim();
+          if(!line) { ip++; continue; }
+        }
+        let [cmd, ...rest] = line.split(/\s+/);
+        let args = rest.join(' ').split(',').map(x=>x.trim()).filter(x=>x.length);
+        terminalPrint(`<span class="step">[${String(ip+1).padStart(2,'0')}] ${escapeHtml(lineRaw)}</span>`, "step");
+        try {
+          switch(cmd) {
+            case 'print': {
+              let val = args.map(argVal).join(' ');
+              terminalPrint(val, "out");
+              break;
+            }
+            case 'set':
+              if(args[0] in reg) reg[args[0]] = argVal(args[1]);
+              terminalPrint(`Set <span class="input">${args[0]}</span> = <span class="input">${argVal(args[1])}</span>`, "info");
+              break;
+            case 'add':
+              if(args[0] in reg) reg[args[0]] += argVal(args[1]);
+              terminalPrint(`Add <span class="input">${args[1]}</span> to <span class="input">${args[0]}</span> → <span class="input">${reg[args[0]]}</span>`, "info");
+              break;
+            case 'sub':
+              if(args[0] in reg) reg[args[0]] -= argVal(args[1]);
+              terminalPrint(`Subtract <span class="input">${args[1]}</span> from <span class="input">${args[0]}</span> → <span class="input">${reg[args[0]]}</span>`, "info");
+              break;
+            case 'cmp': {
+              let cmp1 = argVal(args[0]), cmp2 = argVal(args[1]);
+              cmpFlag = cmp1 - cmp2;
+              terminalPrint(`Compare <span class="input">${cmp1}</span> vs <span class="input">${cmp2}</span>`, "info");
+              break;
+            }
+            case 'jmp':
+              if(args[0] in labels) {
+                terminalPrint(`Jump to <span class="input">${args[0]}</span>`, "info");
+                ip = labels[args[0]];
+                continue;
+              }
+              break;
+            case 'jlt':
+              if(cmpFlag < 0 && args[0] in labels) {
+                terminalPrint(`Jump if less-than to <span class="input">${args[0]}</span>`, "info");
+                ip = labels[args[0]];
+                continue;
+              }
+              break;
+            case 'jeq':
+              if(cmpFlag === 0 && args[0] in labels) {
+                terminalPrint(`Jump if equal to <span class="input">${args[0]}</span>`, "info");
+                ip = labels[args[0]];
+                continue;
+              }
+              break;
+            case 'jne':
+              if(cmpFlag !== 0 && args[0] in labels) {
+                terminalPrint(`Jump if not-equal to <span class="input">${args[0]}</span>`, "info");
+                ip = labels[args[0]];
+                continue;
+              }
+              break;
+            case 'input':
+              let promptMsg = args[1] ? args[1] : 'Input:';
+              let userInput = inputs.length > 0 ? inputs.shift() : window.prompt(promptMsg);
+              reg[args[0]] = isNaN(Number(userInput)) ? userInput : Number(userInput);
+              terminalPrint(`Input <span class="input">${args[0]}</span> = <span class="input">${reg[args[0]]}</span>`, "input");
+              break;
+            case 'end':
+            case 'halt':
+              terminalPrint(`Program ended.`, "info");
+              running = false;
+              break;
+            default:
+              terminalPrint(`Unknown instruction: <span class="err">${escapeHtml(cmd)}</span>`, "err");
+          }
+        } catch (e) {
+          terminalPrint(`Runtime error: <span class="err">${escapeHtml(e+"")}</span>`, "err");
+        }
+        ip++;
+        stepCount++;
+        if(stepCount > 500) {
+          terminalPrint("Too many steps, stopped for safety.", "err");
+          break;
+        }
+      }
+      terminalPrint(`<hr>`, "info");
+      terminalPrint(`<b>Registers:</b> ` + Object.entries(reg).map(([k,v]) => `<span class="input">${k}=${v}</span>`).join(', '), "info");
+    }
+    document.getElementById('run-btn').onclick = () => {
+      terminalClear();
+      let code = editor.innerText.replace(/\u200B/g,'');
+      let input = terminalInput.value.trim();
+      let inputArr = input ? input.split(',') : [];
+      try {
+        runWACA(code, inputArr);
+      } catch (e) {
+        terminalPrint("Error: "+e, "err");
+      }
+    };
+
+    // --- Docs panel ---
+    const docPanel = document.getElementById('doc-panel');
+    const docBtn = document.getElementById('show-doc-btn');
+    let docVisible = false;
+    docBtn.onclick = () => {
+      docVisible = !docVisible;
+      docPanel.classList.toggle("visible", docVisible);
+      if(docVisible) renderDocs();
+    };
+    // --- Documentation Markdown ---
+    const WACA_DOCS = `
+# WACA (WoofWorks Advanced Coding Architecture) - Documentation
+
+_WACA is a simple, minimal assembly-like language for building text-based applications and games!_
+
+---
+
+## Table of Contents
+- [Introduction](#introduction)
+- [Syntax Overview](#syntax-overview)
+- [Registers](#registers)
+- [Instructions](#instructions)
+- [Examples](#examples)
+- [Directives & Macros](#directives--macros)
+- [File Format (.waca)](#file-format-waca)
+- [Saving/Loading](#savingloading)
+- [Tips & Tricks](#tips--tricks)
+
+---
+
+## Introduction
+
+WACA aims to be a fun, approachable, and powerful low-level language, inspired by assembly but with a friendlier syntax. You can use it to write interactive text-based apps, games, tools, and more!
+
+A typical WACA program:
+- Declares labels for code structure.
+- Uses basic operations: math, jumps, printing, input.
+- Manipulates a set of registers.
+
+---
+
+## Syntax Overview
+
+- Lines may contain instructions, labels, or comments.
+- Labels end with a colon \`:\`
+- Comments start with \`;\`
+- Arguments are comma-separated.
+- Strings are double-quoted.
+
+**Example:**
+\`\`\`
+start:
+  print "Hello, WACA!"
+  set A, 0
+; This is a comment
+loop:
+  add A, 1
+  print A
+  cmp A, 10
+  jlt loop
+  end
+\`\`\`
+
+---
+
+## Registers
+
+| Register | Purpose                  |
+|----------|--------------------------|
+| A-F      | General-purpose          |
+| SP       | Stack Pointer            |
+| IP       | Instruction Pointer      |
+| OUT/IN   | Output/Input             |
+
+---
+
+## Instructions
+
+### Output/Input
+
+- \`print <val>\` &mdash; Print a value (number, register, or string)
+- \`input <reg> [prompt]\` &mdash; Prompt for input, store in register
+
+### Math/Logic
+
+- \`set <reg>, <val>\` &mdash; Set register to value
+- \`add <reg>, <val>\` &mdash; Add value to register
+- \`sub <reg>, <val>\` &mdash; Subtract value from register
+- \`mul <reg>, <val>\` &mdash; Multiply register by value
+- \`div <reg>, <val>\` &mdash; Divide register by value
+- \`mod <reg>, <val>\` &mdash; Modulo
+
+### Comparison & Jumps
+
+- \`cmp <reg>, <val>\` &mdash; Compare register to value
+- \`jmp <label>\` &mdash; Unconditional jump
+- \`jlt <label>\` &mdash; Jump if last cmp was less-than
+- \`jgt <label>\` &mdash; Jump if greater-than
+- \`jeq <label>\` &mdash; Jump if equal
+- \`jne <label>\` &mdash; Jump if not-equal
+
+### Call/Return
+
+- \`call <label>\` &mdash; Call subroutine
+- \`ret\` &mdash; Return from subroutine
+
+### Stack
+
+- \`push <reg>\`
+- \`pop <reg>\`
+
+### Misc
+
+- \`halt\` or \`end\` &mdash; Stop program
+
+---
+
+## Directives & Macros
+
+- \`.data\` / \`.text\` &mdash; Sections (optional)
+- \`.string <label> "..." \` &mdash; Define string data
+- \`.macro <name> ... \` &mdash; Macro definitions
+
+---
+
+## Examples
+
+### Counter
+
+\`\`\`
+start:
+  set A, 0
+loop:
+  print "Count: "
+  print A
+  add A, 1
+  cmp A, 5
+  jlt loop
+  print "Done!"
+  end
+\`\`\`
+
+### Input Echo
+
+\`\`\`
+  print "Enter something:"
+  input A
+  print "You typed:"
+  print A
+  end
+\`\`\`
+
+---
+
+## File Format (.waca)
+
+WACA files are plain text files, using the \`.waca\` extension.
+
+---
+
+## Saving/Loading
+
+- Click **Save** to download your code as a .waca file.
+- Click **Load** to open a .waca file.
+
+---
+
+## Tips & Tricks
+
+- Use comments (\`;\`) to annotate your code.
+- Use labels to manage control flow.
+- Experiment! WACA is forgiving & playful.
+
+---
+
+## Credits
+
+- Designed for fun by the WoofWorks community.
+- Built with ❤️ for beginners and tinkerers!
+
+---
+`;
+    // Markdown to HTML renderer (very basic)
+    function renderDocs() {
+      let html = WACA_DOCS
+        .replace(/^### (.*)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.*)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.*)$/gm, '<h1>$1</h1>')
+        .replace(/```([\s\S]*?)```/gm, (match, code) => `<pre><code>${escapeHtml(code.trim())}</code></pre>`)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^- (.*?)$/gm, '<li>$1</li>')
+        .replace(/<li>(.*?)<\/li>/gs, m => `<ul>${m}</ul>`)
+        .replace(/---/g, '<hr>');
+      docPanel.innerHTML = html;
+    }
+    // Initial rendering
+    updateHighlight();
+  </script>
+</body>
+</html>
