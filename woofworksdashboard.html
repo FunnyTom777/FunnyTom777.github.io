@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WoofWorks Dashboard</title>
+<style>
+  body {
+    margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a1128;
+    color: #a0c4ff;
+    display: flex; flex-direction: column; height: 100vh;
+  }
+  header {
+    background: #001f54;
+    padding: 10px 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #f0f0f0;
+  }
+  #login-section, #dashboard {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  #login-section {
+    max-width: 400px;
+    margin: 50px auto;
+    background: #001f54;
+    border-radius: 10px;
+    padding: 30px 20px;
+    box-shadow: 0 0 15px #144272aa;
+  }
+  input, button, select, textarea {
+    font-size: 1rem;
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+  }
+  input, select, textarea {
+    width: 100%;
+    background: #0a1128;
+    color: #a0c4ff;
+    border: 1px solid #144272;
+  }
+  button {
+    background: #144272;
+    color: #a0c4ff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #2a5caa;
+  }
+  #dashboard {
+    display: none;
+  }
+  .info-panel {
+    margin-bottom: 20px;
+    background: #001f54;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #144272aa;
+  }
+  .info-panel h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #144272;
+    padding-bottom: 5px;
+  }
+  #tasks-list {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  #tasks-list li {
+    margin-bottom: 8px;
+    padding: 8px;
+    background: #00193d;
+    border-radius: 6px;
+    border: 1px solid #144272;
+  }
+  #chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #00193d;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 0 15px #144272aa;
+  }
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding-right: 10px;
+  }
+  .message {
+    margin-bottom: 10px;
+  }
+  .message strong {
+    color: #71a1ff;
+  }
+  #chat-input {
+    display: flex;
+  }
+  #chat-input textarea {
+    flex: 1;
+    resize: none;
+    border-radius: 6px 0 0 6px;
+    padding: 8px;
+  }
+  #chat-input button {
+    border-radius: 0 6px 6px 0;
+  }
+  #mention-list {
+    position: absolute;
+    background: #001f54;
+    border: 1px solid #144272;
+    border-radius: 6px;
+    max-height: 150px;
+    overflow-y: auto;
+    display: none;
+    z-index: 10;
+    width: 200px;
+  }
+  #mention-list div {
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  #mention-list div:hover {
+    background: #2a5caa;
+  }
+</style>
+</head>
+<body>
+
+<header>WoofWorks Dashboard</header>
+
+<section id="login-section">
+  <h2>Login</h2>
+  <input id="email" type="email" placeholder="Email" autocomplete="username" />
+  <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+  <button id="login-btn">Login</button>
+  <button id="register-btn">Register</button>
+  <p id="login-error" style="color:#ff7b7b;"></p>
+</section>
+
+<section id="dashboard">
+  <div class="info-panel">
+    <h2>Your Info</h2>
+    <p><strong>WoofCoin Balance:</strong> <span id="woofcoin">...</span></p>
+    <p><strong>Rank:</strong> <span id="rank">...</span></p>
+    <p><strong>Role:</strong> <span id="role">...</span></p>
+  </div>
+
+  <div class="info-panel">
+    <h2>Public Tasks</h2>
+    <ul id="tasks-list">
+      <li>Loading tasks...</li>
+    </ul>
+  </div>
+
+  <div id="chat">
+    <h2>WoofWorks Chat</h2>
+    <div id="messages"></div>
+    <div id="chat-input">
+      <textarea id="message-input" rows="2" placeholder="Type a message... Use @ to mention"></textarea>
+      <button id="send-btn">Send</button>
+    </div>
+    <div id="mention-list"></div>
+  </div>
+
+  <button id="logout-btn" style="margin-top:20px; background:#ff4b4b;">Logout</button>
+</section>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Your actual Firebase config here:
+  const firebaseConfig = {
+    apiKey: "AIzaSyDsFimFgQKXLhpflX4PTfWcpKwfI5qM8I4",
+    authDomain: "woofworks-dashboard.firebaseapp.com",
+    projectId: "woofworks-dashboard",
+    storageBucket: "woofworks-dashboard.firebasestorage.app",
+    messagingSenderId: "150822066679",
+    appId: "1:150822066679:web:4b5927a5389d90daa036f2"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Elements
+  const loginSection = document.getElementById('login-section');
+  const dashboard = document.getElementById('dashboard');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const loginBtn = document.getElementById('login-btn');
+  const registerBtn = document.getElementById('register-btn');
+  const loginError = document.getElementById('login-error');
+
+  const woofcoinSpan = document.getElementById('woofcoin');
+  const rankSpan = document.getElementById('rank');
+  const roleSpan = document.getElementById('role');
+  const tasksList = document.getElementById('tasks-list');
+
+  const logoutBtn = document.getElementById('logout-btn');
+
+  const messagesDiv = document.getElementById('messages');
+  const messageInput = document.getElementById('message-input');
+  const sendBtn = document.getElementById('send-btn');
+
+  const mentionList = document.getElementById('mention-list');
+
+  // State
+  let currentUser = null;
+  let usersCache = [];
+
+  // Login
+  loginBtn.onclick = async () => {
+    loginError.textContent = "";
+    try {
+      await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+    } catch(e) {
+      loginError.textContent = e.message;
+    }
+  };
+
+  // Register
+  registerBtn.onclick = async () => {
+    loginError.textContent = "";
+    try {
+      const cred = await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+      // Create user doc with default data
+      await db.collection('users').doc(cred.user.uid).set({
+        email: emailInput.value,
+        woofcoin: 100,
+        rank: "Rookie",
+        role: "Employee",
+        name: emailInput.value.split('@')[0],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch(e) {
+      loginError.textContent = e.message;
+    }
+  };
+
+  // Logout
+  logoutBtn.onclick = () => auth.signOut();
+
+  // Listen for auth changes
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      currentUser = user;
+      loginSection.style.display = 'none';
+      dashboard.style.display = 'flex';
+
+      await loadUserData();
+      loadTasks();
+      loadUsers();
+      loadMessages();
+    } else {
+      currentUser = null;
+      loginSection.style.display = 'block';
+      dashboard.style.display = 'none';
+    }
+  });
+
+  // Load user data from Firestore
+  async function loadUserData() {
+    const doc = await db.collection('users').doc(currentUser.uid).get();
+    if (!doc.exists) {
+      // If no user doc, create with defaults
+      await db.collection('users').doc(currentUser.uid).set({
+        email: currentUser.email,
+        woofcoin: 100,
+        rank: "Rookie",
+        role: "Employee",
+        name: currentUser.email.split('@')[0],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    updateUserUI();
+  }
+
+  // Update user info UI
+  async function updateUserUI() {
+    const doc = await db.collection('users').doc(currentUser.uid).get();
+    const data = doc.data();
+    woofcoinSpan.textContent = data.woofcoin;
+    rankSpan.textContent = data.rank;
+    roleSpan.textContent = data.role;
+  }
+
+  // Load public tasks from Firestore
+  function loadTasks() {
+    db.collection('tasks').onSnapshot(snapshot => {
+      tasksList.innerHTML = '';
+      if (snapshot.empty) {
+        tasksList.innerHTML = '<li>No tasks available.</li>';
+        return;
+      }
+      snapshot.forEach(doc => {
+        const task = doc.data();
+        const li = document.createElement('li');
+        li.textContent = task.description;
+        tasksList.appendChild(li);
+      });
+    });
+  }
+
+  // Load all users (for mentions + chat)
+  function loadUsers() {
+    db.collection('users').onSnapshot(snapshot => {
+      usersCache = [];
+      snapshot.forEach(doc => {
+        const user = doc.data();
+        user.id = doc.id;
+        usersCache.push(user);
+      });
+    });
+  }
+
+  // Chat messaging
+  function loadMessages() {
+    db.collection('messages').orderBy('createdAt').limit(100).onSnapshot(snapshot => {
+      messagesDiv.innerHTML = '';
+      snapshot.forEach(doc => {
+        const msg = doc.data();
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message';
+        let text = msg.text;
+
+        // Basic mention highlight
+        usersCache.forEach(u => {
+          const mention = '@' + u.name;
+          if (text.includes(mention)) {
+            text = text.replaceAll(mention, `<strong>${mention}</strong>`);
+          }
+        });
+
+        msgDiv.innerHTML = `<strong>${msg.senderName}:</strong> ${text}`;
+        messagesDiv.appendChild(msgDiv);
+      });
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+  }
+
+  // Send chat message
+  sendBtn.onclick = async () => {
+    let text = messageInput.value.trim();
+    if (!text) return;
+
+    const userDoc = await db.collection('users').doc(currentUser.uid).get();
+    const senderName = userDoc.data().name;
+
+    await db.collection('messages').add({
+      text,
+      senderId: currentUser.uid,
+      senderName,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    messageInput.value = '';
+  };
+
+  // Mention autocomplete logic
+  messageInput.addEventListener('input', e => {
+    const val = e.target.value;
+    const cursorPos = e.target.selectionStart;
+
+    let mentionStart = val.lastIndexOf('@', cursorPos - 1);
+    if (mentionStart === -1) {
+      mentionList.style.display = 'none';
+      return;
+    }
+
+    let wordEnd = val.indexOf(' ', mentionStart);
+    if (wordEnd === -1) wordEnd = val.length;
+
+    const mentionQuery = val.substring(mentionStart + 1, cursorPos).toLowerCase();
+
+    if (mentionQuery.length === 0) {
+      mentionList.style.display = 'none';
+      return;
+    }
+
+    const matches = usersCache.filter(u => u.name.toLowerCase().startsWith(mentionQuery)).slice(0, 5);
+
+    if (matches.length === 0) {
+      mentionList.style.display = 'none';
+      return;
+    }
+
+    mentionList.innerHTML = '';
+    matches.forEach(user => {
+      const div = document.createElement('div');
+      div.textContent = user.name;
+      div.onclick = () => {
+        const before = val.substring(0, mentionStart + 1);
+        const after = val.substring(cursorPos);
+        messageInput.value = before + user.name + after;
+        messageInput.focus();
+        mentionList.style.display = 'none';
+      };
+      mentionList.appendChild(div);
+    });
+
+    const rect = messageInput.getBoundingClientRect();
+    mentionList.style.top = rect.bottom + window.scrollY + 'px';
+    mentionList.style.left = rect.left + window.scrollX + 'px';
+    mentionList.style.display = 'block';
+  });
+
+  document.addEventListener('click', e => {
+    if (!mentionList.contains(e.target) && e.target !== messageInput) {
+      mentionList.style.display = 'none';
+    }
+  });
+</script>
+
+</body>
+</html>
