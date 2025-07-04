@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Cube Demo - Green Barkworks Style</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google Fonts for retro/tech style -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --glow-green: #19e37c;
+      --glow-green-light: #1aff5e;
+      --glow-green-bg: #032013;
+      --glow-green-shadow: #1aff5e33;
+      --inner-border: #035a30;
+      --panel-bg: rgba(8, 20, 14, 0.82);
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      min-height: 100vh;
+      width: 100vw;
+      box-sizing: border-box;
+      background: radial-gradient(circle at 30% 20%, #073f1b 0%, #032013 100%) fixed;
+      font-family: 'Share Tech Mono', Consolas, monospace;
+      color: var(--glow-green);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+    }
+    .barkworks-panel {
+      width: 100%;
+      max-width: 500px;
+      padding: 20px 12px 12px 12px;
+      box-sizing: border-box;
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--panel-bg);
+      border-radius: 18px;
+      box-shadow: 0 0 40px 10px var(--glow-green-shadow), 0 0 0 3px var(--inner-border) inset;
+      border: 2px solid var(--glow-green);
+      transition: box-shadow 0.2s;
+    }
+    h1 {
+      font-size: 2.4rem;
+      margin: 0 0 10px 0;
+      color: var(--glow-green-light);
+      text-align: center;
+      letter-spacing: 2px;
+      text-shadow:
+        0 0 8px var(--glow-green),
+        0 0 32px var(--glow-green-light),
+        0 0 64px #fff3;
+      user-select: none;
+    }
+    .bw-lights-row {
+      display: flex;
+      justify-content: center;
+      margin: 0 0 10px 0;
+      gap: 6px;
+    }
+    .bw-light {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 0 2px;
+      box-shadow: 0 0 10px 2px #00ff94bb;
+      background: var(--glow-green);
+      vertical-align: middle;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .bw-light.off {
+      background: #1a2b1e;
+      box-shadow: 0 0 4px 0 #062415;
+    }
+    .subtitle {
+      font-size: 1.05rem;
+      color: #baffd7;
+      text-align: center;
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 6px var(--glow-green-light);
+      user-select: none;
+    }
+    #cube-canvas {
+      width: 100%;
+      max-width: 410px;
+      background: #02130a;
+      border-radius: 16px;
+      margin-bottom: 18px;
+      border: 2px solid var(--glow-green);
+      box-shadow: 0 0 20px 2px var(--glow-green-light), 0 0 12px 0 #0008 inset;
+      display: block;
+      touch-action: none;
+      transition: box-shadow 0.2s;
+    }
+    .hint {
+      color: #96ffc6;
+      font-size: 1rem;
+      margin: 0 0 8px 0;
+      text-align: center;
+      text-shadow: 0 0 4px #19e37c55;
+      user-select: none;
+    }
+    @media (max-width: 600px) {
+      .barkworks-panel {
+        margin-top: 6vw;
+        padding: 3vw;
+        max-width: 99vw;
+      }
+      h1 { font-size: 7vw; }
+      #cube-canvas { max-width: 98vw; }
+    }
+    @media (max-width: 400px) {
+      h1 { font-size: 8vw; }
+    }
+  </style>
+</head>
+<body>
+  <div class="barkworks-panel animate-slidefade-in">
+    <div class="bw-lights-row">
+      <span class="bw-light"></span>
+      <span class="bw-light"></span>
+      <span class="bw-light off"></span>
+      <span class="bw-light"></span>
+      <span class="bw-light off"></span>
+    </div>
+    <h1>3D Cube Demo</h1>
+    <div class="subtitle">
+      Barkworks style!<br>
+      Drag to rotate the cube.<br>
+      Works on mobile and desktop.
+    </div>
+    <canvas id="cube-canvas" width="400" height="400"></canvas>
+    <div class="hint">Try spinning me! 🟩</div>
+  </div>
+  <style>
+    @keyframes slidefade-in {
+      0% { opacity: 0; transform: translateY(-20px);}
+      100% { opacity: 1; transform: translateY(0);}
+    }
+    .animate-slidefade-in { animation: slidefade-in 1s ease-out forwards; }
+    /* Hide scrollbar for mobile menu */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+  <script>
+    // Responsive canvas setup
+    const canvas = document.getElementById('cube-canvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+      // Always keep canvas square, fitting parent
+      const box = canvas.parentElement.getBoundingClientRect();
+      const size = Math.min(box.width, window.innerHeight * 0.48, 410, window.innerWidth - 16);
+      canvas.width = size;
+      canvas.height = size;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Cube setup
+    const scaleBase = 0.36;
+    let scale = canvas.width * scaleBase;
+    function updateScale() { scale = canvas.width * scaleBase; }
+    window.addEventListener('resize', updateScale);
+
+    const cubeVertices = [
+      [-1, -1, -1],
+      [+1, -1, -1],
+      [+1, +1, -1],
+      [-1, +1, -1],
+      [-1, -1, +1],
+      [+1, -1, +1],
+      [+1, +1, +1],
+      [-1, +1, +1],
+    ];
+    const cubeEdges = [
+      [0,1],[1,2],[2,3],[3,0], // back face
+      [4,5],[5,6],[6,7],[7,4], // front face
+      [0,4],[1,5],[2,6],[3,7], // connectors
+    ];
+
+    // Rotation state (use rotation matrix for stable rotations)
+    let rotationMatrix = matIdentity();
+    let spinning = true;
+    let autoSpinSpeed = {x:0.011, y:0.017};
+
+    // Drag state for virtual trackball
+    let dragging = false;
+    let lastPos = null;
+    let velocity = [0,0];
+    let inertiaId = null;
+
+    // Matrix math for stable 3D rotations
+    function matIdentity() {
+      return [
+        [1,0,0],
+        [0,1,0],
+        [0,0,1]
+      ];
+    }
+    function matMul(a, b) {
+      let r = [];
+      for(let i=0;i<3;i++) {
+        r[i] = [];
+        for(let j=0;j<3;j++) {
+          r[i][j] = a[i][0]*b[0][j] + a[i][1]*b[1][j] + a[i][2]*b[2][j];
+        }
+      }
+      return r;
+    }
+    function matRotX(theta) {
+      let c = Math.cos(theta), s = Math.sin(theta);
+      return [
+        [1,0,0],
+        [0,c,-s],
+        [0,s,c]
+      ];
+    }
+    function matRotY(theta) {
+      let c = Math.cos(theta), s = Math.sin(theta);
+      return [
+        [c,0,s],
+        [0,1,0],
+        [-s,0,c]
+      ];
+    }
+    function matRotZ(theta) {
+      let c = Math.cos(theta), s = Math.sin(theta);
+      return [
+        [c,-s,0],
+        [s,c,0],
+        [0,0,1]
+      ];
+    }
+    function vecMatMul(vec, m) {
+      return [
+        vec[0]*m[0][0]+vec[1]*m[1][0]+vec[2]*m[2][0],
+        vec[0]*m[0][1]+vec[1]*m[1][1]+vec[2]*m[2][1],
+        vec[0]*m[0][2]+vec[1]*m[1][2]+vec[2]*m[2][2]
+      ];
+    }
+    // 3D → 2D projection
+    function project([x, y, z]) {
+      const persp = 2.5 / (z + 5.5);
+      return [
+        x * scale * persp + canvas.width / 2,
+        y * scale * persp + canvas.height / 2
+      ];
+    }
+
+    // Draw function
+    function draw() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      updateScale();
+
+      // Projected vertices
+      const projected = cubeVertices.map(v =>
+        project(vecMatMul(v, rotationMatrix))
+      );
+      // Draw edges
+      ctx.strokeStyle = "#19e37c";
+      ctx.lineWidth = Math.max(2, canvas.width * 0.012);
+      ctx.shadowColor = "#1aff5e";
+      ctx.shadowBlur = 10;
+      cubeEdges.forEach(([i, j]) => {
+        ctx.beginPath();
+        ctx.moveTo(...projected[i]);
+        ctx.lineTo(...projected[j]);
+        ctx.stroke();
+      });
+      ctx.shadowBlur = 0;
+      // Draw vertices
+      projected.forEach(([x, y]) => {
+        ctx.beginPath();
+        ctx.arc(x, y, Math.max(4, canvas.width*0.022), 0, 2 * Math.PI);
+        ctx.fillStyle = "#aaffd9";
+        ctx.shadowColor = "#19e37c";
+        ctx.shadowBlur = 7;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    // Animation loop
+    function animate() {
+      if (spinning && !dragging) {
+        // Apply auto spin by multiplying rotation matrices
+        rotationMatrix = matMul(matRotX(autoSpinSpeed.x), rotationMatrix);
+        rotationMatrix = matMul(matRotY(autoSpinSpeed.y), rotationMatrix);
+      }
+      draw();
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Trackball drag events
+    function getPointerPos(e) {
+      if (e.touches) {
+        return {x: e.touches[0].clientX, y: e.touches[0].clientY};
+      } else {
+        return {x: e.clientX, y: e.clientY};
+      }
+    }
+    function pointerDown(e) {
+      e.preventDefault();
+      dragging = true;
+      spinning = false;
+      lastPos = getPointerPos(e);
+      velocity = [0,0];
+      if (inertiaId) clearTimeout(inertiaId);
+    }
+    function pointerMove(e) {
+      if (!dragging) return;
+      let pos = getPointerPos(e);
+      let dx = (pos.x - lastPos.x) / canvas.width * Math.PI;
+      let dy = (pos.y - lastPos.y) / canvas.height * Math.PI;
+      // Y drag → rotate X axis, X drag → rotate Y axis (trackball)
+      let rot = matMul(matRotX(dy), matRotY(dx));
+      rotationMatrix = matMul(rot, rotationMatrix);
+      velocity = [dx, dy];
+      lastPos = pos;
+    }
+    function pointerUp(e) {
+      dragging = false;
+      // Gentle inertia: keep spinning a bit in the drag direction
+      let [dx, dy] = velocity;
+      function inertiaSpin() {
+        dx *= 0.92;
+        dy *= 0.92;
+        if (Math.abs(dx) < 0.002 && Math.abs(dy) < 0.002) {
+          spinning = true; // return to auto-spin
+          inertiaId = null;
+          return;
+        }
+        let rot = matMul(matRotX(dy), matRotY(dx));
+        rotationMatrix = matMul(rot, rotationMatrix);
+        draw();
+        inertiaId = setTimeout(inertiaSpin, 16);
+      }
+      inertiaSpin();
+    }
+
+    // Mouse
+    canvas.addEventListener('mousedown', pointerDown);
+    window.addEventListener('mousemove', pointerMove);
+    window.addEventListener('mouseup', pointerUp);
+    // Touch
+    canvas.addEventListener('touchstart', pointerDown, {passive:false});
+    canvas.addEventListener('touchmove', pointerMove, {passive:false});
+    canvas.addEventListener('touchend', pointerUp);
+
+    // Prevent page scroll while dragging on mobile
+    canvas.addEventListener('touchmove', e => { if (dragging) e.preventDefault(); }, {passive:false});
+  </script>
+</body>
+</html>
