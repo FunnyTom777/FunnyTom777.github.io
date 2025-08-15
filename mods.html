@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FunnyTom777 - FS25 Modding</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  .markdown-panel {
+    background: #1c2f23;
+    border: 2px solid #19e37c;
+    border-radius: 0.75rem;
+    box-shadow: 0 0 20px #19e37c44;
+    padding: 1rem 1.25rem;
+    font-family: monospace;
+    color: #e0ffe9;
+  }
+  .markdown-panel h1, .markdown-panel h2, .markdown-panel h3 {
+    color: #19e37c;
+    margin-top: 1rem;
+  }
+  .markdown-panel a {
+    color: #91ffbf;
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-b from-[#0d1b13] to-[#16271b] text-gray-200 font-sans">
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-[#19e37c] via-[#133f29] to-[#101e14] p-4 shadow-xl">
+  <div class="container mx-auto flex justify-between items-center max-w-6xl">
+    <h1 class="text-2xl font-bold text-[#19e37c]">FunnyTom777's Modding</h1>
+    <a href="index.html" class="text-[#91ffbf] hover:underline">← Back to Home</a>
+  </div>
+</header>
+
+<!-- Markdown Viewer -->
+<section class="py-10">
+  <div class="container mx-auto max-w-4xl px-4">
+    <div id="markdown-content" class="markdown-panel">Loading mods...</div>
+  </div>
+</section>
+
+<script>
+  fetch("mods.md") // Your markdown file
+    .then(response => response.text())
+    .then(text => {
+      document.getElementById("markdown-content").innerHTML = marked.parse(text);
+    })
+    .catch(err => {
+      document.getElementById("markdown-content").innerHTML = "❌ Error loading mods.md";
+      console.error(err);
+    });
+</script>
+
+</body>
+</html>
