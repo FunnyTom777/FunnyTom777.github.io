@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Meta Number Encoder/Decoder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin: 40px; background: #f2f2f2; }
+  textarea { width: 100%; height: 100px; margin: 10px 0; font-size: 16px; }
+  input { width: 100%; font-size: 16px; padding: 8px; margin: 5px 0; }
+  button { font-size: 16px; padding: 10px 20px; margin: 5px; }
+  .container { max-width: 700px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Super Secure Meta Number Encoder/Decoder</h2>
+
+<label for="keyInput">Secret Key:</label>
+<input type="text" id="keyInput" placeholder="Enter your secret key here">
+
+<label for="inputText">Input Text / Encoded String:</label>
+<textarea id="inputText"></textarea>
+
+<button onclick="encodeText()">Encode</button>
+<button onclick="decodeText()">Decode</button>
+<button onclick="copyOutput()">Copy Output</button>
+
+<label for="outputText">Output:</label>
+<textarea id="outputText" readonly></textarea>
+</div>
+
+<script>
+// --- Core Functions ---
+const allChars = Array.from([...Array(26)].map((_, i) => String.fromCharCode(i+65)) // A-Z
+                  .concat([...Array(26)].map((_, i) => String.fromCharCode(i+97))) // a-z
+                  .concat([...` !"#$%&'()*+,-./:;<=>?@[\\]^_\`{|}~`])) // punctuation & space
+allChars.push(" "); // ensure space is included
+
+function generateMapping() {
+    let numbers = Array.from({length: allChars.length}, (_, i) => i+1);
+    numbers = shuffle(numbers);
+    let mapping = {};
+    allChars.forEach((c,i)=>mapping[c]=numbers[i]);
+    return mapping;
+}
+
+function shuffle(array) {
+    for (let i = array.length-1; i>0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function encodeTextUsingMapping(text, mapping) {
+    return text.split('').map(c=>mapping[c]).join('-');
+}
+
+function decodeTextUsingMapping(encodedText, mapping) {
+    const reverseMap = Object.fromEntries(Object.entries(mapping).map(([k,v]) => [v,k]));
+    return encodedText.split('-').map(n=>reverseMap[Number(n)]).join('');
+}
+
+// --- AES Encrypt/Decrypt ---
+function encryptMapping(mapping, key) {
+    return CryptoJS.AES.encrypt(JSON.stringify(mapping), key).toString();
+}
+
+function decryptMapping(cipherText, key) {
+    const bytes = CryptoJS.AES.decrypt(cipherText, key);
+    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+}
+
+// --- Encode/Decode Actions ---
+let currentMapping = {};
+
+function encodeText() {
+    const text = document.getElementById('inputText').value;
+    const key = document.getElementById('keyInput').value;
+    if(!text || !key) {
+        document.getElementById('outputText').value = "Please enter text AND a secret key.";
+        return;
+    }
+    currentMapping = generateMapping();
+    const encryptedMapping = encryptMapping(currentMapping, key);
+    const encodedText = encodeTextUsingMapping(text, currentMapping);
+    document.getElementById('outputText').value = `${encryptedMapping}--${encodedText}`;
+}
+
+function decodeText() {
+    const fullText = document.getElementById('inputText').value;
+    const key = document.getElementById('keyInput').value;
+    if(!fullText.includes("--") || !key) {
+        document.getElementById('outputText').value = "Encoded string must contain '--' AND a secret key must be entered.";
+        return;
+    }
+    const [encryptedMapping, encodedTextStr] = fullText.split("--");
+    try {
+        const decodedMapping = decryptMapping(encryptedMapping, key);
+        const decodedText = decodeTextUsingMapping(encodedTextStr, decodedMapping);
+        document.getElementById('outputText').value = decodedText;
+    } catch (e) {
+        document.getElementById('outputText').value = `Error decoding: wrong key or corrupted data.`;
+    }
+}
+
+// --- Copy Output ---
+function copyOutput() {
+    const output = document.getElementById('outputText');
+    output.select();
+    output.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    alert("Output copied to clipboard!");
+}
+</script>
+</body>
+</html>
