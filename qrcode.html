@@ -1,115 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WoofWorks Message Portal</title>
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #1e1e1e;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-  }
-  h1 {
-    margin-bottom: 20px;
-    text-align: center;
-    color: #00d1ff;
-  }
-  input, textarea {
-    width: 100%;
-    max-width: 400px;
-    padding: 12px;
-    margin: 6px 0;
-    border-radius: 8px;
-    border: none;
-    font-size: 16px;
-  }
-  textarea {
-    resize: none;
-    height: 120px;
-  }
-  button {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 8px;
-    background: #00d1ff;
-    color: #1e1e1e;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  button:hover {
-    background: #00a0bf;
-  }
-  .container {
-    width: 100%;
-    max-width: 420px;
-  }
-  label {
-    display: block;
-    margin-top: 10px;
-    font-weight: bold;
-    font-size: 14px;
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WoofWorks Chat (Locked)</title>
+  <style>
+    :root { --bg: #1f2328; --panel:#2c2f33; --accent:#00d1ff; --text:#fff; }
+    body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#111,#1b1b1b);font-family:Inter,system-ui,Arial,sans-serif;color:var(--text)}
+    .card{background:var(--panel);padding:22px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.5);max-width:420px;width:92%}
+    h1{margin:0 0 10px;font-size:20px;color:var(--accent);text-align:center}
+    p{margin:0 0 14px;color:#cfd6db;font-size:14px;text-align:center}
+    input[type="password"]{width:100%;padding:12px;border-radius:8px;border:none;font-size:15px;margin-bottom:10px}
+    .row{display:flex;gap:8px}
+    button{flex:1;padding:12px;border-radius:8px;border:none;background:var(--accent);color:#111;font-weight:700;cursor:pointer}
+    .small{font-size:13px;color:#9aa6b2;text-align:center;margin-top:10px}
+    .error{color:#ffb4b4;text-align:center;margin-top:8px}
+    @media(min-width:900px){
+      body{background:linear-gradient(180deg,#0b0b0b,#101214)}
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>WoofWorks Message Portal</h1>
-  <label for="name">Name</label>
-  <input id="name" placeholder="Your Name" />
-  <label for="password">Password</label>
-  <input id="password" type="password" placeholder="Enter Password" />
-  <label for="msg">Message</label>
-  <textarea id="msg" placeholder="Type your message here..."></textarea>
-  <button onclick="sendMessage()">Send Message</button>
-</div>
+  <div id="locked" class="card" role="dialog" aria-label="WoofWorks Login">
+    <h1>WoofWorks Portal</h1>
+    <p>Enter the portal password to open the chat widget.</p>
+
+    <input id="pw" type="password" placeholder="Enter password" autocomplete="off" />
+    <div class="row">
+      <button id="unlock">Unlock</button>
+      <button id="clear" style="background:#3a3f44;color:#fff">Clear</button>
+    </div>
+    <div id="msg" class="error" aria-live="polite"></div>
+  </div>
+
+  <!-- placeholder where widget will be injected -->
+  <div id="widget-wrap" style="display:none;"></div>
 
 <script>
-async function sendMessage() {
-  const name = document.getElementById('name').value.trim();
-  const msg = document.getElementById('msg').value.trim();
-  const password = document.getElementById('password').value;
+(() => {
+  // === CONFIG ===
+  // Base64-encoded password
+  const PASSWORD_B64 = "ZGFkMTIz";
+  // Base64-encoded server & channel IDs
+  const SERVER_B64  = "MTM4OTg2MTk1NTI4MzQ1NjA3Mg=="; // btoa
+  const CHANNEL_B64 = "MTQxNTkyNjY1NzQ4Mjc1NjExNw=="; // btoa
+  // CDN for the widget
+  const WIDGET_SCRIPT = "https://cdn.jsdelivr.net/npm/@widgetbot/html-embed";
 
-  // Obfuscated password
-  const correctPassword = atob("ZGFkMTIz");
+  // attempt limit
+  const MAX_ATTEMPTS = 5;
 
-  if(password !== correctPassword) {
-    alert("Incorrect password! Message not sent.");
-    return;
+  // === internal ===
+  const pwInput = document.getElementById('pw');
+  const unlockBtn = document.getElementById('unlock');
+  const clearBtn = document.getElementById('clear');
+  const msgEl = document.getElementById('msg');
+  const lockedCard = document.getElementById('locked');
+  const widgetWrap = document.getElementById('widget-wrap');
+
+  let attempts = parseInt(localStorage.getItem('ww_attempts')||"0",10);
+  const unlocked = localStorage.getItem('ww_unlocked') === '1';
+
+  function decode(b64){ try { return atob(b64); } catch(e){ return ''; } }
+  const CORRECT = decode(PASSWORD_B64);
+
+  function showMessage(t, isError=true){
+    msgEl.textContent = t;
+    msgEl.style.color = isError ? '#ffb4b4' : '#b8ffda';
+    if(!isError) setTimeout(()=> msgEl.textContent='', 2500);
   }
 
-  if(!name || !msg) {
-    alert("Please fill in both name and message!");
-    return;
+  function injectWidget(){
+    // add the widget tag element
+    const widget = document.createElement('widgetbot');
+    widget.setAttribute('server', decode(SERVER_B64));
+    widget.setAttribute('channel', decode(CHANNEL_B64));
+    widget.setAttribute('width','100%');
+    widget.setAttribute('height','600');
+    // you can tweak width/height or CSS later
+    widgetWrap.appendChild(widget);
+
+    // load the widget script
+    const s = document.createElement('script');
+    s.src = WIDGET_SCRIPT;
+    s.async = true;
+    document.body.appendChild(s);
+
+    // hide the login card and show the widget
+    lockedCard.style.display = 'none';
+    widgetWrap.style.display = 'block';
   }
 
-  const webhookURL = "https://discord.com/api/webhooks/1415912878321569822/xFg0gGPMhK5_bPiSLGVs91g-YSLo7KQjxaszOKB7AiBtwgzUmtl_XfqPhFpPk7eob3qn";
-
-  const payload = { content: `**${name}**: ${msg}` };
-
-  try {
-    await fetch(webhookURL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    alert("Message sent successfully!");
-    document.getElementById('name').value = "";
-    document.getElementById('password').value = "";
-    document.getElementById('msg').value = "";
-  } catch (err) {
-    console.error(err);
-    alert("Failed to send message. Check console.");
+  function lockPage(){
+    localStorage.removeItem('ww_unlocked');
+    widgetWrap.style.display = 'none';
+    lockedCard.style.display = 'block';
+    showMessage("Locked.", false);
   }
-}
+
+  // if previously unlocked, inject immediately
+  if(unlocked) {
+    injectWidget();
+  }
+
+  unlockBtn.addEventListener('click', ()=> {
+    const val = pwInput.value || '';
+    if(attempts >= MAX_ATTEMPTS){
+      showMessage("Too many wrong attempts. Refresh to try again later.");
+      return;
+    }
+
+    if(val === CORRECT){
+      localStorage.setItem('ww_unlocked','1');
+      localStorage.setItem('ww_attempts','0');
+      showMessage("Unlocked! Opening widget...", false);
+      setTimeout(()=> injectWidget(), 300);
+    } else {
+      attempts++;
+      localStorage.setItem('ww_attempts', String(attempts));
+      const remain = Math.max(0, MAX_ATTEMPTS - attempts);
+      showMessage(`Wrong password. ${remain} attempt${remain===1?'':'s'} left.`);
+      // small delay to slow brute force
+      unlockBtn.disabled = true;
+      setTimeout(()=> unlockBtn.disabled = false, 900);
+    }
+  });
+
+  clearBtn.addEventListener('click', ()=> {
+    localStorage.removeItem('ww_unlocked');
+    localStorage.removeItem('ww_attempts');
+    pwInput.value = '';
+    showMessage("Cleared local unlock.", false);
+  });
+
+  // allow Enter key
+  pwInput.addEventListener('keydown', (e)=> {
+    if(e.key === 'Enter') unlockBtn.click();
+  });
+})();
 </script>
 </body>
 </html>
