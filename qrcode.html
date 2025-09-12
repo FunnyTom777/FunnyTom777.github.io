@@ -1,76 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>WoofWorks Chat (Locked)</title>
-  <style>
-    :root { --bg:#1f2328; --panel:#2c2f33; --accent:#00d1ff; --text:#fff; }
-    body{
-      margin:0; height:100vh;
-      display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(180deg,#111,#1b1b1b);
-      font-family:Inter,system-ui,Arial,sans-serif; color:var(--text);
-    }
-    .card{
-      background:var(--panel); padding:22px; border-radius:12px;
-      box-shadow:0 6px 20px rgba(0,0,0,.5);
-      max-width:420px; width:92%;
-    }
-    h1{margin:0 0 10px;font-size:20px;color:var(--accent);text-align:center}
-    p{margin:0 0 14px;color:#cfd6db;font-size:14px;text-align:center}
-    input[type="password"]{
-      width:100%;padding:12px;border-radius:8px;border:none;
-      font-size:15px;margin-bottom:10px
-    }
-    .row{display:flex;gap:8px}
-    button{
-      flex:1;padding:12px;border-radius:8px;border:none;
-      background:var(--accent);color:#111;font-weight:700;cursor:pointer
-    }
-    .small{font-size:13px;color:#9aa6b2;text-align:center;margin-top:10px}
-    .error{color:#ffb4b4;text-align:center;margin-top:8px}
-    /* Responsive widget container */
-    #widget-wrap{
-      display:none;
-      width:100%; height:100vh;
-      box-sizing:border-box;
-      padding:8px;
-    }
-    #widget-wrap widgetbot{
-      width:100%;
-      height:100%;
-      border-radius:12px;
-      box-shadow:0 6px 20px rgba(0,0,0,.6);
-    }
-    @media(min-width:900px){
-      body{background:linear-gradient(180deg,#0b0b0b,#101214)}
-      #widget-wrap{padding:20px;}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>WoofWorks Chat (Locked)</title>
+<style>
+:root { --bg:#1f2328; --panel:#2c2f33; --accent:#00d1ff; --text:#fff; }
+body{
+  margin:0; height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,#111,#1b1b1b);
+  font-family:Inter,system-ui,Arial,sans-serif; color:var(--text);
+}
+.card{
+  background:var(--panel); padding:22px; border-radius:12px;
+  box-shadow:0 6px 20px rgba(0,0,0,.5);
+  max-width:420px; width:92%;
+}
+h1{margin:0 0 10px;font-size:20px;color:var(--accent);text-align:center}
+p{margin:0 0 14px;color:#cfd6db;font-size:14px;text-align:center}
+input[type="password"]{
+  width:100%;padding:12px;border-radius:8px;border:none;
+  font-size:15px;margin-bottom:10px
+}
+.row{display:flex;gap:8px}
+button{
+  flex:1;padding:12px;border-radius:8px;border:none;
+  background:var(--accent);color:#111;font-weight:700;cursor:pointer
+}
+.small{font-size:13px;color:#9aa6b2;text-align:center;margin-top:10px}
+.error{color:#ffb4b4;text-align:center;margin-top:8px}
+/* Responsive widget container */
+#widget-wrap{
+  display:none;
+  width:100%; height:100vh;
+  box-sizing:border-box;
+  padding:8px;
+}
+#widget-wrap widgetbot{
+  width:100%;
+  height:100%;
+  border-radius:12px;
+  box-shadow:0 6px 20px rgba(0,0,0,.6);
+}
+@media(min-width:900px){
+  body{background:linear-gradient(180deg,#0b0b0b,#101214)}
+  #widget-wrap{padding:20px;}
+}
+</style>
 </head>
 <body>
-  <div id="locked" class="card" role="dialog" aria-label="WoofWorks Login">
-    <h1>WoofWorks Portal</h1>
-    <p>Enter the portal password to open the chat widget.</p>
-    <input id="pw" type="password" placeholder="Enter password" autocomplete="off" />
-    <div class="row">
-      <button id="unlock">Unlock</button>
-      <button id="clear" style="background:#3a3f44;color:#fff">Clear</button>
-    </div>
-    <div id="msg" class="error" aria-live="polite"></div>
+<div id="locked" class="card" role="dialog" aria-label="WoofWorks Login">
+  <h1>WoofWorks Portal</h1>
+  <p>Enter the portal password to open the chat widget.</p>
+  <input id="pw" type="password" placeholder="Enter password" autocomplete="off" />
+  <div class="row">
+    <button id="unlock">Unlock</button>
+    <button id="clear" style="background:#3a3f44;color:#fff">Clear</button>
   </div>
+  <div id="msg" class="error" aria-live="polite"></div>
+</div>
 
-  <!-- Widget container -->
-  <div id="widget-wrap"></div>
+<!-- Widget container -->
+<div id="widget-wrap"></div>
+
+<!-- Supabase client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 (() => {
-  const PASSWORD_B64 = "ZGFkMTIz";
+  // Supabase config
+  const SUPABASE_URL = "https://oyyrpvfwbmgxeethadbp.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95eXJwdmZ3Ym1neGVldGhhZGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2NTYxMTQsImV4cCI6MjA3MzIzMjExNH0.uD-b1n-2w0X4ZaXyObpKLVAcBoYskYv5a5muO4Fd4FA";
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   const SERVER_B64  = "MTM4OTg2MTk1NTI4MzQ1NjA3Mg==";
   const CHANNEL_B64 = "MTQxNTkyNjY1NzQ4Mjc1NjExNw==";
   const WIDGET_SCRIPT = "https://cdn.jsdelivr.net/npm/@widgetbot/html-embed";
-  const MAX_ATTEMPTS = 5;
 
   const pwInput = document.getElementById('pw');
   const unlockBtn = document.getElementById('unlock');
@@ -79,16 +85,23 @@
   const lockedCard = document.getElementById('locked');
   const widgetWrap = document.getElementById('widget-wrap');
 
-  let attempts = parseInt(localStorage.getItem('ww_attempts')||"0",10);
-  const unlocked = localStorage.getItem('ww_unlocked') === '1';
+  let unlocked = false;
 
   function decode(b64){ try { return atob(b64); } catch(e){ return ''; } }
-  const CORRECT = decode(PASSWORD_B64);
 
   function showMessage(t,isError=true){
     msgEl.textContent = t;
     msgEl.style.color = isError ? '#ffb4b4' : '#b8ffda';
     if(!isError) setTimeout(()=> msgEl.textContent='', 2500);
+  }
+
+  async function checkPassword(password){
+    const { data, error } = await supabase
+      .from('chat_access')
+      .select('*')
+      .eq('password', password)
+      .limit(1);
+    return data && data.length > 0;
   }
 
   function injectWidget(){
@@ -106,37 +119,26 @@
     widgetWrap.style.display = 'block';
   }
 
-  if(unlocked) injectWidget();
-
-  unlockBtn.addEventListener('click', ()=> {
+  unlockBtn.addEventListener('click', async ()=>{
     const val = pwInput.value || '';
-    if(attempts >= MAX_ATTEMPTS){
-      showMessage("Too many wrong attempts. Refresh to try again later."); return;
-    }
-    if(val === CORRECT){
-      localStorage.setItem('ww_unlocked','1');
-      localStorage.setItem('ww_attempts','0');
+    const valid = await checkPassword(val);
+    if(valid){
+      unlocked = true;
       showMessage("Unlocked! Opening widget...", false);
       setTimeout(()=> injectWidget(), 300);
     } else {
-      attempts++;
-      localStorage.setItem('ww_attempts', String(attempts));
-      const remain = Math.max(0, MAX_ATTEMPTS - attempts);
-      showMessage(`Wrong password. ${remain} attempt${remain===1?'':'s'} left.`);
-      unlockBtn.disabled = true;
-      setTimeout(()=> unlockBtn.disabled = false, 900);
+      showMessage("Wrong password!");
     }
   });
 
-  clearBtn.addEventListener('click', ()=> {
-    localStorage.removeItem('ww_unlocked');
-    localStorage.removeItem('ww_attempts');
+  clearBtn.addEventListener('click', ()=>{
+    unlocked = false;
     pwInput.value = '';
-    showMessage("Cleared local unlock.", false);
+    showMessage("Cleared unlock.", false);
   });
 
   pwInput.addEventListener('keydown', (e)=> {
-    if(e.key === 'Enter') unlockBtn.click();
+    if(e.key==='Enter') unlockBtn.click();
   });
 })();
 </script>
