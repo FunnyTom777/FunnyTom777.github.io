@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Send Message to WoofWorks</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #2c2f33;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  h1 { margin-bottom: 20px; }
+  input, textarea {
+    width: 300px;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    border: none;
+  }
+  textarea { height: 100px; resize: none; }
+  button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #7289da;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  button:hover { background-color: #5b6eae; }
+</style>
+</head>
+<body>
+<h1>Send a Message to WoofWorks</h1>
+<input id="name" placeholder="Your Name" />
+<textarea id="msg" placeholder="Your Message"></textarea>
+<button onclick="sendMessage()">Send</button>
+
+<script>
+async function sendMessage() {
+  const name = document.getElementById('name').value;
+  const msg = document.getElementById('msg').value;
+  if(!name || !msg) {
+    alert("Please enter both name and message!");
+    return;
+  }
+
+  const webhookURL = "https://discord.com/api/webhooks/1415912878321569822/xFg0gGPMhK5_bPiSLGVs91g-YSLo7KQjxaszOKB7AiBtwgzUmtl_XfqPhFpPk7eob3qn";
+
+  const payload = { content: `**${name}**: ${msg}` };
+
+  try {
+    await fetch(webhookURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    alert("Message sent!");
+    document.getElementById('name').value = "";
+    document.getElementById('msg').value = "";
+  } catch (e) {
+    alert("Failed to send message. Check console.");
+    console.error(e);
+  }
+}
+</script>
+</body>
+</html>
