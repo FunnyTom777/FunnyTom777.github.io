@@ -79,7 +79,7 @@ async function sendMessage() {
   const password = document.getElementById('password').value;
 
   // Obfuscated password
-  const correctPassword = atob("ZGFkMTIz"); // base64 for "dad123"
+  const correctPassword = atob("ZGFkMTIz");
 
   if(password !== correctPassword) {
     alert("Incorrect password! Message not sent.");
@@ -91,7 +91,7 @@ async function sendMessage() {
     return;
   }
 
-  const webhookURL = "YOUR_WEBHOOK_URL_HERE"; // Replace with your WoofWorks webhook
+  const webhookURL = "https://discord.com/api/webhooks/1415912878321569822/xFg0gGPMhK5_bPiSLGVs91g-YSLo7KQjxaszOKB7AiBtwgzUmtl_XfqPhFpPk7eob3qn";
 
   const payload = { content: `**${name}**: ${msg}` };
 
