@@ -1,27 +1,97 @@
-<input id="name" placeholder="Your Name" />
-<input id="password" placeholder="Password" type="password" />
-<textarea id="msg" placeholder="Your Message"></textarea>
-<button onclick="sendMessage()">Send</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WoofWorks Message Portal</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1e1e1e;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  h1 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #00d1ff;
+  }
+  input, textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px;
+    margin: 6px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+  }
+  textarea {
+    resize: none;
+    height: 120px;
+  }
+  button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    background: #00d1ff;
+    color: #1e1e1e;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  button:hover {
+    background: #00a0bf;
+  }
+  .container {
+    width: 100%;
+    max-width: 420px;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>WoofWorks Message Portal</h1>
+  <label for="name">Name</label>
+  <input id="name" placeholder="Your Name" />
+  <label for="password">Password</label>
+  <input id="password" type="password" placeholder="Enter Password" />
+  <label for="msg">Message</label>
+  <textarea id="msg" placeholder="Type your message here..."></textarea>
+  <button onclick="sendMessage()">Send Message</button>
+</div>
 
 <script>
 async function sendMessage() {
-  const name = document.getElementById('name').value;
-  const msg = document.getElementById('msg').value;
+  const name = document.getElementById('name').value.trim();
+  const msg = document.getElementById('msg').value.trim();
   const password = document.getElementById('password').value;
 
-  const correctPassword = "woofworks123"; // <-- set your password here
+  // Obfuscated password
+  const correctPassword = atob("ZGFkMTIz"); // base64 for "dad123"
 
   if(password !== correctPassword) {
-    alert("Wrong password! Message not sent.");
+    alert("Incorrect password! Message not sent.");
     return;
   }
 
   if(!name || !msg) {
-    alert("Please enter both name and message!");
+    alert("Please fill in both name and message!");
     return;
   }
 
-  const webhookURL = "YOUR_WEBHOOK_URL_HERE";
+  const webhookURL = "YOUR_WEBHOOK_URL_HERE"; // Replace with your WoofWorks webhook
 
   const payload = { content: `**${name}**: ${msg}` };
 
@@ -31,13 +101,15 @@ async function sendMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    alert("Message sent!");
+    alert("Message sent successfully!");
     document.getElementById('name').value = "";
     document.getElementById('password').value = "";
     document.getElementById('msg').value = "";
-  } catch (e) {
+  } catch (err) {
+    console.error(err);
     alert("Failed to send message. Check console.");
-    console.error(e);
   }
 }
 </script>
+</body>
+</html>
